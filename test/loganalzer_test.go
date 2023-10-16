@@ -1,12 +1,16 @@
-package loganalyzer
+package test
 
-import "testing"
+import (
+	"testing"
 
-func TestParse(t *testing.T) {
-	config := Config{
+	loganalyzer "github.com/tom-draper/log-analyzer"
+)
+
+func TestLogAnalyzer(t *testing.T) {
+	config := loganalyzer.Config{
 		{
 			Pattern: "<timestamp> :: thread - message",
-			Tokens: []Token{
+			Tokens: []loganalyzer.Token{
 				{Value: "<timestamp>", Timestamp: true},
 				{Value: "thread"},
 				{Value: "message"},
@@ -14,17 +18,17 @@ func TestParse(t *testing.T) {
 		},
 		{
 			Pattern: "<timestamp> :: message",
-			Tokens: []Token{
+			Tokens: []loganalyzer.Token{
 				{Value: "<timestamp>", Timestamp: true},
 				{Value: "message"},
 			},
 		},
 		{
 			Pattern: "message",
-			Tokens: []Token{
+			Tokens: []loganalyzer.Token{
 				{Value: "message"},
 			},
 		},
 	}
-	Parse("Test1", config)
+	loganalyzer.ParseFile("./data/test.log", config)
 }
