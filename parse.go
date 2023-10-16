@@ -25,14 +25,14 @@ func getParams(text string, regEx string) map[string]string {
 func tryPattern(line string, pattern Pattern) map[string]string {
 	var regEx string = pattern.Pattern
 	for _, token := range pattern.Tokens {
-		// encode token value to create temporary token ID as hex as any
+		// Encode token value to create temporary token ID as hex as any
 		// brackets in token may break regex
 		tokenID := hex.EncodeToString([]byte(token.Value))
 		regEx = strings.Replace(regEx, token.Value, fmt.Sprintf("(?P<%s>.*)", tokenID), 1)
 	}
 	encodedParams := getParams(line, regEx)
 
-	// decode back to token value
+	// Decode back to token value
 	params := make(map[string]string)
 	for tokenID, match := range encodedParams {
 		tokenValue, err := hex.DecodeString(tokenID)
