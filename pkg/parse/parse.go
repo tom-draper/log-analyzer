@@ -33,6 +33,7 @@ func tryPattern(line string, pattern Pattern) map[string]any {
 		regEx = strings.Replace(regEx, token, fmt.Sprintf("(?P<%s>.*)", tokenID), 1)
 	}
 	encodedParams := getParams(line, regEx)
+	delete(encodedParams, "") // Delete any blank groups created from having parenthesis in pattern
 
 	// Decode back to raw token value
 	params := make(map[string]string)
