@@ -1,2 +1,2 @@
 # log-analyzer
-Tools for analysing any log file.
+Software for analysing any log file.
