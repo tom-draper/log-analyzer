@@ -1,21 +1,14 @@
 [
   {
     "pattern": "timestamp :: thread - message",
-    "tokens": [
-      { "value": "timestamp", "timestamp": true },
-      { "value": "thread" },
-      { "value": "message" }
-    ]
+    "tokens": ["timestamp", "thread", "message"]
   },
   {
     "pattern": "timestamp :: message",
-    "tokens": [
-      { "value": "timestamp", "timestamp": true },
-      { "value": "message" }
-    ]
+    "tokens": ["timestamp", "message"]
   },
   {
     "pattern": "message",
-    "tokens": [{ "value": "message" }]
+    "tokens": ["message"]
   }
 ]

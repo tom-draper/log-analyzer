@@ -10,11 +10,11 @@ func TestLoadConfig(t *testing.T) {
 	if err != nil {
 		t.Error("could not load config file")
 	}
-	expected := Config{
+	expected := TypedConfig{
 		{
 			Pattern: "<timestamp> :: thread - message",
 			Tokens: []Token{
-				{Value: "<timestamp>", Timestamp: true},
+				{Value: "<timestamp>", Type: "date"},
 				{Value: "thread"},
 				{Value: "message"},
 			},
@@ -22,7 +22,7 @@ func TestLoadConfig(t *testing.T) {
 		{
 			Pattern: "<timestamp> :: message",
 			Tokens: []Token{
-				{Value: "<timestamp>", Timestamp: true},
+				{Value: "<timestamp>", Type: "date"},
 				{Value: "message"},
 			},
 		},

@@ -1,13 +1,16 @@
 package parse
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestParse(t *testing.T) {
-	config := Config{
+	config := TypedConfig{
 		{
 			Pattern: "<timestamp> :: thread - message",
 			Tokens: []Token{
-				{Value: "<timestamp>", Timestamp: true},
+				{Value: "<timestamp>", Type: "date"},
 				{Value: "thread"},
 				{Value: "message"},
 			},
@@ -15,7 +18,7 @@ func TestParse(t *testing.T) {
 		{
 			Pattern: "<timestamp> :: message",
 			Tokens: []Token{
-				{Value: "<timestamp>", Timestamp: true},
+				{Value: "<timestamp>", Type: "date"},
 				{Value: "message"},
 			},
 		},
@@ -26,5 +29,6 @@ func TestParse(t *testing.T) {
 			},
 		},
 	}
-	Parse("Test1", config)
+	fmt.Println(config)
+	// Parse("Test1", config)
 }

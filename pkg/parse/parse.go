@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/araddon/dateparse"
@@ -17,7 +18,7 @@ func getParams(text string, regEx string) map[string]string {
 	paramsMap := make(map[string]string)
 	for i, name := range compRegEx.SubexpNames() {
 		if i > 0 && i <= len(match) {
-			paramsMap[name] = match[i]
+			paramsMap[name] = strings.TrimSpace(match[i])
 		}
 	}
 	return paramsMap
@@ -28,20 +29,21 @@ func tryPattern(line string, pattern Pattern) map[string]any {
 	for _, token := range pattern.Tokens {
 		// Encode token value to create temporary token ID as hex as any
 		// brackets in token may break regex
-		tokenID := hex.EncodeToString([]byte(token.Value))
-		regEx = strings.Replace(regEx, token.Value, fmt.Sprintf("(?P<%s>.*)", tokenID), 1)
+		tokenID := hex.EncodeToString([]byte(token))
+		regEx = strings.Replace(regEx, token, fmt.Sprintf("(?P<%s>.*)", tokenID), 1)
 	}
 	encodedParams := getParams(line, regEx)
 
-	// Decode back to token value
+	// Decode back to raw token value
 	params := make(map[string]string)
 	for tokenID, match := range encodedParams {
-		tokenValue, err := hex.DecodeString(tokenID)
+		token, err := hex.DecodeString(tokenID)
 		if err == nil {
-			params[string(tokenValue)] = match
+			params[string(token)] = match
 		}
 	}
 
+	// Attempt to infer data types
 	typedParams := parseDataTypes(params, pattern)
 
 	return typedParams
@@ -49,21 +51,18 @@ func tryPattern(line string, pattern Pattern) map[string]any {
 
 func parseDataTypes(params map[string]string, pattern Pattern) map[string]any {
 	typedParams := make(map[string]any)
-	for tokenValue, match := range params {
-		for _, token := range pattern.Tokens {
-			if tokenValue != token.Value {
-				continue
-			}
-			// If this token is for a timestamp value
-			if token.Timestamp {
-				// Attempt to parse as datetime
-				t, err := dateparse.ParseAny(match)
-				if err == nil {
-					typedParams[tokenValue] = t
-					continue
-				}
-			}
-			typedParams[tokenValue] = match
+	for token, match := range params {
+		// Attempt to parse as datetime
+		if t, err := dateparse.ParseAny(match); err == nil {
+			typedParams[token] = t
+		} else if value, err := strconv.ParseFloat(match, 64); strings.Contains(match, ".") && err == nil {
+			typedParams[token] = value
+		} else if value, err := strconv.Atoi(match); err == nil {
+			typedParams[token] = value
+		} else if value, err := strconv.ParseBool(match); err == nil {
+			typedParams[token] = value
+		} else {
+			typedParams[token] = match
 		}
 	}
 	return typedParams
