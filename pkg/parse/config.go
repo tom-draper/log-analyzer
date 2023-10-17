@@ -1,8 +1,7 @@
-package loganalyzer
+package parse
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 )
@@ -32,6 +31,5 @@ func LoadConfig(path string) (Config, error) {
 	var config Config
 	json.Unmarshal([]byte(byteValue), &config)
 
-	fmt.Println(config)
 	return config, nil
 }

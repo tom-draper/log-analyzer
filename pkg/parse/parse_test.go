@@ -1,4 +1,4 @@
-package loganalyzer
+package parse
 
 import "testing"
 
