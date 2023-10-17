@@ -26,7 +26,7 @@ func main() {
 		logPaths = append(logPaths, os.Args[i])
 	}
 
-	var lines []map[string]string
+	var lines []map[string]any
 	if len(logPaths) > 1 {
 		lines, err = parse.ParseFiles(logPaths, config)
 	} else {

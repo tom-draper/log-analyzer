@@ -6,6 +6,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/araddon/dateparse"
 )
 
 func getParams(text string, regEx string) map[string]string {
@@ -21,7 +23,7 @@ func getParams(text string, regEx string) map[string]string {
 	return paramsMap
 }
 
-func tryPattern(line string, pattern Pattern) map[string]string {
+func tryPattern(line string, pattern Pattern) map[string]any {
 	var regEx string = pattern.Pattern
 	for _, token := range pattern.Tokens {
 		// Encode token value to create temporary token ID as hex as any
@@ -40,12 +42,36 @@ func tryPattern(line string, pattern Pattern) map[string]string {
 		}
 	}
 
-	return params
+	typedParams := applyDataTypes(params, pattern)
+
+	return typedParams
 }
 
-func parseLine(line string, config Config) map[string]string {
+func applyDataTypes(params map[string]string, pattern Pattern) map[string]any {
+	typedParams := make(map[string]any)
+	for tokenValue, match := range params {
+		for _, token := range pattern.Tokens {
+			if tokenValue != token.Value {
+				continue
+			}
+			// If this token is for a timestamp value
+			if token.Timestamp {
+				// Attempt to parse as datetime
+				t, err := dateparse.ParseAny(match)
+				if err == nil {
+					typedParams[tokenValue] = t
+					continue
+				}
+			}
+			typedParams[tokenValue] = match
+		}
+	}
+	return typedParams
+}
+
+func parseLine(line string, config Config) map[string]any {
 	// Attempt to parse the line against each pattern in config, only taking the best
-	best := make(map[string]string)
+	best := make(map[string]any)
 	for _, pattern := range config {
 		params := tryPattern(line, pattern)
 		if len(params) > len(best) {
@@ -55,8 +81,8 @@ func parseLine(line string, config Config) map[string]string {
 	return best
 }
 
-func Parse(logtext string, config Config) ([]map[string]string, error) {
-	extracted := make([]map[string]string, 0)
+func Parse(logtext string, config Config) ([]map[string]any, error) {
+	extracted := make([]map[string]any, 0)
 	for _, line := range strings.Split(strings.ReplaceAll(logtext, "\r\n", "\n"), "\n") {
 		params := parseLine(line, config)
 		extracted = append(extracted, params)
@@ -64,7 +90,7 @@ func Parse(logtext string, config Config) ([]map[string]string, error) {
 	return extracted, nil
 }
 
-func ParseFile(path string, config Config) ([]map[string]string, error) {
+func ParseFile(path string, config Config) ([]map[string]any, error) {
 	body, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -76,8 +102,8 @@ func ParseFile(path string, config Config) ([]map[string]string, error) {
 	return params, nil
 }
 
-func ParseFiles(paths []string, config Config) ([]map[string]string, error) {
-	allParams := make([]map[string]string, 0)
+func ParseFiles(paths []string, config Config) ([]map[string]any, error) {
+	allParams := make([]map[string]any, 0)
 	for _, path := range paths {
 		fileParams, err := ParseFile(path, config)
 		if err != nil {

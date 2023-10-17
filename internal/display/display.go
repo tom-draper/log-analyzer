@@ -2,7 +2,7 @@ package display
 
 import "fmt"
 
-func DisplayLines(lines []map[string]string) {
+func DisplayLines(lines []map[string]any) {
 	fmt.Printf("%d lines\n", len(lines))
 	for i, line := range lines {
 		fmt.Printf("line %d\n", i)
