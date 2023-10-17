@@ -42,12 +42,12 @@ func tryPattern(line string, pattern Pattern) map[string]any {
 		}
 	}
 
-	typedParams := applyDataTypes(params, pattern)
+	typedParams := parseDataTypes(params, pattern)
 
 	return typedParams
 }
 
-func applyDataTypes(params map[string]string, pattern Pattern) map[string]any {
+func parseDataTypes(params map[string]string, pattern Pattern) map[string]any {
 	typedParams := make(map[string]any)
 	for tokenValue, match := range params {
 		for _, token := range pattern.Tokens {
@@ -82,12 +82,12 @@ func parseLine(line string, config Config) map[string]any {
 }
 
 func Parse(logtext string, config Config) ([]map[string]any, error) {
-	extracted := make([]map[string]any, 0)
+	params := make([]map[string]any, 0)
 	for _, line := range strings.Split(strings.ReplaceAll(logtext, "\r\n", "\n"), "\n") {
-		params := parseLine(line, config)
-		extracted = append(extracted, params)
+		p := parseLine(line, config)
+		params = append(params, p)
 	}
-	return extracted, nil
+	return params, nil
 }
 
 func ParseFile(path string, config Config) ([]map[string]any, error) {
@@ -103,13 +103,13 @@ func ParseFile(path string, config Config) ([]map[string]any, error) {
 }
 
 func ParseFiles(paths []string, config Config) ([]map[string]any, error) {
-	allParams := make([]map[string]any, 0)
+	params := make([]map[string]any, 0)
 	for _, path := range paths {
 		fileParams, err := ParseFile(path, config)
 		if err != nil {
 			return nil, fmt.Errorf("unable to parse file at path %s: %w", path, err)
 		}
-		allParams = append(allParams, fileParams...)
+		params = append(params, fileParams...)
 	}
-	return allParams, nil
+	return params, nil
 }
