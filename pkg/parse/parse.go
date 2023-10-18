@@ -24,11 +24,14 @@ func getParams(text string, regEx string) map[string]string {
 	return paramsMap
 }
 
-func tryPattern(line string, pattern Pattern) map[string]any {
-	var regEx string = pattern.Pattern
-	for _, token := range pattern.Tokens {
+func tryPattern(line string, pattern string, tokens []string) map[string]any {
+	var regEx string = pattern
+	for _, token := range tokens {
 		// Encode token value to create temporary token ID as hex as any
 		// brackets in token may break regex
+		if !strings.Contains(regEx, token) {
+			continue
+		}
 		tokenID := hex.EncodeToString([]byte(token))
 		regEx = strings.Replace(regEx, token, fmt.Sprintf("(?P<%s>.*)", tokenID), 1)
 	}
@@ -45,12 +48,12 @@ func tryPattern(line string, pattern Pattern) map[string]any {
 	}
 
 	// Attempt to infer data types
-	typedParams := parseDataTypes(params, pattern)
+	typedParams := parseDataTypes(params)
 
 	return typedParams
 }
 
-func parseDataTypes(params map[string]string, pattern Pattern) map[string]any {
+func parseDataTypes(params map[string]string) map[string]any {
 	typedParams := make(map[string]any)
 	for token, match := range params {
 		// Attempt to parse as datetime
@@ -72,8 +75,8 @@ func parseDataTypes(params map[string]string, pattern Pattern) map[string]any {
 func parseLine(line string, config Config) map[string]any {
 	// Attempt to parse the line against each pattern in config, only taking the best
 	best := make(map[string]any)
-	for _, pattern := range config {
-		params := tryPattern(line, pattern)
+	for _, pattern := range config.Patterns {
+		params := tryPattern(line, pattern, config.Tokens)
 		if len(params) > len(best) {
 			best = params
 		}
