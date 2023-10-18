@@ -1,18 +1,9 @@
 [
-  {
-    "pattern": "timestamp :: thread - message --> pid (flag) ()",
-    "tokens": ["timestamp", "thread", "message", "pid", "flag"]
-  },
-  {
-    "pattern": "timestamp :: thread - message",
-    "tokens": ["timestamp", "thread", "message"]
-  },
-  {
-    "pattern": "timestamp :: message",
-    "tokens": ["timestamp", "message"]
-  },
-  {
-    "pattern": "message",
-    "tokens": ["message"]
-  }
+  "tokens": ["timestamp", "thread", "message", "pid", "flag"],
+  "patterns": [
+    "timestamp :: thread - message --> pid (flag) ()",
+    "timestamp :: thread - message",
+    "timestamp :: message",
+    "message",
+  ]
 ]
