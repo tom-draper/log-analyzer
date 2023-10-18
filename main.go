@@ -12,7 +12,7 @@ import (
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("No log paths provided.")
-		// return
+		return
 	}
 
 	// Retrieve log line patterns from config file
@@ -31,7 +31,7 @@ func main() {
 	// Extract tokens from log files
 	var lines []map[string]any
 	if len(logPaths) == 1 || true {
-		lines, err = parse.ParseFile("./test.log", config)
+		lines, err = parse.ParseFile(logPaths[0], config)
 	} else {
 		lines, err = parse.ParseFiles(logPaths, config)
 	}

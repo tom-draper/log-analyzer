@@ -25,6 +25,15 @@ func getParams(text string, regEx string) map[string]string {
 	return paramsMap
 }
 
+func escapeRegexCharacters(regEx string) string {
+	// Replace all brackets
+	regEx = strings.ReplaceAll(regEx, "(", "\\(")
+	regEx = strings.ReplaceAll(regEx, ")", "\\)")
+	regEx = strings.ReplaceAll(regEx, "]", "\\]")
+	regEx = strings.ReplaceAll(regEx, "[", "\\[")
+	return regEx
+}
+
 func tryPattern(line string, pattern string, tokens []string) map[string]any {
 	var regEx string = pattern
 	for _, token := range tokens {
@@ -36,8 +45,8 @@ func tryPattern(line string, pattern string, tokens []string) map[string]any {
 		tokenID := hex.EncodeToString([]byte(token))
 		regEx = strings.Replace(regEx, token, fmt.Sprintf("(?P<%s>.*)", tokenID), 1)
 	}
+	regEx = escapeRegexCharacters(regEx)
 	encodedParams := getParams(line, regEx)
-	delete(encodedParams, "") // Delete any blank groups created from having parenthesis in pattern
 
 	// Decode back to raw token value
 	params := make(map[string]string)
