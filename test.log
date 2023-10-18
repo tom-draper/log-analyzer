@@ -1,6 +1,0 @@
-starting...
-2015-07-12 14:59:23 :: thread 1 - starting --> 0 (false) ()
-2015-07-12 14:59:30 :: thread 2 - starting --> 1 (true) ()
-2015-07-12 14:59:32 :: thread 1 - exiting
-2015-07-12 14:59:32 :: thread 2 - exiting
-2015-07-12 14:59:45 :: completed in 52ms 
