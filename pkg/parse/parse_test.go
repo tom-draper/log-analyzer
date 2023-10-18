@@ -1,34 +1,31 @@
 package parse
 
 import (
-	"fmt"
 	"testing"
 )
 
-func TestParse(t *testing.T) {
-	config := TypedConfig{
-		{
-			Pattern: "<timestamp> :: thread - message",
-			Tokens: []Token{
-				{Value: "<timestamp>", Type: "date"},
-				{Value: "thread"},
-				{Value: "message"},
-			},
+type Profile struct{
+	config Config
+	logpath string
+}
+
+var profiles = []Profile{
+	{
+		config: Config{
+		Tokens: []string{"<timestamp>", "thread", "message"},
+		Patterns: []string{
+			"<timestamp> :: thread - message",
+			"<timestamp> :: message",
+			"message",
 		},
-		{
-			Pattern: "<timestamp> :: message",
-			Tokens: []Token{
-				{Value: "<timestamp>", Type: "date"},
-				{Value: "message"},
-			},
 		},
-		{
-			Pattern: "message",
-			Tokens: []Token{
-				{Value: "message"},
-			},
-		},
+		logpath: "../../test/data/test.log",
+	},
+}
+
+func TestParseFile(t *testing.T) {
+	for _, profile := range profiles {
+		ParseFile(profile.logpath, profile.config)
+
 	}
-	fmt.Println(config)
-	// Parse("Test1", config)
 }
