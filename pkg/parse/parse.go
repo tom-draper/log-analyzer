@@ -3,6 +3,7 @@ package parse
 import (
 	"encoding/hex"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -80,6 +81,9 @@ func parseLine(line string, config Config) map[string]any {
 		if len(params) > len(best) {
 			best = params
 		}
+	}
+	if len(best) == 0 {
+		log.Printf("no pattern matched line: %s\n", line)
 	}
 	return best
 }
