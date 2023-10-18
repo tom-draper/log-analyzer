@@ -10,29 +10,15 @@ func TestLoadConfig(t *testing.T) {
 	if err != nil {
 		t.Error("could not load config file")
 	}
-	expected := TypedConfig{
-		{
-			Pattern: "<timestamp> :: thread - message",
-			Tokens: []Token{
-				{Value: "<timestamp>", Type: "date"},
-				{Value: "thread"},
-				{Value: "message"},
-			},
-		},
-		{
-			Pattern: "<timestamp> :: message",
-			Tokens: []Token{
-				{Value: "<timestamp>", Type: "date"},
-				{Value: "message"},
-			},
-		},
-		{
-			Pattern: "message",
-			Tokens: []Token{
-				{Value: "message"},
-			},
+	expected := Config{
+		Tokens: []string{"<timestamp>", "thread", "message"},
+		Patterns: []string{
+			"<timestamp> :: thread - message",
+			"<timestamp> :: message",
+			"message",
 		},
 	}
+
 	if !reflect.DeepEqual(got, expected) {
 		t.Errorf("config got %+v did not match expected %+v", got, expected)
 	}
