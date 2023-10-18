@@ -6,18 +6,14 @@ import (
 	"os"
 )
 
-type Config []Pattern
-
-type Pattern struct {
-	Pattern string   `json:"pattern"`
-	Tokens  []string `json:"tokens"` // all unique tokens used in pattern
+type Config struct {
+	Tokens []string
+	Patterns []string
 }
 
-type TypedConfig []TypedPattern
-
-type TypedPattern struct {
-	Pattern string  `json:"pattern"`
-	Tokens  []Token `json:"tokens"` // all unique tokens used in pattern
+type TypedConfig struct {
+	Tokens []Token
+	Patterns []string
 }
 
 type Token struct {
