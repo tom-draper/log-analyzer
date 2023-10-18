@@ -36,16 +36,17 @@ func escapeRegexCharacters(regEx string) string {
 
 func tryPattern(line string, pattern string, tokens []string) map[string]any {
 	var regEx string = pattern
+	regEx = escapeRegexCharacters(regEx)
 	for _, token := range tokens {
 		// Encode token value to create temporary token ID as hex as any
 		// brackets in token may break regex
-		if !strings.Contains(regEx, token) {
+		t := escapeRegexCharacters(token)
+		if !strings.Contains(regEx, t) {
 			continue
 		}
-		tokenID := hex.EncodeToString([]byte(token))
-		regEx = strings.Replace(regEx, token, fmt.Sprintf("(?P<%s>.*)", tokenID), 1)
+		tokenID := hex.EncodeToString([]byte(t))
+		regEx = strings.Replace(regEx, t, fmt.Sprintf("(?P<%s>.*)", tokenID), 1)
 	}
-	regEx = escapeRegexCharacters(regEx)
 	encodedParams := getParams(line, regEx)
 
 	// Decode back to raw token value

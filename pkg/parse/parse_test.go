@@ -26,7 +26,7 @@ var profiles = []Profile{
 		config: Config{
 			Tokens: []string{"timestamp", "status", "message"},
 			Patterns: []string{
-				"timestamp status message",
+				"[timestamp] [status] message",
 			},
 		},
 		logpath: "../../test/data/logs/Apache.log",
