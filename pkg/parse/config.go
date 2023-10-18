@@ -24,7 +24,7 @@ type Token struct {
 func LoadConfig(path string) (Config, error) {
 	jsonFile, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 	defer jsonFile.Close()
 
