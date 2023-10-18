@@ -4,6 +4,6 @@
     "timestamp :: thread - message --> pid (flag) ()",
     "timestamp :: thread - message",
     "timestamp :: message",
-    "message",
+    "message"
   ]
 ]
