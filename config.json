@@ -1,9 +1,7 @@
 {
-  "tokens": ["timestamp", "thread", "message", "pid", "flag"],
+  "tokens": ["timestamp", "ip", "database", "type", "query", "elapsed"],
   "patterns": [
-    "timestamp :: thread - message --> pid (flag)",
-    "timestamp :: thread - message",
-    "timestamp :: message",
-    "message"
+    "[timestamp] ip:database type:  statement: query",
+    "[timestamp] ip:database type:  duration: elapsed ms  statement: query"
   ]
 }
