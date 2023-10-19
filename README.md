@@ -69,5 +69,5 @@ line 3
 Finally, your dashboard is generated. 
 
 ```text
-Dashboard runing at http://localhost:3000/
+Dashboard running at http://localhost:3000/
 ```
