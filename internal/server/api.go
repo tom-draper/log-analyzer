@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -12,4 +13,5 @@ func Start(lines []map[string]string) {
 		w.Write([]byte("test"))
 	})
 	http.ListenAndServe(":3000", r)
+	fmt.Println("Dashboard runing at http://localhost:3000/")
 }
