@@ -1,0 +1,14 @@
+# github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
+## explicit; go 1.12
+github.com/araddon/dateparse
+# github.com/go-chi/chi/v5 v5.0.10
+## explicit; go 1.14
+github.com/go-chi/chi/v5
+# internal/display v1.0.0 => ./internal/display
+## explicit; go 1.21
+internal/display
+# internal/server v1.0.0 => ./internal/server
+## explicit; go 1.21
+internal/server
+# internal/display => ./internal/display
+# internal/server => ./internal/server
