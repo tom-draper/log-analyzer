@@ -2,6 +2,7 @@ package test
 
 import (
 	"internal/display"
+	"internal/server"
 	"testing"
 
 	"github.com/tom-draper/log-analyzer/pkg/parse"
@@ -14,6 +15,6 @@ func TestLogAnalyzer(t *testing.T) {
 	}
 
 	lines, err := parse.ParseFile("./data/test.log", config)
-	// Analyze lines...
 	display.DisplayLines(lines)
+	server.Start(lines)
 }

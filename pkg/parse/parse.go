@@ -137,6 +137,18 @@ func ParseFiles(paths []string, config Config) ([]map[string]any, error) {
 	return params, nil
 }
 
+func sampleLines(lines []string, params []map[string]any, n int) ([]string, []map[string]any) {
+	sampledLines := make([]string, 0)
+	sampledParams := make([]map[string]any, 0)
+	selectedIndices := make(map[int]struct{}, 0)
+	for i := 0; i < min(n, len(lines)); i++ {
+		idx := randomIndex(len(lines), selectedIndices)
+		sampledLines = append(sampledLines, lines[idx])
+		sampledParams = append(sampledParams, params[idx])
+	}
+	return sampledLines, sampledParams
+}
+
 func randomIndex(size int, existingIndexes map[int]struct{}) int {
 	for {
 		randomIndex := rand.Intn(size)
@@ -148,11 +160,11 @@ func randomIndex(size int, existingIndexes map[int]struct{}) int {
 	}
 }
 
-func randomIndices(lines []map[string]any, n int) []int {
+func randomIndices(params []map[string]any, n int) []int {
 	indicies := make([]int, 0)
 	selectedIndices := make(map[int]struct{}, 0)
-	for i := 0; i < min(n, len(lines)); i++ {
-		idx := randomIndex(len(lines), selectedIndices)
+	for i := 0; i < min(n, len(params)); i++ {
+		idx := randomIndex(len(params), selectedIndices)
 		indicies = append(indicies, idx)
 	}
 	return indicies
@@ -162,9 +174,9 @@ func displayConfigTest(logtext string, params []map[string]any) {
 	indicies := randomIndices(params, 5)
 	sampledLines := make([]string, 0)
 	sampledParams := make([]map[string]any, 0)
-	loglines := splitLines(logtext)
+	lines := splitLines(logtext)
 	for _, idx := range indicies {
-		sampledLines = append(sampledLines, loglines[idx])
+		sampledLines = append(sampledLines, lines[idx])
 		sampledParams = append(sampledParams, params[idx])
 	}
 
@@ -188,6 +200,7 @@ func ParseFileTest(path string, config Config) {
 	if err != nil {
 		panic(err)
 	}
+
 	displayConfigTest(string(body), params)
 }
 

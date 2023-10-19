@@ -5,11 +5,11 @@ import (
 	"reflect"
 )
 
-func DisplayLines(lines []map[string]any) {
-	fmt.Printf("%d lines\n", len(lines))
-	for i, line := range lines {
+func DisplayLines(params []map[string]any) {
+	fmt.Printf("%d lines\n", len(params))
+	for i, p := range params {
 		fmt.Printf("line %d\n", i)
-		for k, v := range line {
+		for k, v := range p {
 			fmt.Printf("	%s(%s): %v\n", k, reflect.TypeOf(v).String(), v)
 		}
 	}
