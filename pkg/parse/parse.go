@@ -3,7 +3,9 @@ package parse
 import (
 	"encoding/hex"
 	"fmt"
+	"internal/display"
 	"log"
+	"math/rand"
 	"os"
 	"regexp"
 	"strconv"
@@ -98,9 +100,13 @@ func parseLine(line string, config Config) map[string]any {
 	return best
 }
 
+func splitLines(text string) []string {
+	return strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n")
+}
+
 func Parse(logtext string, config Config) ([]map[string]any, error) {
 	params := make([]map[string]any, 0)
-	for _, line := range strings.Split(strings.ReplaceAll(logtext, "\r\n", "\n"), "\n") {
+	for _, line := range splitLines(logtext) {
 		p := parseLine(line, config)
 		params = append(params, p)
 	}
@@ -129,4 +135,64 @@ func ParseFiles(paths []string, config Config) ([]map[string]any, error) {
 		params = append(params, fileParams...)
 	}
 	return params, nil
+}
+
+func randomIndex(size int, existingIndexes map[int]struct{}) int {
+	for {
+		randomIndex := rand.Intn(size)
+		_, exists := existingIndexes[randomIndex]
+		if !exists {
+			existingIndexes[randomIndex] = struct{}{}
+			return randomIndex
+		}
+	}
+}
+
+func randomIndices(lines []map[string]any, n int) []int {
+	indicies := make([]int, 0)
+	selectedIndices := make(map[int]struct{}, 0)
+	for i := 0; i < min(n, len(lines)); i++ {
+		idx := randomIndex(len(lines), selectedIndices)
+		indicies = append(indicies, idx)
+	}
+	return indicies
+}
+
+func displayConfigTest(logtext string, params []map[string]any) {
+	indicies := randomIndices(params, 5)
+	sampledLines := make([]string, 0)
+	sampledParams := make([]map[string]any, 0)
+	loglines := splitLines(logtext)
+	for _, idx := range indicies {
+		sampledLines = append(sampledLines, loglines[idx])
+		sampledParams = append(sampledParams, params[idx])
+	}
+
+	display.DisplayTestLines(sampledLines, sampledParams, indicies)
+}
+
+func ParseTest(logtext string, config Config) {
+	params, err := Parse(logtext, config)
+	if err != nil {
+		panic(err)
+	}
+	displayConfigTest(logtext, params)
+}
+
+func ParseFileTest(path string, config Config) {
+	body, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	params, err := Parse(string(body), config)
+	if err != nil {
+		panic(err)
+	}
+	displayConfigTest(string(body), params)
+}
+
+func ParseFilesTest(paths []string, config Config) {
+	for _, path := range paths {
+		ParseFileTest(path, config)
+	}
 }
