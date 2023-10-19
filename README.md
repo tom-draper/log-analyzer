@@ -1,7 +1,9 @@
 # log-analyzer
 Software for analysing any unstructured log file.
 
-`demo.log`
+## Example
+
+An unstructured log file named `demo.log`:
 
 ```log
 [2007-09-01 16:44:49.244 ADT] 192.168.2.10:ossecdb LOG:  duration: 4.550 ms  statement: SELECT id FROM location WHERE name = 'enigma->/var/log/messages' AND server_id = '1'
@@ -10,9 +12,9 @@ Software for analysing any unstructured log file.
 [2007-09-27 11:02:51.611 ADT] 192.168.2.10:ossecdb LOG:  statement: INSERT INTO alert(id,server_id,rule_id,timestamp,location_id,src_ip) VALUES ('3577', '1', '50503','1190916566', '140', '0')
 ```
 
-In `config.json`, build the patterns featured in your log files using a set of token values. These tokens will be grouped and targeted for extraction from the log file.
+In `config.json`, build the patterns featured in your log files using a set of token values. These tokens can have any identifying name, and will be grouped and targeted for extraction from the log file.
 
-`patterns`: a list of string patterns found in your log file(s)
+`patterns`: a list of string patterns found in your log file    
 `tokens`: all unique tokens used in your patterns. These describe which values are important within your patterns and create targets for extraction
 
 ```json
