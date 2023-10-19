@@ -1,6 +1,6 @@
 starting...
-2015-07-12 14:59:23 :: thread1 - starting
-2015-07-12 14:59:30 :: thread2 - starting
+2015-07-12 14:59:23 :: thread1 - starting - 0 (true)
+2015-07-12 14:59:30 :: thread2 - starting - 1 (false)
 2015-07-12 14:59:32 :: thread1 - exiting
 2015-07-12 14:59:32 :: thread2 - exiting
 2015-07-12 14:59:45 :: complete

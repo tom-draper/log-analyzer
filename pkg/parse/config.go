@@ -7,12 +7,12 @@ import (
 )
 
 type Config struct {
-	Tokens []string
+	Tokens   []string
 	Patterns []string
 }
 
 type TypedConfig struct {
-	Tokens []Token
+	Tokens   []Token
 	Patterns []string
 }
 
@@ -28,10 +28,15 @@ func LoadConfig(path string) (Config, error) {
 	}
 	defer jsonFile.Close()
 
-	byteValue, _ := io.ReadAll(jsonFile)
+	byteValue, err := io.ReadAll(jsonFile)
+	if err != nil {
+		return Config{}, err
+	}
 
 	var config Config
-	json.Unmarshal([]byte(byteValue), &config)
+	if err := json.Unmarshal([]byte(byteValue), &config); err != nil {
+		return Config{}, err
+	}
 
 	return config, nil
 }

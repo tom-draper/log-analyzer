@@ -2,6 +2,13 @@
   import svelteLogo from './assets/svelte.svg'
   import viteLogo from '/vite.svg'
   import Counter from './lib/Counter.svelte'
+  import { onMount } from 'svelte';
+  onMount(async () => {
+    let response = await fetch("/data")
+    console.log(response)
+    let data = await response.json()
+    console.log(data)
+  })
 </script>
 
 <main>
