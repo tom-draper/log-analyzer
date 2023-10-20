@@ -1,5 +1,5 @@
 # log-analyzer
-Software for analysing any unstructured log file.
+Software for analyzing any unstructured log file.
 
 ## Example
 
