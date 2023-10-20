@@ -12,7 +12,7 @@ An unstructured log file named `demo.log`:
 [2007-09-27 11:02:51.611 ADT] 192.168.2.10:ossecdb LOG:  statement: INSERT INTO alert(id,server_id,rule_id,timestamp,location_id,src_ip) VALUES ('3577', '1', '50503','1190916566', '140', '0')
 ```
 
-In `config.json`, build the patterns featured in your log files using a set of token values. These tokens can have any identifying name, and will be grouped and targeted for extraction from the log file.
+In `config.json`, build some simple patterns featured in your log files using a set of token values. These tokens can have any identifying name, and will be grouped and targeted for extraction from the log file.
 
 - `patterns`: a list of string patterns found in your log file    
 - `tokens`: all unique tokens used across your patterns, representing which values are important and should be targeted for extraction
