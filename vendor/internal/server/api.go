@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/render"
 )
 
-func Start(lines []map[string]any) {
+func Start(params []map[string]any) {
 	r := chi.NewRouter()
 	// Serve index.html
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +28,7 @@ func Start(lines []map[string]any) {
 	})
 	// Return lines data when requested by dashboard
 	r.Get("/data", func(w http.ResponseWriter, r *http.Request) {
-		jsonString, err := json.Marshal(lines)
+		jsonString, err := json.Marshal(params)
 		if err != nil {
 			render.Render(w, r, ErrInternalServerError(err))
 		}
