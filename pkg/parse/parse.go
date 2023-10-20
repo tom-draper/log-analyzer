@@ -2,6 +2,7 @@ package parse
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"internal/display"
 	"log"
@@ -161,7 +162,10 @@ func sampleLines(lines []string, params []map[string]any, n int) ([]string, []ma
 	sampledParams := make([]map[string]any, 0)
 	selectedIndices := make(map[int]struct{}, 0)
 	for i := 0; i < min(n, len(lines)); i++ {
-		idx := randomIndex(len(lines), selectedIndices)
+		idx, err := randomIndex(len(lines), selectedIndices)
+		if err != nil {
+			continue
+		}
 		sampledLines = append(sampledLines, lines[idx])
 		sampledParams = append(sampledParams, params[idx])
 	}
@@ -170,13 +174,17 @@ func sampleLines(lines []string, params []map[string]any, n int) ([]string, []ma
 
 // randomIndex selects and returns a random index from a slice of a given size.
 // Indicies contained within existingIndicies memory will not be selected.
-func randomIndex(size int, existingIndicies map[int]struct{}) int {
+func randomIndex(size int, existingIndicies map[int]struct{}) (int, error) {
+	if len(existingIndicies) >= size {
+		return 0, errors.New("all indicies are existing")
+	}
+
 	for {
 		randomIndex := rand.Intn(size)
 		_, exists := existingIndicies[randomIndex]
 		if !exists {
 			existingIndicies[randomIndex] = struct{}{}
-			return randomIndex
+			return randomIndex, nil
 		}
 	}
 }
@@ -194,13 +202,17 @@ func randomIndices(params []map[string]any, n int) []int {
 	indicies := make([]int, 0)
 	selectedIndices := make(map[int]struct{}, 0)
 	for i := 0; i < min(n, len(params)); i++ {
-		idx := randomIndex(len(params), selectedIndices)
+		idx, err := randomIndex(len(params), selectedIndices)
+		if err != nil {
+			continue
+		}
 		indicies = append(indicies, idx)
 	}
 	return indicies
 }
 
-// Randomly samples extracted params and displays them along with the origin log text line for user evaluation.
+// Randomly samples extracted params and displays them along with the origin log
+// text line for user evaluation.
 func displayConfigTest(logtext string, params []map[string]any) {
 	indicies := randomIndices(params, 5)
 	sampledLines := make([]string, 0)

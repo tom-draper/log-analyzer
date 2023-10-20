@@ -39,15 +39,34 @@ func main() {
 	var lines []map[string]any
 	if len(logPaths) == 1 {
 		lines, err = parse.ParseFile(logPaths[0], config)
+		if err != nil {
+			fmt.Printf("unable to parse log file: %s\n", fmt.Sprint(err))
+		}
 	} else {
 		lines, err = parse.ParseFiles(logPaths, config)
-	}
-	if err != nil {
-		panic(err)
+		if err != nil {
+			fmt.Printf("unable to parse log files: %s\n", fmt.Sprint(err))
+		}
 	}
 
+	if len(lines) == 0 {
+		fmt.Println("no lines extracted\nensure log file path is correct")
+		return
+	} else if !tokensExtracted(lines) {
+		fmt.Println("no tokens extracted\nensure patterns in `config.json` are correct and all tokens are named")
+		return
+	}
 	display.DisplayLines(lines)
 	server.Start(lines)
+}
+
+func tokensExtracted(params []map[string]any) bool {
+	for _, p := range params {
+		if len(p) > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func getCommandLineArgs() ([]string, bool) {
