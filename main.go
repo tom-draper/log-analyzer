@@ -12,18 +12,19 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("No log paths provided.")
-		return
+		fmt.Println("no log file paths provided\nprovide log file path(s) as command-line arguments\n\nexample:\n./main ./logs/postgres-main.log ./logs/postgres-1.log")
+		// return
 	}
 
 	// Retrieve log line patterns from config file
 	config, err := parse.LoadConfig("./config.json")
 	if err != nil {
-		fmt.Println("Failed to load log patterns from ./config.json")
+		fmt.Println("failed to load log patterns from ./config.json")
 		return
 	}
 
 	logPaths, test := getCommandLineArgs()
+	logPaths = append(logPaths, "./test/data/logs/test.log")
 
 	// If testing config against log file(s), run test
 	if test {

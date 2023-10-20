@@ -5,7 +5,6 @@ import (
 	"reflect"
 )
 
-// DisplayLines prints all extracted parameters from log text.
 func DisplayLines(params []map[string]any) {
 	fmt.Printf("%d lines\n", len(params))
 	for i, p := range params {
@@ -16,8 +15,6 @@ func DisplayLines(params []map[string]any) {
 	}
 }
 
-// DisplayTestLines prints a sample of extracted parameters along with the
-// origin log text line and line number to allow for user evaluation.
 func DisplayTestLines(lines []string, params []map[string]any, indicies []int) {
 	fmt.Printf("%d lines\n", len(lines))
 	for i, p := range params {
