@@ -14,6 +14,9 @@ import (
 	"github.com/araddon/dateparse"
 )
 
+// getParams extracts all possible group values contained within the regular
+// expression from the text and stores the extracted values in a returned
+// (groupName => value) map.
 func getParams(text string, regEx string) map[string]string {
 	compRegEx := regexp.MustCompile(regEx)
 	match := compRegEx.FindStringSubmatch(text)
@@ -27,8 +30,9 @@ func getParams(text string, regEx string) map[string]string {
 	return paramsMap
 }
 
+// Replace all characters that have a special meaning within a regular
+// expression with an escaped version of the character.
 func escapeRegexCharacters(regEx string) string {
-	// Replace all brackets
 	regEx = strings.ReplaceAll(regEx, "(", "\\(")
 	regEx = strings.ReplaceAll(regEx, ")", "\\)")
 	regEx = strings.ReplaceAll(regEx, "]", "\\]")
@@ -36,6 +40,9 @@ func escapeRegexCharacters(regEx string) string {
 	return regEx
 }
 
+// tryPattern attempts to extract the corresponding token values described by
+// the given pattern from the log text line. Any extracted values have their
+// data types inferred and then converted.
 func tryPattern(line string, pattern string, tokens []string) map[string]any {
 	var regEx string = pattern
 	regEx = escapeRegexCharacters(regEx)
@@ -61,12 +68,14 @@ func tryPattern(line string, pattern string, tokens []string) map[string]any {
 	}
 
 	// Attempt to infer data types
-	typedParams := parseDataTypes(params)
+	typedParams := inferDataTypes(params)
 
 	return typedParams
 }
 
-func parseDataTypes(params map[string]string) map[string]any {
+// inferDataTypes infers the intended the data type of each extracted parameter
+// value from a log text line and performs a data type conversion.
+func inferDataTypes(params map[string]string) map[string]any {
 	typedParams := make(map[string]any)
 	for token, match := range params {
 		// Attempt to parse as datetime
@@ -85,6 +94,8 @@ func parseDataTypes(params map[string]string) map[string]any {
 	return typedParams
 }
 
+// parseLine extracts token parameters from each line using the most appropriate
+// pattern in the given config.
 func parseLine(line string, config Config) map[string]any {
 	// Attempt to parse the line against each pattern in config, only taking the best
 	best := make(map[string]any)
@@ -104,6 +115,8 @@ func splitLines(text string) []string {
 	return strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n")
 }
 
+// Parse separates the log text into lines and attempts to extract tokens
+// parameters from each line using the most appropriate pattern in the given config.
 func Parse(logtext string, config Config) ([]map[string]any, error) {
 	params := make([]map[string]any, 0)
 	for _, line := range splitLines(logtext) {
@@ -113,6 +126,9 @@ func Parse(logtext string, config Config) ([]map[string]any, error) {
 	return params, nil
 }
 
+// ParseFile reads the log text from the given file path, separates the text
+// into lines and attempts to extract tokens parameters from each line using the
+// most appropriate pattern in the given config.
 func ParseFile(path string, config Config) ([]map[string]any, error) {
 	body, err := os.ReadFile(path)
 	if err != nil {
@@ -125,6 +141,9 @@ func ParseFile(path string, config Config) ([]map[string]any, error) {
 	return params, nil
 }
 
+// ParseFile reads the log text from each of the given file paths, separates the
+// text into lines and attempts to extract tokens parameters from each line
+// using the most appropriate pattern in the given config.
 func ParseFiles(paths []string, config Config) ([]map[string]any, error) {
 	params := make([]map[string]any, 0)
 	for _, path := range paths {
@@ -149,17 +168,28 @@ func sampleLines(lines []string, params []map[string]any, n int) ([]string, []ma
 	return sampledLines, sampledParams
 }
 
-func randomIndex(size int, existingIndexes map[int]struct{}) int {
+// randomIndex selects and returns a random index from a slice of a given size.
+// Indicies contained within existingIndicies memory will not be selected.
+func randomIndex(size int, existingIndicies map[int]struct{}) int {
 	for {
 		randomIndex := rand.Intn(size)
-		_, exists := existingIndexes[randomIndex]
+		_, exists := existingIndicies[randomIndex]
 		if !exists {
-			existingIndexes[randomIndex] = struct{}{}
+			existingIndicies[randomIndex] = struct{}{}
 			return randomIndex
 		}
 	}
 }
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// randomIndicies build and returns a list of n random index integers available
+// in the slice of params.
 func randomIndices(params []map[string]any, n int) []int {
 	indicies := make([]int, 0)
 	selectedIndices := make(map[int]struct{}, 0)
@@ -170,6 +200,7 @@ func randomIndices(params []map[string]any, n int) []int {
 	return indicies
 }
 
+// Randomly samples extracted params and displays them along with the origin log text line for user evaluation.
 func displayConfigTest(logtext string, params []map[string]any) {
 	indicies := randomIndices(params, 5)
 	sampledLines := make([]string, 0)
@@ -183,6 +214,8 @@ func displayConfigTest(logtext string, params []map[string]any) {
 	display.DisplayTestLines(sampledLines, sampledParams, indicies)
 }
 
+// ParseTest runs Parse and displays a random sample of extracted parameters 
+// along with the origin lines from the log text.
 func ParseTest(logtext string, config Config) {
 	params, err := Parse(logtext, config)
 	if err != nil {
@@ -191,6 +224,8 @@ func ParseTest(logtext string, config Config) {
 	displayConfigTest(logtext, params)
 }
 
+// ParseTest runs ParseFile and displays a random sample of extracted parameters
+// along with the origin lines from the log file.
 func ParseFileTest(path string, config Config) {
 	body, err := os.ReadFile(path)
 	if err != nil {
@@ -204,8 +239,25 @@ func ParseFileTest(path string, config Config) {
 	displayConfigTest(string(body), params)
 }
 
+// ParseTest runs ParseFiles and displays a random sample of extracted
+// parameters along with the origin lines from the log files.
 func ParseFilesTest(paths []string, config Config) {
+	var logtext string                  // Build string holding all log text content
+	params := make([]map[string]any, 0) // Extracted params for each log text line
 	for _, path := range paths {
-		ParseFileTest(path, config)
+		fileParams, err := ParseFile(path, config)
+		if err != nil {
+			log.Printf("unable to parse file at path %s: %s", path, fmt.Sprint(err))
+			continue
+		}
+		body, err := os.ReadFile(path)
+		if err != nil {
+			panic(err)
+		}
+
+		logtext += "\n" + string(body)
+		params = append(params, fileParams...)
 	}
+
+	displayConfigTest(logtext, params)
 }
