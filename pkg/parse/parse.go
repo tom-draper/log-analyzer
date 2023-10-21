@@ -106,9 +106,7 @@ func parseLine(line string, config Config) (map[string]any, string) {
 			patternUsed = pattern
 		}
 	}
-	if len(best) == 0 {
-		log.Printf("no pattern matched line: %s\n", line)
-	}
+
 	return best, patternUsed
 }
 
@@ -120,8 +118,11 @@ func splitLines(text string) []string {
 // parameters from each line using the most appropriate pattern in the given config.
 func Parse(logtext string, config Config) ([]map[string]any, error) {
 	params := make([]map[string]any, 0)
-	for _, line := range splitLines(logtext) {
+	for i, line := range splitLines(logtext) {
 		p, _ := parseLine(line, config)
+		if len(p) == 0 {
+			log.Printf("no pattern matched line %d: \"%s\"\n", i, line)
+		}
 		params = append(params, p)
 	}
 	return params, nil
