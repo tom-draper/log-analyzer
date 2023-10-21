@@ -4,9 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"internal/display"
 	"log"
-	"math/rand"
 	"os"
 	"regexp"
 	"strconv"
@@ -97,19 +95,21 @@ func inferDataTypes(params map[string]string) map[string]any {
 
 // parseLine extracts token parameters from each line using the most appropriate
 // pattern in the given config.
-func parseLine(line string, config Config) map[string]any {
+func parseLine(line string, config Config) (map[string]any, string) {
 	// Attempt to parse the line against each pattern in config, only taking the best
+	var patternUsed string
 	best := make(map[string]any)
 	for _, pattern := range config.Patterns {
 		params := tryPattern(line, pattern, config.Tokens)
 		if len(params) > len(best) {
 			best = params
+			patternUsed = pattern
 		}
 	}
 	if len(best) == 0 {
 		log.Printf("no pattern matched line: %s\n", line)
 	}
-	return best
+	return best, patternUsed
 }
 
 func splitLines(text string) []string {
@@ -121,7 +121,7 @@ func splitLines(text string) []string {
 func Parse(logtext string, config Config) ([]map[string]any, error) {
 	params := make([]map[string]any, 0)
 	for _, line := range splitLines(logtext) {
-		p := parseLine(line, config)
+		p, _ := parseLine(line, config)
 		params = append(params, p)
 	}
 	return params, nil
@@ -157,119 +157,65 @@ func ParseFiles(paths []string, config Config) ([]map[string]any, error) {
 	return params, nil
 }
 
-func sampleLines(lines []string, params []map[string]any, n int) ([]string, []map[string]any) {
-	sampledLines := make([]string, 0)
-	sampledParams := make([]map[string]any, 0)
-	selectedIndices := make(map[int]struct{}, 0)
-	for i := 0; i < min(n, len(lines)); i++ {
-		idx, err := randomIndex(len(lines), selectedIndices)
-		if err != nil {
-			continue
-		}
-		sampledLines = append(sampledLines, lines[idx])
-		sampledParams = append(sampledParams, params[idx])
-	}
-	return sampledLines, sampledParams
-}
-
-// randomIndex selects and returns a random index from a slice of a given size.
-// Indicies contained within existingIndicies memory will not be selected.
-func randomIndex(size int, existingIndicies map[int]struct{}) (int, error) {
-	if len(existingIndicies) >= size {
-		return 0, errors.New("all indicies are existing")
-	}
-
-	for {
-		randomIndex := rand.Intn(size)
-		_, exists := existingIndicies[randomIndex]
-		if !exists {
-			existingIndicies[randomIndex] = struct{}{}
-			return randomIndex, nil
-		}
-	}
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-// randomIndicies build and returns a list of n random index integers available
-// in the slice of params.
-func randomIndices(params []map[string]any, n int) []int {
-	indicies := make([]int, 0)
-	selectedIndices := make(map[int]struct{}, 0)
-	for i := 0; i < min(n, len(params)); i++ {
-		idx, err := randomIndex(len(params), selectedIndices)
-		if err != nil {
-			continue
-		}
-		indicies = append(indicies, idx)
-	}
-	return indicies
-}
-
-// Randomly samples extracted params and displays them along with the origin log
-// text line for user evaluation.
-func displayConfigTest(logtext string, params []map[string]any) {
-	indicies := randomIndices(params, 5)
-	sampledLines := make([]string, 0)
-	sampledParams := make([]map[string]any, 0)
-	lines := splitLines(logtext)
-	for _, idx := range indicies {
-		sampledLines = append(sampledLines, lines[idx])
-		sampledParams = append(sampledParams, params[idx])
-	}
-
-	display.DisplayTestLines(sampledLines, sampledParams, indicies)
+type ExtractResult struct {
+	Line       string         `json:"line"`
+	LineNumber int            `json:"lineNumber"`
+	Pattern    string         `json:"pattern"`
+	Params     map[string]any `json:"params"`
 }
 
 // ParseTest runs Parse and displays a random sample of extracted parameters
 // along with the origin lines from the log text.
-func ParseTest(logtext string, config Config) {
-	params, err := Parse(logtext, config)
-	if err != nil {
-		panic(err)
+func ParseTest(logtext string, config Config) []ExtractResult {
+	results := make([]ExtractResult, 0)
+	for i, line := range splitLines(logtext) {
+		p, pattern := parseLine(line, config)
+		result := ExtractResult{
+			Line:       line,
+			LineNumber: i,
+			Pattern:    pattern,
+			Params:     p,
+		}
+		results = append(results, result)
 	}
-	displayConfigTest(logtext, params)
+
+	return results
 }
 
 // ParseTest runs ParseFile and displays a random sample of extracted parameters
 // along with the origin lines from the log file.
-func ParseFileTest(path string, config Config) {
+func ParseFileTest(path string, config Config) ([]ExtractResult, error) {
 	body, err := os.ReadFile(path)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	params, err := Parse(string(body), config)
+	results := ParseTest(string(body), config)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	displayConfigTest(string(body), params)
+	return results, nil
 }
 
 // ParseTest runs ParseFiles and displays a random sample of extracted
 // parameters along with the origin lines from the log files.
-func ParseFilesTest(paths []string, config Config) {
-	var logtext string                  // Build string holding all log text content
-	params := make([]map[string]any, 0) // Extracted params for each log text line
+func ParseFilesTest(paths []string, config Config) ([]ExtractResult, error) {
+	results := make([]ExtractResult, 0)
+
+	var parsedAny bool
 	for _, path := range paths {
-		fileParams, err := ParseFile(path, config)
+		r, err := ParseFileTest(path, config)
 		if err != nil {
-			log.Printf("unable to parse file at path %s: %s", path, fmt.Sprint(err))
+			log.Printf("unable to read file at path %s: %s", path, fmt.Sprint(err))
 			continue
 		}
-		body, err := os.ReadFile(path)
-		if err != nil {
-			panic(err)
-		}
-
-		logtext += "\n" + string(body)
-		params = append(params, fileParams...)
+		parsedAny = true
+		results = append(results, r...)
 	}
 
-	displayConfigTest(logtext, params)
+	if !parsedAny {
+		return nil, errors.New("unable to read log file path provided")
+	}
+
+	return results, nil
 }
