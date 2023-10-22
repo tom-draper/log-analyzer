@@ -1,7 +1,6 @@
 {
-  "tokens": ["timestamp", "ip", "database", "type", "query", "elapsed"],
+  "tokens": ["ip_address", "timestamp", "method", "path", "http", "status", "response_time", "url", "user_agent"],
   "patterns": [
-    "[timestamp] ip:database type:  statement: query",
-    "[timestamp] ip:database type:  duration: elapsed ms  statement: query"
+    "ip_address - - [timestamp] \"method path *\" status * \"url\" \"user_agent\""
   ]
 }

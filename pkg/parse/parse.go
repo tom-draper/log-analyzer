@@ -39,9 +39,9 @@ func escapeRegexCharacters(regEx string) string {
 	regEx = strings.ReplaceAll(regEx, ")", "\\)")
 	regEx = strings.ReplaceAll(regEx, "]", "\\]")
 	regEx = strings.ReplaceAll(regEx, "[", "\\[")
-	regEx = strings.ReplaceAll(regEx, ".", "\\.")
-	regEx = strings.ReplaceAll(regEx, "?", "\\?")
-	regEx = strings.ReplaceAll(regEx, "*", "\\*")
+	// regEx = strings.ReplaceAll(regEx, ".", "\\.")
+	// regEx = strings.ReplaceAll(regEx, "?", "\\?")
+	// regEx = strings.ReplaceAll(regEx, "*", "\\*")
 	return regEx
 }
 
@@ -51,7 +51,10 @@ func escapeRegexCharacters(regEx string) string {
 func tryPattern(line string, pattern string, tokens []string) map[string]any {
 	var regEx string = pattern
 	regEx = escapeRegexCharacters(regEx)
-	tokens = append(tokens, "*")
+	// Convert wildcard asterisk into underscore _ so we only have to deal
+	// with one wildcard char
+	regEx = strings.ReplaceAll(regEx, "*", "_")
+	tokens = append(tokens, "_")
 	for _, token := range tokens {
 		// Encode token value to create temporary token ID as hex as any
 		// brackets in token may break regex
@@ -59,8 +62,9 @@ func tryPattern(line string, pattern string, tokens []string) map[string]any {
 		if !strings.Contains(regEx, t) {
 			continue
 		}
+
 		tokenID := hex.EncodeToString([]byte(t))
-		regEx = strings.Replace(regEx, t, fmt.Sprintf("(?P<%s>.*)", tokenID), 1)
+		regEx = strings.ReplaceAll(regEx, t, fmt.Sprintf("(?P<%s>.*)", tokenID))
 	}
 	encodedParams := getParams(line, regEx)
 
@@ -68,8 +72,15 @@ func tryPattern(line string, pattern string, tokens []string) map[string]any {
 	params := make(map[string]string)
 	for tokenID, match := range encodedParams {
 		token, err := hex.DecodeString(tokenID)
+		if err != nil {
+			continue
+		}
 		stoken := string(token)
-		if err == nil && stoken != "*" {
+		// Avoid adding to final parameters if was a wildcard token
+		if stoken == "" || stoken[0] == '_' {
+			continue
+		}
+		if _, ok := params[stoken]; !ok {
 			params[stoken] = match
 		}
 	}
