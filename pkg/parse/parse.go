@@ -1,7 +1,9 @@
 package parse
 
 import (
+	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -9,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/araddon/dateparse"
 )
@@ -174,7 +177,30 @@ func ParseFiles(paths []string, config Config) ([]map[string]any, error) {
 	return params, nil
 }
 
-type ExtractResult struct {
+func writeConfigTest(extractions []Extraction) (int, error) {
+	//write data as buffer to json encoder
+	buffer := new(bytes.Buffer)
+	encoder := json.NewEncoder(buffer)
+	encoder.SetIndent("", "\t")
+
+	err := encoder.Encode(extractions)
+	if err != nil {
+		return 0, err
+	}
+	filedir := fmt.Sprintf("test-%d.json", time.Now().Unix())
+	file, err := os.OpenFile(filedir, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return 0, err
+	}
+	n, err := file.Write(buffer.Bytes())
+	if err != nil {
+		return 0, err
+	}
+	fmt.Println(filedir)
+	return n, nil
+}
+
+type Extraction struct {
 	Line       string         `json:"line"`
 	LineNumber int            `json:"lineNumber"`
 	Pattern    string         `json:"pattern"`
@@ -183,41 +209,54 @@ type ExtractResult struct {
 
 // ParseTest runs Parse and displays a random sample of extracted parameters
 // along with the origin lines from the log text.
-func ParseTest(logtext string, config Config) []ExtractResult {
-	results := make([]ExtractResult, 0)
+func ParseTest(logtext string, config Config) []Extraction {
+	extractions := parseTestExtractions(logtext, config)
+	writeConfigTest(extractions)
+	return extractions
+}
+
+// parseTest runs Parse and returns a random sample of extracted parameters
+// along with the origin lines from the log text.
+func parseTest(logtext string, config Config) []Extraction {
+	extractions := parseTestExtractions(logtext, config)
+	return extractions
+}
+
+func parseTestExtractions(logtext string, config Config) []Extraction {
+	extractions := make([]Extraction, 0)
 	for i, line := range splitLines(logtext) {
 		p, pattern := parseLine(line, config)
-		result := ExtractResult{
+		extraction := Extraction{
 			Line:       line,
 			LineNumber: i,
 			Pattern:    pattern,
 			Params:     p,
 		}
-		results = append(results, result)
+		extractions = append(extractions, extraction)
 	}
-
-	return results
+	return extractions
 }
 
 // ParseTest runs ParseFile and displays a random sample of extracted parameters
 // along with the origin lines from the log file.
-func ParseFileTest(path string, config Config) ([]ExtractResult, error) {
+func ParseFileTest(path string, config Config) ([]Extraction, error) {
 	body, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	results := ParseTest(string(body), config)
+	extractions := parseTest(string(body), config)
 	if err != nil {
 		return nil, err
 	}
 
-	return results, nil
+	writeConfigTest(extractions)
+	return extractions, nil
 }
 
 // ParseTest runs ParseFiles and displays a random sample of extracted
 // parameters along with the origin lines from the log files.
-func ParseFilesTest(paths []string, config Config) ([]ExtractResult, error) {
-	results := make([]ExtractResult, 0)
+func ParseFilesTest(paths []string, config Config) ([]Extraction, error) {
+	extractions := make([]Extraction, 0)
 
 	var parsedAny bool
 	for _, path := range paths {
@@ -227,12 +266,13 @@ func ParseFilesTest(paths []string, config Config) ([]ExtractResult, error) {
 			continue
 		}
 		parsedAny = true
-		results = append(results, r...)
+		extractions = append(extractions, r...)
 	}
 
 	if !parsedAny {
 		return nil, errors.New("unable to read log file path provided")
 	}
 
-	return results, nil
+	writeConfigTest(extractions)
+	return extractions, nil
 }
