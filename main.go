@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"internal/display"
 	"internal/server"
 
 	"github.com/tom-draper/log-analyzer/pkg/parse"
@@ -56,7 +55,7 @@ func main() {
 		fmt.Println("no tokens extracted\nensure patterns in `config.json` are correct and all tokens are named")
 		return
 	}
-	display.DisplayLines(lines)
+
 	server.Start(lines)
 }
 

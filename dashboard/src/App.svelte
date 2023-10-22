@@ -1,14 +1,41 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
-  import { onMount } from 'svelte';
+  import svelteLogo from "./assets/svelte.svg";
+  import viteLogo from "/vite.svg";
+  import Counter from "./lib/Counter.svelte";
+  import { onMount } from "svelte";
+
+  type LineExtraction = {
+    [token: string]: string;
+  };
+
+  type TokenValueFreq = {
+    [token: string]: { [value: string]: number };
+  };
+
+  function valueFreq(data: LineExtraction[]): TokenValueFreq {
+    let freq: TokenValueFreq = {};
+    for (let i = 0; i < data.length; i++) {
+      for (const [token, value] of Object.entries(data[i])) {
+        if (!(token in freq)) {
+          freq[token] = {};
+        }
+        if (!(value in freq[token])) {
+          freq[token][value] = 0;
+        }
+        freq[token][value] += 1;
+      }
+    }
+
+    console.log(freq);
+    return freq;
+  }
+
   onMount(async () => {
-    let response = await fetch("/data")
-    console.log(response)
-    let data = await response.json()
-    console.log(data)
-  })
+    const response = await fetch("/data");
+    const data = await response.json();
+    console.log(data);
+    const freq = valueFreq(data);
+  });
 </script>
 
 <main>
@@ -27,12 +54,14 @@
   </div>
 
   <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
+    Check out <a
+      href="https://github.com/sveltejs/kit#readme"
+      target="_blank"
+      rel="noreferrer">SvelteKit</a
+    >, the official Svelte app framework powered by Vite!
   </p>
 
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
+  <p class="read-the-docs">Click on the Vite and Svelte logos to learn more</p>
 </main>
 
 <style>
