@@ -36,6 +36,9 @@ func escapeRegexCharacters(regEx string) string {
 	regEx = strings.ReplaceAll(regEx, ")", "\\)")
 	regEx = strings.ReplaceAll(regEx, "]", "\\]")
 	regEx = strings.ReplaceAll(regEx, "[", "\\[")
+	regEx = strings.ReplaceAll(regEx, ".", "\\.")
+	regEx = strings.ReplaceAll(regEx, "?", "\\?")
+	regEx = strings.ReplaceAll(regEx, "*", "\\*")
 	return regEx
 }
 
@@ -45,6 +48,7 @@ func escapeRegexCharacters(regEx string) string {
 func tryPattern(line string, pattern string, tokens []string) map[string]any {
 	var regEx string = pattern
 	regEx = escapeRegexCharacters(regEx)
+	tokens = append(tokens, "*")
 	for _, token := range tokens {
 		// Encode token value to create temporary token ID as hex as any
 		// brackets in token may break regex
@@ -61,8 +65,9 @@ func tryPattern(line string, pattern string, tokens []string) map[string]any {
 	params := make(map[string]string)
 	for tokenID, match := range encodedParams {
 		token, err := hex.DecodeString(tokenID)
-		if err == nil {
-			params[string(token)] = match
+		stoken := string(token)
+		if err == nil && stoken != "*" {
+			params[stoken] = match
 		}
 	}
 
@@ -99,11 +104,22 @@ func parseLine(line string, config Config) (map[string]any, string) {
 	// Attempt to parse the line against each pattern in config, only taking the best
 	var patternUsed string
 	best := make(map[string]any)
+	multiSpaceRegEx := regexp.MustCompile(`[ ]{2,}`)
 	for _, pattern := range config.Patterns {
 		params := tryPattern(line, pattern, config.Tokens)
 		if len(params) > len(best) {
 			best = params
 			patternUsed = pattern
+		}
+
+		if multiSpaceRegEx.MatchString(line) {
+			singleSpaceLine := multiSpaceRegEx.ReplaceAllString(strings.ReplaceAll(line, "\t", " "), " ")
+			singleSpacePattern := multiSpaceRegEx.ReplaceAllString(strings.ReplaceAll(pattern, "\t", " "), " ")
+			params = tryPattern(singleSpaceLine, singleSpacePattern, config.Tokens)
+			if len(params) > len(best) {
+				best = params
+				patternUsed = pattern
+			}
 		}
 	}
 

@@ -13,7 +13,7 @@ import (
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("no log file paths provided\nprovide log file path(s) as command-line arguments\n\nexample:\n./main ./logs/postgres-main.log ./logs/postgres-1.log")
-		// return
+		return
 	}
 
 	// Retrieve log line patterns from config file
@@ -24,7 +24,6 @@ func main() {
 	}
 
 	logPaths, test := getCommandLineArgs()
-	logPaths = append(logPaths, "./test/data/logs/test.log")
 
 	// If testing config against log file(s), run test
 	if test {
