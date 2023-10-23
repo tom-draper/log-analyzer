@@ -227,7 +227,7 @@ func writeConfigTest(extractions []Extraction) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println(fileDir)
+	fmt.Println(fileDir) // Display output location
 	return n, nil
 }
 
