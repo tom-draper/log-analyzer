@@ -1,6 +1,7 @@
 {
-  "tokens": ["ip_address", "timestamp", "method", "path", "http", "status", "response_time", "url", "user_agent"],
-  "patterns": [
-    "ip_address - - [timestamp] \"method path *\" status * \"url\" \"user_agent\""
-  ]
+    "patterns": [
+        "[timestamp] ip \"method endpoint http\" status bytes \"user_agent\"",
+        "[timestamp] ip [error] message"
+    ],
+    "tokens": ["timestamp", "ip", "method", "endpoint", "http", "status", "bytes", "user_agent", "message"]
 }

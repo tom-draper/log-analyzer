@@ -40,6 +40,7 @@ func escapeRegexCharacters(regEx string) string {
 	regEx = strings.ReplaceAll(regEx, ")", "\\)")
 	regEx = strings.ReplaceAll(regEx, "]", "\\]")
 	regEx = strings.ReplaceAll(regEx, "[", "\\[")
+	regEx = strings.ReplaceAll(regEx, "“", "\"")
 	return regEx
 }
 

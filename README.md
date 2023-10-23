@@ -24,9 +24,9 @@ In `config.json`, build some simple patterns featured in your log files using a 
 {
     "patterns": [
         "[timestamp] ip \"method endpoint http\" status bytes \"user_agent\"",
-        "[timestamp] ip [error] message",
+        "[timestamp] ip [error] message"
     ],
-    "tokens": ["timestamp", "ip", "method", "endpoint", "http", "status", "bytes", "user_agent", "message"],
+    "tokens": ["timestamp", "ip", "method", "endpoint", "http", "status", "bytes", "user_agent", "message"]
 }
 ```
 
@@ -41,32 +41,54 @@ The tokens are extracted from the log file and their data types inferred.
 
 ```text
 line 0
-        ip(string): 192.168.2.10
-        database(string): ossecdb
-        type(string): LOG
-        elapsed(float64): 4.55
-        query(string): SELECT id FROM location WHERE name = 'enigma->/var/log/messages' AND server_id = '1'
-        timestamp(time.Time): 2007-09-01 16:44:49.244 +0000 UTC
+        method(string): GET
+        endpoint(string): /blog/home
+        http(string): HTTP/1.1
+        status(int): 200
+        bytes(int): 182
+        user_agent(string): Mozilla/5.0 Chrome/60.0.3112.113
+        timestamp(time.Time): 2023-12-11 11:01:28 +0000 UTC
+        ip(string): 220.203.23.174
 line 1
-        elapsed(float64): 5.252
-        query(string): INSERT INTO location(server_id, name) VALUES ('1', 'enigma->/var/log/messages')
-        timestamp(time.Time): 2007-09-01 16:44:49.251 +0000 UTC
-        ip(string): 192.168.2.10
-        database(string): ossecdb
-        type(string): LOG
+        user_agent(string): Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36
+        timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
+        ip(string): 89.238.65.53
+        method(string): POST
+        endpoint(string): /new-user/
+        http(string): HTTP/1.1
+        status(int): 200
+        bytes(int): 182
 line 2
-        type(string): LOG
-        elapsed(float64): 0.016
-        query(string): SELECT id FROM location WHERE name = 'enigma->/var/log/messages' AND server_id = '1'
-        timestamp(time.Time): 2007-09-01 16:44:49.252 +0000 UTC
-        ip(string): 192.168.2.10
-        database(string): ossecdb
+        ip(string): 209.51.141.74
+        method(string): GET
+        endpoint(string): /test
+        http(string): HTTP/1.1
+        status(int): 404
+        bytes(int): 182
+        user_agent(string): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36
+        timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
 line 3
-        database(string): ossecdb
-        type(string): LOG
-        query(string): INSERT INTO alert(id,server_id,rule_id,timestamp,location_id,src_ip) VALUES ('3577', '1', '50503','1190916566', '140', '0')
-        timestamp(time.Time): 2007-09-27 11:02:51.611 +0000 UTC
-        ip(string): 192.168.2.10
+        bytes(int): 182
+        user_agent(string): Mozilla/5.0 (iPhone13,2; U; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/15E148 Safari/602.1
+        timestamp(time.Time): 2023-12-11 11:01:31 +0000 UTC
+        ip(string): 201.235.175.120
+        method(string): GET
+        endpoint(string): /online
+        http(string): HTTP/1.1
+        status(int): 200
+line 4
+        timestamp(time.Time): 2023-12-11 11:01:32 +0000 UTC
+        ip(string): 122.161.56.36
+        message(string): request failed: error reading the headers
+line 5
+        http(string): HTTP/1.1
+        status(int): 502
+        bytes(int): 182
+        user_agent(string): python-requests/2.26.0
+        timestamp(time.Time): 2023-12-11 11:01:34 +0000 UTC
+        ip(string): 74.6.8.121
+        method(string): GET
+        endpoint(string): /api/data
 ```
 
 Finally, your dashboard is generated. 
@@ -95,6 +117,6 @@ For example, if you don't want thread pool number or ID featured in our dashboar
     "patterns": [
         "[timestamp] pool-*-thread-* INFO: function() elapsed ms"
     ],
-    "tokens": ["timestamp", "function", "elapsed"],
+    "tokens": ["timestamp", "function", "elapsed"]
 }
 ```

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"internal/display"
 	"internal/server"
 
 	"github.com/tom-draper/log-analyzer/pkg/parse"
@@ -56,6 +57,7 @@ func main() {
 		return
 	}
 
+	display.DisplayLines(lines)
 	server.Start(lines)
 }
 

@@ -43,7 +43,7 @@ func splitLines(text string) []string {
 
 func TestParse(t *testing.T) {
 	for _, profile := range profiles {
-		params, err := parse.ParseFile(profile.logpath, profile.config)
+		params, err := parse.ParseFile(profile.logpath, &profile.config)
 		if err != nil {
 			t.Error(err)
 		}
@@ -69,7 +69,7 @@ func TestLogAnalyzer(t *testing.T) {
 		t.Error(err)
 	}
 
-	params, err := parse.ParseFile("./data/test.log", config)
+	params, err := parse.ParseFile("./data/test.log", &config)
 	if err != nil {
 		t.Error(err)
 	}
