@@ -151,13 +151,13 @@ func ParseFast(logtext string, config *Config) ([]map[string]any, error) {
 	var wg sync.WaitGroup
 	for i, line := range lines {
 		wg.Add(1)
-		go func(line string, config *Config, lineNumber int, wg *sync.WaitGroup) {
+		go func(line string, config *Config, lineIdx int, wg *sync.WaitGroup) {
 			defer wg.Done()
 			p, _ := parseLine(line, config)
 			if len(p) == 0 {
-				log.Printf("no pattern matched line %d: \"%s\"\n", lineNumber, line)
+				log.Printf("no pattern matched line %d: \"%s\"\n", lineIdx+1, line)
 			}
-			params[lineNumber] = p
+			params[lineIdx] = p
 		}(line, config, i, &wg)
 	}
 	return params, nil
@@ -171,7 +171,7 @@ func Parse(logtext string, config *Config) ([]map[string]any, error) {
 	for i, line := range lines {
 		p, _ := parseLine(line, config)
 		if len(p) == 0 {
-			log.Printf("no pattern matched line %d: \"%s\"\n", i, line)
+			log.Printf("no pattern matched line %d: \"%s\"\n", i+1, line)
 		}
 		params[i] = p
 	}

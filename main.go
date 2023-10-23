@@ -16,7 +16,8 @@ func main() {
 		return
 	}
 
-	logPaths, configPath, test := getCommandLineArgs()
+	logPaths, configPath, test, printLines := getCommandLineArgs()
+	// Default to ./config.json
 	if configPath == "" {
 		configPath = "./config.json"
 	}
@@ -60,7 +61,9 @@ func main() {
 		return
 	}
 
-	display.DisplayLines(lines)
+	if printLines {
+		display.DisplayLines(lines)
+	}
 	server.Start(lines)
 }
 
@@ -73,14 +76,17 @@ func tokensExtracted(params []map[string]any) bool {
 	return false
 }
 
-func getCommandLineArgs() ([]string, string, bool) {
+func getCommandLineArgs() (logPaths []string, configPath string, test bool, print bool) {
 	// Get log file paths from command-line arguments
-	test := false
-	var configPath string
-	logPaths := make([]string, 0)
+	logPaths = make([]string, 0)
 	for i := 1; i < len(os.Args); i++ {
 		if os.Args[i] == "--test" {
 			test = true
+			continue
+		} else if os.Args[i] == "-p" || os.Args[i] == "--print" {
+			print = true
+			continue
+		} else if os.Args[i] == "-c" || os.Args[i] == "--config" {
 			continue
 		} else if i > 1 && (os.Args[i-1] == "-c" || os.Args[i-1] == "--config") {
 			configPath = os.Args[i]
@@ -88,5 +94,5 @@ func getCommandLineArgs() ([]string, string, bool) {
 		}
 		logPaths = append(logPaths, os.Args[i])
 	}
-	return logPaths, configPath, test
+	return logPaths, configPath, test, print
 }
