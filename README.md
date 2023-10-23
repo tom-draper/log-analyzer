@@ -40,7 +40,7 @@ Run the log analyzer, providing the path to your log file.
 The tokens are extracted from the log file and their data types inferred.
 
 ```text
-line 0
+line 1
         method(string): GET
         endpoint(string): /blog/home
         http(string): HTTP/1.1
@@ -49,7 +49,7 @@ line 0
         user_agent(string): Mozilla/5.0 Chrome/60.0.3112.113
         timestamp(time.Time): 2023-12-11 11:01:28 +0000 UTC
         ip(string): 220.203.23.174
-line 1
+line 2
         user_agent(string): Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36
         timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
         ip(string): 89.238.65.53
@@ -58,7 +58,7 @@ line 1
         http(string): HTTP/1.1
         status(int): 200
         bytes(int): 182
-line 2
+line 3
         ip(string): 209.51.141.74
         method(string): GET
         endpoint(string): /test
@@ -67,7 +67,7 @@ line 2
         bytes(int): 182
         user_agent(string): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36
         timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
-line 3
+line 4
         bytes(int): 182
         user_agent(string): Mozilla/5.0 (iPhone13,2; U; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/15E148 Safari/602.1
         timestamp(time.Time): 2023-12-11 11:01:31 +0000 UTC
@@ -76,11 +76,11 @@ line 3
         endpoint(string): /online
         http(string): HTTP/1.1
         status(int): 200
-line 4
+line 5
         timestamp(time.Time): 2023-12-11 11:01:32 +0000 UTC
         ip(string): 122.161.56.36
         message(string): request failed: error reading the headers
-line 5
+line 6
         http(string): HTTP/1.1
         status(int): 502
         bytes(int): 182
