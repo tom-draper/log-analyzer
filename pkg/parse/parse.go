@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/araddon/dateparse"
@@ -39,9 +40,6 @@ func escapeRegexCharacters(regEx string) string {
 	regEx = strings.ReplaceAll(regEx, ")", "\\)")
 	regEx = strings.ReplaceAll(regEx, "]", "\\]")
 	regEx = strings.ReplaceAll(regEx, "[", "\\[")
-	// regEx = strings.ReplaceAll(regEx, ".", "\\.")
-	// regEx = strings.ReplaceAll(regEx, "?", "\\?")
-	// regEx = strings.ReplaceAll(regEx, "*", "\\*")
 	return regEx
 }
 
@@ -114,7 +112,7 @@ func inferDataTypes(params map[string]string) map[string]any {
 
 // parseLine extracts token parameters from each line using the most appropriate
 // pattern in the given config.
-func parseLine(line string, config Config) (map[string]any, string) {
+func parseLine(line string, config *Config) (map[string]any, string) {
 	// Attempt to parse the line against each pattern in config, only taking the best
 	var patternUsed string
 	best := make(map[string]any)
@@ -126,6 +124,7 @@ func parseLine(line string, config Config) (map[string]any, string) {
 			patternUsed = pattern
 		}
 
+		// Try pattern again after eliminating multi-spaces and tab characters
 		if multiSpaceRegEx.MatchString(line) {
 			singleSpaceLine := multiSpaceRegEx.ReplaceAllString(strings.ReplaceAll(line, "\t", " "), " ")
 			singleSpacePattern := multiSpaceRegEx.ReplaceAllString(strings.ReplaceAll(pattern, "\t", " "), " ")
@@ -144,16 +143,36 @@ func splitLines(text string) []string {
 	return strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n")
 }
 
+// ParseFast is identical to Parse but run concurrently.
+func ParseFast(logtext string, config *Config) ([]map[string]any, error) {
+	lines := splitLines(logtext)
+	params := make([]map[string]any, len(lines))
+	var wg sync.WaitGroup
+	for i, line := range lines {
+		wg.Add(1)
+		go func(line string, config *Config, lineNumber int, wg *sync.WaitGroup) {
+			defer wg.Done()
+			p, _ := parseLine(line, config)
+			if len(p) == 0 {
+				log.Printf("no pattern matched line %d: \"%s\"\n", lineNumber, line)
+			}
+			params[lineNumber] = p
+		}(line, config, i, &wg)
+	}
+	return params, nil
+}
+
 // Parse separates the log text into lines and attempts to extract tokens
 // parameters from each line using the most appropriate pattern in the given config.
-func Parse(logtext string, config Config) ([]map[string]any, error) {
-	params := make([]map[string]any, 0)
-	for i, line := range splitLines(logtext) {
+func Parse(logtext string, config *Config) ([]map[string]any, error) {
+	lines := splitLines(logtext)
+	params := make([]map[string]any, len(lines))
+	for i, line := range lines {
 		p, _ := parseLine(line, config)
 		if len(p) == 0 {
 			log.Printf("no pattern matched line %d: \"%s\"\n", i, line)
 		}
-		params = append(params, p)
+		params[i] = p
 	}
 	return params, nil
 }
@@ -161,7 +180,7 @@ func Parse(logtext string, config Config) ([]map[string]any, error) {
 // ParseFile reads the log text from the given file path, separates the text
 // into lines and attempts to extract tokens parameters from each line using the
 // most appropriate pattern in the given config.
-func ParseFile(path string, config Config) ([]map[string]any, error) {
+func ParseFile(path string, config *Config) ([]map[string]any, error) {
 	body, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -176,7 +195,7 @@ func ParseFile(path string, config Config) ([]map[string]any, error) {
 // ParseFile reads the log text from each of the given file paths, separates the
 // text into lines and attempts to extract tokens parameters from each line
 // using the most appropriate pattern in the given config.
-func ParseFiles(paths []string, config Config) ([]map[string]any, error) {
+func ParseFiles(paths []string, config *Config) ([]map[string]any, error) {
 	params := make([]map[string]any, 0)
 	for _, path := range paths {
 		fileParams, err := ParseFile(path, config)
@@ -198,8 +217,8 @@ func writeConfigTest(extractions []Extraction) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	filedir := fmt.Sprintf("test-%d.json", time.Now().Unix())
-	file, err := os.OpenFile(filedir, os.O_RDWR|os.O_CREATE, 0755)
+	fileDir := fmt.Sprintf("test-%d.json", time.Now().Unix())
+	file, err := os.OpenFile(fileDir, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return 0, err
 	}
@@ -207,7 +226,7 @@ func writeConfigTest(extractions []Extraction) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println(filedir)
+	fmt.Println(fileDir)
 	return n, nil
 }
 
@@ -220,7 +239,7 @@ type Extraction struct {
 
 // ParseTest runs Parse and displays a random sample of extracted parameters
 // along with the origin lines from the log text.
-func ParseTest(logtext string, config Config) []Extraction {
+func ParseTest(logtext string, config *Config) []Extraction {
 	extractions := parseTestExtractions(logtext, config)
 	writeConfigTest(extractions)
 	return extractions
@@ -228,12 +247,12 @@ func ParseTest(logtext string, config Config) []Extraction {
 
 // parseTest runs Parse and returns a random sample of extracted parameters
 // along with the origin lines from the log text.
-func parseTest(logtext string, config Config) []Extraction {
+func parseTest(logtext string, config *Config) []Extraction {
 	extractions := parseTestExtractions(logtext, config)
 	return extractions
 }
 
-func parseTestExtractions(logtext string, config Config) []Extraction {
+func parseTestExtractions(logtext string, config *Config) []Extraction {
 	extractions := make([]Extraction, 0)
 	for i, line := range splitLines(logtext) {
 		p, pattern := parseLine(line, config)
@@ -250,7 +269,7 @@ func parseTestExtractions(logtext string, config Config) []Extraction {
 
 // ParseTest runs ParseFile and displays a random sample of extracted parameters
 // along with the origin lines from the log file.
-func ParseFileTest(path string, config Config) ([]Extraction, error) {
+func ParseFileTest(path string, config *Config) ([]Extraction, error) {
 	body, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -266,7 +285,7 @@ func ParseFileTest(path string, config Config) ([]Extraction, error) {
 
 // ParseTest runs ParseFiles and displays a random sample of extracted
 // parameters along with the origin lines from the log files.
-func ParseFilesTest(paths []string, config Config) ([]Extraction, error) {
+func ParseFilesTest(paths []string, config *Config) ([]Extraction, error) {
 	extractions := make([]Extraction, 0)
 
 	var parsedAny bool
