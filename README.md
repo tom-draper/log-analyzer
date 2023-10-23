@@ -96,15 +96,15 @@ Unimportant values within your log file can be excluded from your dashboard by u
 For example, if you don't want thread pool number or ID featured in your dashboard:
 
 ```log
-[03/Jan/2023:09:18:54] pool-1-thread-2 INFO: getUserID() 14.29 ms
-[03/Jan/2023:09:18:54] pool-1-thread-1 INFO: getUserID() 13.11 ms
-[03/Jan/2023:09:18:54] pool-1-thread-2 INFO: getStatus() 3.87 ms
+[03/Jan/2023:09:18:54] pool-1-thread-2 INFO: getUserID() duration 14.29 ms
+[03/Jan/2023:09:18:54] pool-1-thread-1 INFO: getUserID() duration 13.11 ms
+[03/Jan/2023:09:18:54] pool-1-thread-2 INFO: getStatus() duration 3.87 ms
 ```
 
 ```json
 {
     "patterns": [
-        "[timestamp] pool-*-thread-* INFO: function() elapsed ms"
+        "[timestamp] pool-*-thread-* INFO: function() duration elapsed ms"
     ],
     "tokens": ["timestamp", "function", "elapsed"]
 }
