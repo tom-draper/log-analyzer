@@ -27,9 +27,9 @@ func main() {
 	// If testing config against log file(s), run test
 	if test {
 		if len(logPaths) == 1 {
-			parse.ParseFileTest(logPaths[0], config)
+			parse.ParseFileTest(logPaths[0], &config)
 		} else {
-			parse.ParseFilesTest(logPaths, config)
+			parse.ParseFilesTest(logPaths, &config)
 		}
 		return
 	}
@@ -37,12 +37,12 @@ func main() {
 	// Extract tokens from log files
 	var lines []map[string]any
 	if len(logPaths) == 1 {
-		lines, err = parse.ParseFile(logPaths[0], config)
+		lines, err = parse.ParseFile(logPaths[0], &config)
 		if err != nil {
 			fmt.Printf("unable to parse log file: %s\n", fmt.Sprint(err))
 		}
 	} else {
-		lines, err = parse.ParseFiles(logPaths, config)
+		lines, err = parse.ParseFiles(logPaths, &config)
 		if err != nil {
 			fmt.Printf("unable to parse log files: %s\n", fmt.Sprint(err))
 		}
