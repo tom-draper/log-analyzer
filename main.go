@@ -83,7 +83,7 @@ func getCommandLineArgs() (logPaths []string, configPath string, test bool, prin
 		if os.Args[i] == "--test" {
 			test = true
 			continue
-		} else if os.Args[i] == "-p" || os.Args[i] == "--print" {
+		} else if os.Args[i] == "-p" || os.Args[i] == "--print" || os.Args[i] == "-d" || os.Args[i] == "--display" {
 			print = true
 			continue
 		} else if os.Args[i] == "-c" || os.Args[i] == "--config" {
