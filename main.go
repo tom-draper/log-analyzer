@@ -87,6 +87,7 @@ func getCommandLineArgs() (logPaths []string, configPath string, test bool, prin
 			print = true
 			continue
 		} else if os.Args[i] == "-c" || os.Args[i] == "--config" {
+			// Skip as path will be recorded next iteration
 			continue
 		} else if i > 1 && (os.Args[i-1] == "-c" || os.Args[i-1] == "--config") {
 			configPath = os.Args[i]
