@@ -1,5 +1,5 @@
 # log-analyzer
-Software for analyzing any unstructured log file. Turn unstructured log files into a dashboard.
+Turn unstructured log files into dashboards.
 
 ## Example
 
