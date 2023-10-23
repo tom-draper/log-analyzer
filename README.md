@@ -7,12 +7,11 @@ Turn unstructured log files into a dashboard.
 An unstructured log file named `demo.log`:
 
 ```log
-[11/Dec/2023:11:01:28] 220.203.23.174 "GET /blog/home HTTP/1.1" 200 182 “Mozilla/5.0 Chrome/60.0.3112.113”
-[11/Dec/2023:11:01:29] 89.238.65.53 "POST /new-user/ HTTP/1.1" 200 182 "Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36”
-[11/Dec/2023:11:01:29] 209.51.141.74 "GET /test HTTP/1.1" 404 182 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36”
-[11/Dec/2023:11:01:31] 201.235.175.120 "GET /online HTTP/1.1" 200 182 "Mozilla/5.0 (iPhone13,2; U; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/15E148 Safari/602.1”
+[11/Dec/2023:11:01:28] 220.203.23.174 "GET /blog/home HTTP/1.1" 200 182 "Mozilla/5.0 Chrome/60.0.3112.113"
+[11/Dec/2023:11:01:29] 89.238.65.53 "POST /new-user/ HTTP/1.1" 201 182 "Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36"
+[11/Dec/2023:11:01:29] 209.51.141.74 "GET /test HTTP/1.1" 404 182 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
 [11/Dec/2023:11:01:32] 122.161.56.36 [error] request failed: error reading the headers
-[11/Dec/2023:11:01:34] 74.6.8.121 "GET /api/data HTTP/1.1" 502 182 “python-requests/2.26.0”
+[11/Dec/2023:11:01:34] 74.6.8.121 "GET /api/data HTTP/1.1" 200 182 "python-requests/2.26.0"
 ```
 
 In `config.json`, build some simple patterns featured in your log files using a set of token values. These tokens can have any identifying name, and will be grouped and targeted for extraction from the log file.
@@ -41,6 +40,7 @@ The tokens are extracted from the log file and their data types inferred.
 
 ```text
 line 1
+        ip(string): 220.203.23.174
         method(string): GET
         endpoint(string): /blog/home
         http(string): HTTP/1.1
@@ -48,47 +48,37 @@ line 1
         bytes(int): 182
         user_agent(string): Mozilla/5.0 Chrome/60.0.3112.113
         timestamp(time.Time): 2023-12-11 11:01:28 +0000 UTC
-        ip(string): 220.203.23.174
 line 2
+        bytes(int): 182
         user_agent(string): Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36
         timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
         ip(string): 89.238.65.53
         method(string): POST
         endpoint(string): /new-user/
         http(string): HTTP/1.1
-        status(int): 200
-        bytes(int): 182
+        status(int): 201
 line 3
+        user_agent(string): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36
+        timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
         ip(string): 209.51.141.74
         method(string): GET
         endpoint(string): /test
         http(string): HTTP/1.1
         status(int): 404
         bytes(int): 182
-        user_agent(string): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36
-        timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
 line 4
-        bytes(int): 182
-        user_agent(string): Mozilla/5.0 (iPhone13,2; U; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/15E148 Safari/602.1
-        timestamp(time.Time): 2023-12-11 11:01:31 +0000 UTC
-        ip(string): 201.235.175.120
-        method(string): GET
-        endpoint(string): /online
-        http(string): HTTP/1.1
-        status(int): 200
-line 5
-        timestamp(time.Time): 2023-12-11 11:01:32 +0000 UTC
         ip(string): 122.161.56.36
         message(string): request failed: error reading the headers
-line 6
-        http(string): HTTP/1.1
-        status(int): 502
+        timestamp(time.Time): 2023-12-11 11:01:32 +0000 UTC
+line 5
         bytes(int): 182
         user_agent(string): python-requests/2.26.0
         timestamp(time.Time): 2023-12-11 11:01:34 +0000 UTC
         ip(string): 74.6.8.121
         method(string): GET
         endpoint(string): /api/data
+        http(string): HTTP/1.1
+        status(int): 200
 ```
 
 Finally, your dashboard is generated. 
@@ -103,13 +93,12 @@ Dashboard running at http://localhost:3000/
 
 Unimportant values within your log file can be excluded from your dashboard by using `*` or `_` within your pattern.
 
-
-For example, if you don't want thread pool number or ID featured in our dashboard:
+For example, if you don't want thread pool number or ID featured in your dashboard:
 
 ```log
-[11/Dec/2023:11:01:28] pool-1-thread-2 INFO: getUserID() 14.29 ms
-[11/Dec/2023:11:01:28] pool-1-thread-1 INFO: getUserID() 13.11 ms
-[11/Dec/2023:11:01:28] pool-1-thread-2 INFO: getStatus() 3.87 ms
+[03/Jan/2023:09:18:54] pool-1-thread-2 INFO: getUserID() 14.29 ms
+[03/Jan/2023:09:18:54] pool-1-thread-1 INFO: getUserID() 13.11 ms
+[03/Jan/2023:09:18:54] pool-1-thread-2 INFO: getStatus() 3.87 ms
 ```
 
 ```json
