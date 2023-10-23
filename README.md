@@ -87,7 +87,7 @@ Finally, your dashboard is generated.
 Dashboard running at http://localhost:3000/
 ```
 
-## Additional Configuration
+## Additional Config
 
 ### Wildcard
 
@@ -108,4 +108,16 @@ For example, if you don't want thread pool number or ID featured in your dashboa
     ],
     "tokens": ["timestamp", "function", "elapsed"]
 }
+```
+
+### Config Path
+
+You can specify a path to the config file containing your patterns following the `-c` or `--config` flag. The config path defaults to `./config.json`
+
+### Config Test
+
+Once you have your patterns together, you can perform a test run including the `--test` flag and the extracted result of each line will be saved to json file in the current directory.
+
+```bash
+> ./main ./tests/data/logs/demo.log --test
 ```
