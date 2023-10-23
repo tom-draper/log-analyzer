@@ -35,7 +35,7 @@ var profiles = []Profile{
 
 func TestParseFile(t *testing.T) {
 	for _, profile := range profiles {
-		lines, err := ParseFile(profile.logpath, profile.config)
+		lines, err := ParseFile(profile.logpath, &profile.config)
 		if err != nil {
 			t.Error(err)
 		}
