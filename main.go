@@ -16,14 +16,17 @@ func main() {
 		return
 	}
 
+	logPaths, configPath, test := getCommandLineArgs()
+	if configPath == "" {
+		configPath = "./config.json"
+	}
+
 	// Retrieve log line patterns from config file
-	config, err := parse.LoadConfig("./config.json")
+	config, err := parse.LoadConfig(configPath)
 	if err != nil {
 		fmt.Println("failed to load log patterns from ./config.json")
 		return
 	}
-
-	logPaths, test := getCommandLineArgs()
 
 	// If testing config against log file(s), run test
 	if test {
@@ -70,16 +73,20 @@ func tokensExtracted(params []map[string]any) bool {
 	return false
 }
 
-func getCommandLineArgs() ([]string, bool) {
+func getCommandLineArgs() ([]string, string, bool) {
 	// Get log file paths from command-line arguments
 	test := false
+	var configPath string
 	logPaths := make([]string, 0)
 	for i := 1; i < len(os.Args); i++ {
 		if os.Args[i] == "--test" {
 			test = true
 			continue
+		} else if i > 1 && (os.Args[i-1] == "-c" || os.Args[i-1] == "--config") {
+			configPath = os.Args[i]
+			continue
 		}
 		logPaths = append(logPaths, os.Args[i])
 	}
-	return logPaths, test
+	return logPaths, configPath, test
 }
