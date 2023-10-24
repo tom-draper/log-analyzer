@@ -40,6 +40,7 @@ The tokens are extracted from the log file and their data types inferred.
 
 ```text
 line 1
+        timestamp(time.Time): 2023-12-11 11:01:28 +0000 UTC
         ip(string): 220.203.23.174
         method(string): GET
         endpoint(string): /blog/home
@@ -47,18 +48,16 @@ line 1
         status(int): 200
         bytes(int): 182
         user_agent(string): Mozilla/5.0 Chrome/60.0.3112.113
-        timestamp(time.Time): 2023-12-11 11:01:28 +0000 UTC
 line 2
-        bytes(int): 182
-        user_agent(string): Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36
         timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
         ip(string): 89.238.65.53
         method(string): POST
         endpoint(string): /new-user/
         http(string): HTTP/1.1
         status(int): 201
+        bytes(int): 182
+        user_agent(string): Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36
 line 3
-        user_agent(string): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36
         timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
         ip(string): 209.51.141.74
         method(string): GET
@@ -66,19 +65,20 @@ line 3
         http(string): HTTP/1.1
         status(int): 404
         bytes(int): 182
+        user_agent(string): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36
 line 4
+        timestamp(time.Time): 2023-12-11 11:01:32 +0000 UTC
         ip(string): 122.161.56.36
         message(string): request failed: error reading the headers
-        timestamp(time.Time): 2023-12-11 11:01:32 +0000 UTC
 line 5
-        bytes(int): 182
-        user_agent(string): python-requests/2.26.0
         timestamp(time.Time): 2023-12-11 11:01:34 +0000 UTC
         ip(string): 74.6.8.121
         method(string): GET
         endpoint(string): /api/data
         http(string): HTTP/1.1
         status(int): 200
+        bytes(int): 182
+        user_agent(string): python-requests/2.26.0
 ```
 
 Finally, your dashboard is generated. 
