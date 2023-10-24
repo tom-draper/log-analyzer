@@ -87,7 +87,7 @@ Finally, your dashboard is generated.
 Dashboard running at http://localhost:3000/
 ```
 
-## Additional Config
+## Advanced Config
 
 ### Wildcard
 
