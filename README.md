@@ -93,7 +93,7 @@ Dashboard running at http://localhost:3000/
 
 Unimportant values within your log file that may still vary in value can be excluded from your dashboard by using wildcard tokens `*` or `_` within your pattern.
 
-For example, if you don't want thread pool number or ID featured in your dashboard:
+For example, if you don't want thread pool number or thread ID featured in your dashboard:
 
 ```log
 [03/Jan/2023:09:18:54] pool-1-thread-2 INFO: getUserID() duration 14.29 ms
