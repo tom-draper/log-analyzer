@@ -110,6 +110,49 @@ For example, if you don't want thread pool number or thread ID featured in your 
 }
 ```
 
+### Dependencies
+
+Within the config, we can specify any tokens that are dependent upon other tokens. For example, elapsed running time may depend on the function name. Each dependency specified allows for deeper analysis with a richer dashboard that considers this relationship.
+
+```json
+{
+    "patterns": [
+        "[timestamp] INFO: function() duration elapsed ms"
+    ],
+    "tokens": ["timestamp", "function", "elapsed"],
+    "dependencies": {
+        "elapsed": ["function"]
+    }
+}
+```
+
+### Conversions
+
+Some token values with a numeric value may be equivalent to other token values after performing a conversion to account for different units. In order to group these tokens together in your dashboard, your config needs to specify how to convert them from one to another. In the example below, we state that the `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all time recordings into the `elapsed_ms` token, and shown in terms of milliseconds.
+
+```json
+{
+    "patterns": [
+        "[timestamp] INFO: function() duration elapsed_ms ms"
+        "[timestamp] INFO: function() duration elapsed_ns ns"
+        "[timestamp] INFO: function() duration elapsed_s s"
+    ],
+    "tokens": ["timestamp", "function", "elapsed_ms", "elapsed_ns", "elapsed_s"],
+    "conversions": {
+        "elapsed_ns": {
+            "token": "elapsed_ms",
+            "multiplier": 0.001
+        },
+        "elapsed_s": {
+            "token": "elapsed_ms",
+            "multiplier": 1000
+        }
+    }
+}
+```
+
+### Links
+
 ### Config Path
 
 You can specify a path to the config file containing your patterns following the `-c` or `--config` flag. The config path defaults to `./config.json`
