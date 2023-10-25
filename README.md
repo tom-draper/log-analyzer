@@ -151,8 +151,6 @@ Some token values with a numeric value may be equivalent to other token values a
 }
 ```
 
-### Links
-
 ### Config Path
 
 You can specify a path to the config file containing your patterns following the `-c` or `--config` flag. The config path defaults to `./config.json`
