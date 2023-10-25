@@ -96,9 +96,9 @@ Unimportant values within your log file that may still vary in value can be excl
 For example, if you don't want thread pool number or thread ID featured in your dashboard:
 
 ```log
-[03/Jan/2023:09:18:54] pool-1-thread-2 INFO: getUserID() duration 14.29 ms
-[03/Jan/2023:09:18:54] pool-1-thread-1 INFO: getUserID() duration 13.11 ms
-[03/Jan/2023:09:18:54] pool-1-thread-2 INFO: getStatus() duration 3.87 ms
+[2023-10-25T16:24:31+00:00] pool-1-thread-2 INFO: getUserID() duration 14.29 ms
+[2023-10-25T16:24:32+00:00] pool-1-thread-1 INFO: getUserID() duration 13.11 ms
+[2023-10-25T16:24:37+00:00] pool-1-thread-2 INFO: getStatus() duration 3.87 ms
 ```
 
 ```json
@@ -113,6 +113,12 @@ For example, if you don't want thread pool number or thread ID featured in your 
 ### Dependencies
 
 Within the config, we can specify any tokens that are dependent upon other tokens. For example, elapsed running time may depend on the function name. Each dependency specified allows for deeper analysis with a richer dashboard that considers this relationship.
+
+```log
+[2023-10-25T16:24:31+00:00] INFO: genUUID() duration 44.29 ms
+[2023-10-25T16:24:32+00:00] INFO: createUser() duration 51.13 ms
+[2023-10-25T16:24:37+00:00] INFO: recordDataAccess() duration 6.87 ms
+```
 
 ```json
 {
@@ -129,6 +135,12 @@ Within the config, we can specify any tokens that are dependent upon other token
 ### Conversions
 
 Some token values with a numeric value may be equivalent to other token values after performing a conversion to account for different units. In order to group these tokens together in your dashboard, your config needs to specify how to convert them from one to another. In the example below, we state that the `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all time recordings into the `elapsed_ms` token, and shown in terms of milliseconds.
+
+```log
+[2023-10-25T16:24:31+00:00] INFO: genUUID() duration 1.29 s
+[2023-10-25T16:24:32+00:00] INFO: createUser() duration 51.13 ms
+[2023-10-25T16:24:37+00:00] INFO: recordDataAccess() duration 904.87 ns
+```
 
 ```json
 {
