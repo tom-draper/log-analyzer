@@ -169,7 +169,7 @@ You can specify a path to the config file containing your patterns following the
 
 ### Config Test
 
-Once you have your patterns together, you can perform a test run including the `--test` flag and the extracted result of each line will be saved to json file in the current directory.
+Once you have your patterns together, you can perform a test run by including the `--test` flag and the extracted result of each line will be saved to json file in the current directory.
 
 ```bash
 > ./main ./tests/data/logs/demo.log --test
