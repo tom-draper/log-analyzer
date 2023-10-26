@@ -80,20 +80,21 @@ func getCommandLineArgs() (logPaths []string, configPath string, test bool, prin
 	// Get log file paths from command-line arguments
 	logPaths = make([]string, 0)
 	for i := 1; i < len(os.Args); i++ {
-		if os.Args[i] == "--test" {
+		arg := os.Args[i]
+		if arg == "-t" || arg == "--test" {
 			test = true
 			continue
-		} else if os.Args[i] == "-p" || os.Args[i] == "--print" || os.Args[i] == "-d" || os.Args[i] == "--display" {
+		} else if arg == "-p" || arg == "--print" || arg == "-d" || arg == "--display" {
 			print = true
 			continue
-		} else if os.Args[i] == "-c" || os.Args[i] == "--config" {
+		} else if arg == "-c" || arg == "--config" {
 			// Skip as path will be recorded next iteration
 			continue
 		} else if i > 1 && (os.Args[i-1] == "-c" || os.Args[i-1] == "--config") {
 			configPath = os.Args[i]
 			continue
 		}
-		logPaths = append(logPaths, os.Args[i])
+		logPaths = append(logPaths, arg)
 	}
 	return logPaths, configPath, test, print
 }
