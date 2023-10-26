@@ -112,7 +112,7 @@ For example, if you don't want thread pool number or thread ID featured in your 
 
 ### Dependencies
 
-Within the config, we can specify any tokens that are dependent upon other tokens. For example, elapsed running time may depend on the function name. Each dependency specified allows for deeper analysis with a richer dashboard that considers this relationship.
+Within the config, you can specify any tokens that are dependent upon other tokens. For example, elapsed running time may depend on the function name. Each dependency specified allows for deeper analysis with a richer dashboard that considers this relationship.
 
 ```log
 [2023-10-25T16:24:31+00:00] LOG: genUUID() duration 44.29 ms
@@ -134,7 +134,7 @@ Within the config, we can specify any tokens that are dependent upon other token
 
 ### Conversions
 
-Some token values with a numeric value may be equivalent to other token values after performing a conversion to account for different units. In order to group these tokens together in your dashboard, your config needs to specify how to convert them from one to another. In the example below, we state that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all time recording values into milliseconds.
+Some token values with a numeric value may be equivalent to other token values after performing a conversion to account for different units. In order to group these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below states that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all time recording values into milliseconds.
 
 ```log
 [2002-09-15 20:44:07] LOG: createAccount() duration 51.13 ms
