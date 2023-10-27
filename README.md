@@ -115,15 +115,15 @@ For example, if you don't want thread pool number or thread ID featured in your 
 Within the config, you can specify any tokens that are dependent upon other tokens. For example, elapsed running time may depend on the function name. Each dependency specified allows for deeper analysis with a richer dashboard that considers this relationship.
 
 ```log
-[2023-10-25T16:24:31+00:00] LOG: genUUID() duration 44.29 ms
-[2023-10-25T16:24:32+00:00] LOG: createUser() duration 51.13 ms
-[2023-10-25T16:24:37+00:00] LOG: recordDataAccess() duration 6.87 ms
+2023-10-25 20:44:07 - LOG: genUUID() duration 44.29 ms
+2023-10-25 20:44:08 - LOG: createUser() duration 51.13 ms
+2023-10-25 20:44:11 - LOG: recordDataAccess() duration 6.87 ms
 ```
 
 ```json
 {
     "patterns": [
-        "[timestamp] LOG: function() duration elapsed ms"
+        "timestamp - LOG: function() duration elapsed ms"
     ],
     "tokens": ["timestamp", "function", "elapsed"],
     "dependencies": {
@@ -137,19 +137,19 @@ Within the config, you can specify any tokens that are dependent upon other toke
 Some token values with a numeric value may be equivalent to other token values after performing a conversion to account for different units. In order to group these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below states that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all time recording values into milliseconds.
 
 ```log
-[2002-09-15 20:44:07] LOG: createAccount() duration 51.13 ms
-[2002-09-15 20:44:09] LOG: encryptData() duration 1.29 s
-[2002-09-15 20:44:33] LOG: checkOnline() duration 904.87 ns
+[November 26, 2017 at 7:25p PST] LOG: function 'createAccount' took 51.13 ms
+[November 26, 2017 at 7:25p PST] LOG: function 'encryptData' took 1.29 s
+[November 26, 2017 at 7:25p PST] LOG: function 'checkOnline' took 904.87 ns
 ```
 
 ```json
 {
     "patterns": [
-        "[timestamp] LOG: function() duration elapsed_ms ms"
-        "[timestamp] LOG: function() duration elapsed_ns ns"
-        "[timestamp] LOG: function() duration elapsed_s s"
+        "[timestamp] INFO: function 'function_name' took elapsed_ms ms"
+        "[timestamp] INFO: function 'function_name' took elapsed_ns ns"
+        "[timestamp] INFO: function 'function_name' took elapsed_s s"
     ],
-    "tokens": ["timestamp", "function", "elapsed_ms", "elapsed_ns", "elapsed_s"],
+    "tokens": ["timestamp", "function_name", "elapsed_ms", "elapsed_ns", "elapsed_s"],
     "conversions": {
         "elapsed_ns": {
             "token": "elapsed_ms",
