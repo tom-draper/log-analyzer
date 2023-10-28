@@ -7,18 +7,27 @@ import (
 )
 
 type Config struct {
-	Tokens   []string
-	Patterns []string
+	Tokens       []string              `json:"tokens"`
+	Patterns     []string              `json:"patterns"`
+	Dependencies map[string][]string   `json:"dependencies,omitempty"`
+	Conversions  map[string]Conversion `json:"conversions,omitempty"`
 }
 
 type TypedConfig struct {
-	Tokens   []Token
-	Patterns []string
+	Tokens       []Token               `json:"tokens"`
+	Patterns     []string              `json:"patterns"`
+	Dependencies map[string][]string   `json:"dependencies,omitempty"`
+	Conversions  map[string]Conversion `json:"conversions,omitempty"`
 }
 
 type Token struct {
 	Value string `json:"value"`
 	Type  string `json:"type,omitempty"` // defaults to string
+}
+
+type Conversion struct {
+	Token      string  `json:"token"`
+	Multiplier float64 `json:"multiplier"`
 }
 
 func LoadConfig(path string) (Config, error) {
