@@ -40,16 +40,15 @@
   }
 
   const numBars = 10
-  let bars: [string, number, number][] = [];
+  let bars: [string, number, number][];
   onMount(() => {
     bars = sortedBars(freq);
-    console.log(bars)
   });
 
   export let freq: ValueFreq;
 </script>
 
-{#if bars.length > 0}
+{#if bars !== undefined}
   <div class="freq-graph">
     {#each bars as bar}
       <div class="token-frequency" title="{bar[1].toLocaleString()}">

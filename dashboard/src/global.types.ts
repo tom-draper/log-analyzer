@@ -1,22 +1,22 @@
-  type Data = {
+type Data = {
     extraction: {
-      params: LineParams[];
-      patterns: string[];
+        params: LineParams[];
+        failed: string[];
     };
     config: {
-      tokens: string[];
-      patterns: string[];
+        tokens: string[];
+        patterns: string[];
     };
-  };
+};
 
-  type LineParams = {
+type LineParams = {
     [token: string]: string;
-  };
+};
 
-  type TokenValueFreq = {
+type TokenValueFreq = {
     [token: string]: ValueFreq;
-  };
+};
 
-  type ValueFreq = {
+type ValueFreq = {
     [value: string]: number
-  }
+}

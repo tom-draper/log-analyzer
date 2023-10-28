@@ -21,16 +21,12 @@
 
     let days: { [value: string]: number[] } = {};
     for (let i = 0; i < data.extraction.params.length; i++) {
-      if (
-        !(token in data.extraction.params[i]) ||
-        !(timestampToken in data.extraction.params[i])
-      ) {
+      const params = data.extraction.params;
+      if (!(token in params[i]) || !(timestampToken in params[i])) {
         continue;
       }
 
-      const timestamp = new Date(
-        data.extraction.params[i][timestampToken]
-      ).getTime();
+      const timestamp = new Date(params[i][timestampToken]).getTime();
 
       // Find timeslot index
       let best = {
@@ -44,10 +40,12 @@
             index: j,
             diff: diff,
           };
+        } else {
+          break;
         }
       }
 
-      const value = data.extraction.params[i][token];
+      const value = params[i][token];
       if (!(value in days)) {
         days[value] = Array(timeSlots.length).fill(0);
       }
@@ -133,10 +131,10 @@
   let sortedValueCounts: {
     value: string;
     total: number;
-}[];
-  let valueCounts:{
+  }[];
+  let valueCounts: {
     [value: string]: number[];
-};
+  };
   let valueMax: { [value: string]: number };
   let timeSlots: Moment.Moment[];
   onMount(() => {
@@ -152,9 +150,7 @@
     valueMax = valueCountMax(valueCounts);
   });
 
-  export let data: Data,
-    token: string,
-    timestampToken: string | null;
+  export let data: Data, token: string, timestampToken: string | null;
 </script>
 
 {#if valueMax != undefined}
@@ -170,7 +166,9 @@
             } occurances`}
             style={valueCounts[value.value][i] == 0
               ? `background: #111`
-              : `opacity: ${(valueCounts[value.value][i] / valueMax[value.value]) * 100}%`}
+              : `opacity: ${
+                  (valueCounts[value.value][i] / valueMax[value.value]) * 100
+                }%`}
           />
         {/each}
       </div>
@@ -178,7 +176,9 @@
   </div>
   <div class="time-range">
     <div class="time">{timeSlots[0].toLocaleString()}</div>
-    <div class="time max-time">{timeSlots[timeSlots.length-1].toLocaleString()}</div>
+    <div class="time max-time">
+      {timeSlots[timeSlots.length - 1].toLocaleString()}
+    </div>
   </div>
 {/if}
 
@@ -201,6 +201,7 @@
   .value-name {
     font-size: 0.85em;
     margin-top: 8px;
+    text-wrap: nowrap;
   }
 
   .time-range {

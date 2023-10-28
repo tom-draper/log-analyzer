@@ -3,6 +3,7 @@
   import { onMount } from "svelte";
   import moment from "moment";
   import Card from "./lib/Card.svelte";
+  import FailedLines from "./lib/FailedLines.svelte";
 
   function isDate(date: string): boolean {
     return moment(date, moment.ISO_8601, true).isValid();
@@ -99,6 +100,7 @@
           <Card {data} token={token.token} {timestampToken} />
         {/if}
       {/each}
+      <FailedLines {data} />
     </div>
   {/if}
 </main>

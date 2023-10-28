@@ -25,7 +25,6 @@
     freq = tokenValueFrequency(data, token);
   });
 
-  // your script goes here
   export let data: Data, token: string, timestampToken: string | null;
 </script>
 
