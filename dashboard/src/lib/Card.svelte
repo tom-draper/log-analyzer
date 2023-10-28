@@ -3,6 +3,7 @@
   import ValueFreqGraph from "./ValueFreqGraph.svelte";
   import OverTimeGraph from "./OverTimeGraph.svelte";
   import Statistics from "./Statistics.svelte";
+  import Distribution from "./Distribution.svelte";
 
   function tokenValueFrequency(data: Data, token: string): ValueCount {
     let freq: ValueCount = {};
@@ -38,6 +39,7 @@
     <div class="line-count">{lineCount.toLocaleString()} lines</div>
   </div>
   <Statistics {data} {token}/>
+  <Distribution {data} {token}/>
   {#if freq !== undefined}
     <ValueFreqGraph {freq} />
   {/if}

@@ -32,7 +32,6 @@
       }
       const value = data.extraction.params[i][token];
       if (typeof value === "number") {
-        console.log(value);
         return true;
       }
     }
@@ -96,7 +95,6 @@
       <div class="value">{statistics.p95}</div>
       <div class="label">p95</div>
     </div>
-
     <div class="statistic">
       <div class="value">{statistics.p99}</div>
       <div class="label">p99</div>
@@ -108,7 +106,7 @@
   .container {
     border: 1px solid #ffffff24;
     border-radius: 5px;
-    margin: 3em 0;
+    margin: 3em 0 2em;
     padding: 2rem;
     display: flex;
   }
