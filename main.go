@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"internal/display"
-	"internal/server"
 
+	"github.com/tom-draper/log-analyzer/pkg/analyze"
 	"github.com/tom-draper/log-analyzer/pkg/parse"
 )
 
@@ -40,31 +40,31 @@ func main() {
 	}
 
 	// Extract tokens from log files
-	var lines []map[string]any
+	var extraction parse.Extraction
 	if len(logPaths) == 1 {
-		lines, err = parse.ParseFile(logPaths[0], &config)
+		extraction, err = parse.ParseFile(logPaths[0], &config)
 		if err != nil {
 			fmt.Printf("unable to parse log file: %s\n", fmt.Sprint(err))
 		}
 	} else {
-		lines, err = parse.ParseFiles(logPaths, &config)
+		extraction, err = parse.ParseFiles(logPaths, &config)
 		if err != nil {
 			fmt.Printf("unable to parse log files: %s\n", fmt.Sprint(err))
 		}
 	}
 
-	if len(lines) == 0 {
+	if len(extraction.Params) == 0 {
 		fmt.Println("no lines extracted\nensure log file path is correct")
 		return
-	} else if !tokensExtracted(lines) {
+	} else if !tokensExtracted(extraction.Params) {
 		fmt.Println("no tokens extracted\nensure patterns in `config.json` are correct and all tokens are named")
 		return
 	}
 
 	if printLines {
-		display.DisplayLines(lines)
+		display.DisplayLines(extraction.Params)
 	}
-	server.Start(lines)
+	analyze.Run(&extraction, &config)
 }
 
 func tokensExtracted(params []map[string]any) bool {

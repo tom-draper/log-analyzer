@@ -2,11 +2,11 @@ package test
 
 import (
 	"internal/display"
-	"internal/server"
 	"os"
 	"strings"
 	"testing"
 
+	"github.com/tom-draper/log-analyzer/pkg/analyze"
 	"github.com/tom-draper/log-analyzer/pkg/parse"
 )
 
@@ -43,7 +43,7 @@ func splitLines(text string) []string {
 
 func TestParse(t *testing.T) {
 	for _, profile := range profiles {
-		params, err := parse.ParseFile(profile.logpath, &profile.config)
+		extraction, err := parse.ParseFile(profile.logpath, &profile.config)
 		if err != nil {
 			t.Error(err)
 		}
@@ -59,7 +59,7 @@ func TestParse(t *testing.T) {
 			indicies = append(indicies, i)
 		}
 
-		display.DisplayTestLines(lines, params, indicies)
+		display.DisplayTestLines(lines, extraction.Params, indicies)
 	}
 }
 
@@ -69,11 +69,11 @@ func TestLogAnalyzer(t *testing.T) {
 		t.Error(err)
 	}
 
-	params, err := parse.ParseFile("./data/test.log", &config)
+	extraction, err := parse.ParseFile("./data/test.log", &config)
 	if err != nil {
 		t.Error(err)
 	}
 
-	display.DisplayLines(params)
-	server.Start(params)
+	display.DisplayLines(extraction.Params)
+	analyze.Run(&extraction, &config)
 }

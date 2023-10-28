@@ -9,9 +9,18 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/tom-draper/log-analyzer/pkg/parse"
 )
 
-func Start(params []map[string]any) {
+func Start(extraction *parse.Extraction, config *parse.Config) {
+	data := struct {
+		extraction *parse.Extraction
+		config     *parse.Config
+	}{
+		extraction: extraction,
+		config:     config,
+	}
+
 	r := chi.NewRouter()
 	// Serve index.html
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +37,7 @@ func Start(params []map[string]any) {
 	})
 	// Return lines data when requested by dashboard
 	r.Get("/data", func(w http.ResponseWriter, r *http.Request) {
-		jsonString, err := json.Marshal(params)
+		jsonString, err := json.Marshal(data)
 		if err != nil {
 			render.Render(w, r, ErrInternalServerError(err))
 		}
