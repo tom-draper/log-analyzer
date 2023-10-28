@@ -3,7 +3,7 @@
 </script>
 
 <div class="card">
-  {#each Object.keys(data.extraction.failed) as lineNumber}
+  {#each Object.keys(data.extraction.failed).slice(0, 100) as lineNumber}
     <div class="line-container">
       <div class="lineNumber">{lineNumber}</div>
       <div class="line">{data.extraction.failed[lineNumber]}</div>
@@ -24,6 +24,7 @@
     color: #dd7178;
     border-radius: 5px;
     margin: 5px;
+    font-size: 0.9em;
   }
   .lineNumber {
     margin: 6px 0;

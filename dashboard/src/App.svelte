@@ -39,7 +39,7 @@
         if (!(token in dateCount)) {
           dateCount[token] = 0;
         }
-        if (isDate(value)) {
+        if (typeof value === "string" && isDate(value)) {
           dateCount[token] += 1;
         }
       }
@@ -68,6 +68,27 @@
     return best.token;
   }
 
+  function performConversions(data: Data) {
+    if (data.config.conversions === undefined) {
+      return
+    }
+
+    for (let i = 0; i < data.extraction.params.length; i++) {
+      const params = data.extraction.params[i];
+      for (let [token, conversion] of Object.entries(data.config.conversions)) {
+        if (!(token in params) || typeof params[token] !== "number") {
+          continue
+        }
+        const value = params[token]
+        if (typeof value !== "number") {
+          continue
+        }
+        params[conversion.token] = conversion.multiplier * value
+        delete params[token]
+      }
+    }
+  }
+
   let data: Data;
   let tokenCounts: {token: string, count: number}[]
   let timestampToken: string | null;
@@ -80,12 +101,11 @@
       //@ts-ignore
       data = demo;
     }
+    performConversions(data);
     console.log(data);
     timestampToken = identifyTimestampToken(data);
 
     tokenCounts = sortedTokenCounts(data)
-    
-    console.log(timestampToken);
   });
 </script>
 
@@ -97,7 +117,7 @@
       </div>
       {#each tokenCounts as token}
         {#if token.token !== timestampToken}
-          <Card {data} token={token.token} {timestampToken} />
+          <Card {data} token={token.token} lineCount={token.count} {timestampToken} />
         {/if}
       {/each}
       <FailedLines {data} />

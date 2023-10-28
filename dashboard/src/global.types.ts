@@ -1,22 +1,35 @@
 type Data = {
     extraction: {
         params: LineParams[];
-        failed: string[];
+        failed: {
+            [lineNumber: string]: string
+        };
     };
     config: {
         tokens: string[];
         patterns: string[];
+        dependencies?: string[];
+        conversions?: {
+            [token: string]: {
+                token: string,
+                multiplier: number
+            }
+        };
     };
 };
 
 type LineParams = {
-    [token: string]: string;
+    [token: string]: string | number;
 };
 
 type TokenValueFreq = {
-    [token: string]: ValueFreq;
+    [token: string]: ValueCount;
 };
 
-type ValueFreq = {
+type ValueCount = {
     [value: string]: number
+}
+
+type ValueCounts = {
+    [value: string]: number[]
 }
