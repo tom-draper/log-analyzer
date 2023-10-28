@@ -109,7 +109,6 @@
     return [minDate, maxDate];
   }
 
-  const numTiles = 50;
   let sortedValueCounts: SortableValueCount[];
   let valueCounts: ValueCounts;
   let valueMax: ValueCount;
@@ -120,7 +119,7 @@
       return;
     }
     const dateRange = moment.range(minDate, maxDate);
-    timeSlots = Array.from(dateRange.by("minutes", { step: numTiles }));
+    timeSlots = Array.from(dateRange.by("minutes", { step: 50 }));
 
     valueCounts = valueByTimeSlot(data, token, timestampToken, timeSlots);
     sortedValueCounts = sortedValueByTimeSlot(valueCounts);

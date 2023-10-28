@@ -80,7 +80,7 @@
     Plotly = await import("plotly.js-dist-min");
     isNumeric = isNumericField(data);
     values = valueCounts(data);
-    setTimeout(buildPlot, 100);
+    setTimeout(buildPlot, 10);
   });
   export let data: Data, token: string;
 </script>
