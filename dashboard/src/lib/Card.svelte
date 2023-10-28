@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import ValueFreqGraph from "./ValueFreqGraph.svelte";
+  import OverTimeGraph from "./OverTimeGraph.svelte";
 
   function tokenValueFrequency(data: Data, token: string): ValueFreq {
     let freq: ValueFreq = {};
@@ -22,7 +23,6 @@
   let freq: ValueFreq;
   onMount(() => {
     freq = tokenValueFrequency(data, token);
-    console.log(freq);
   });
 
   // your script goes here
@@ -33,16 +33,19 @@
   <div class="title">{token}</div>
   {#if freq !== undefined}
     <ValueFreqGraph {freq} />
+    <OverTimeGraph {data} {token} {timestampToken} />
   {/if}
 </div>
 
 <style scoped>
   .title {
     margin-bottom: 20px;
+    color: white;
   }
   .card {
     border: 1px solid #ffffff24;
     border-radius: 5px;
     margin: 3em 0;
+    padding: 2rem;
   }
 </style>

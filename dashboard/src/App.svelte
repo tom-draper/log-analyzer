@@ -96,7 +96,7 @@
       </div>
       {#each tokenCounts as token}
         {#if token.token !== timestampToken}
-          <Card {data} token={token.token} tokenCount={token.count} {timestampToken} />
+          <Card {data} token={token.token} {timestampToken} />
         {/if}
       {/each}
     </div>
@@ -105,7 +105,11 @@
 
 <style>
   .content {
-    margin: 5em;
+    margin: 4em;
+  }
+
+  .title {
+    margin: 0 0 20px;
   }
   .header {
     font-size: 2em;

@@ -33,7 +33,7 @@
     
     // Set widths
     for (let i = 0; i < sortedFreq.length; i++) {
-      sortedFreq[i][2] = (sortedFreq[i][1] / maxBar) * 97
+      sortedFreq[i][2] = (sortedFreq[i][1] / maxBar) * 97.8
     }
 
     return sortedFreq;
@@ -52,7 +52,7 @@
 {#if bars.length > 0}
   <div class="freq-graph">
     {#each bars as bar}
-      <div class="token-frequency" title="{bar[1]}">
+      <div class="token-frequency" title="{bar[1].toLocaleString()}">
         <!-- <div class="value-name"></div>   -->
         <div class="bar" style="width: {bar[2]}%">{bar[0]}</div>
       </div>
@@ -73,15 +73,11 @@
     border-radius: 4px;
     margin: 5px 0;
     padding: 1px 10px;
-    font-size: 0.9em;
+    font-size: 0.85em;
     font-weight: 500;
     text-wrap: nowrap;
   }
   .token-frequency {
     position: relative;
-  }
-  .value-name {
-    color: white;
-    position: absolute;
   }
 </style>
