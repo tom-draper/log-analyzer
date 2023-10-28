@@ -17,9 +17,13 @@ type Data struct {
 	Config     *parse.Config     `json:"config"`
 }
 
-func Start(extraction *parse.Extraction, config *parse.Config) {
+func NewData(extraction *parse.Extraction, config *parse.Config) *Data {
 	data := Data{extraction, config}
-	fmt.Println(data)
+	return &data
+}
+
+func Start(extraction *parse.Extraction, config *parse.Config) {
+	data := NewData(extraction, config)
 
 	r := chi.NewRouter()
 	// Serve index.html
