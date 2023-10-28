@@ -2,34 +2,33 @@
   import demo from "./lib/demo.json";
   import { onMount } from "svelte";
   import moment from "moment";
-
-  type LineParams = {
-    [token: string]: string;
-  };
-
-  type TokenValueFreq = {
-    [token: string]: { [value: string]: number };
-  };
-
-  function valueFreq(data: Data): TokenValueFreq {
-    let freq: TokenValueFreq = {};
-    for (let i = 0; i < data.extraction.params.length; i++) {
-      for (let [token, value] of Object.entries(data.extraction.params[i])) {
-        if (!(token in freq)) {
-          freq[token] = {};
-        }
-        if (!(value in freq[token])) {
-          freq[token][value] = 0;
-        }
-        freq[token][value] += 1;
-      }
-    }
-
-    return freq;
-  }
+  import Card from "./lib/Card.svelte";
 
   function isDate(date: string): boolean {
     return moment(date, moment.ISO_8601, true).isValid();
+  }
+
+  function sortedTokenCounts(data: Data): {token: string, count: number}[] {
+    let tokenCount: {[token: string]: number} = {}
+    for (let i = 0; i < data.extraction.params.length; i++) {
+      for (let token of Object.keys(data.extraction.params[i])) {
+        if (!(token in tokenCount)) {
+          tokenCount[token] = 0
+        }
+        tokenCount[token] += 1
+      }
+    }
+    
+    let tokens: {token: string, count: number}[] = []
+    for (let [token, count] of Object.entries(tokenCount)) {
+      tokens.push({token, count})
+    }
+
+    tokens.sort((a, b) => {
+      return b.count - a.count
+    })
+
+    return tokens
   }
 
   function identifyTimestampToken(data: Data): string | null {
@@ -68,18 +67,9 @@
     return best.token;
   }
 
-  type Data = {
-    extraction: {
-      params: LineParams[];
-      patterns: string[];
-    };
-    config: {
-      tokens: string[];
-      patterns: string[];
-    };
-  };
-
   let data: Data;
+  let tokenCounts: {token: string, count: number}[]
+  let timestampToken: string | null;
   const production = import.meta.env.MODE === "production";
   onMount(async () => {
     if (production) {
@@ -90,26 +80,34 @@
       data = demo;
     }
     console.log(data);
-    const timestampToken = identifyTimestampToken(data);
+    timestampToken = identifyTimestampToken(data);
+
+    tokenCounts = sortedTokenCounts(data)
+    
     console.log(timestampToken);
-    const freq = valueFreq(data);
-    console.log(freq);
   });
 </script>
 
 <main>
-  {#if data != undefined}
+  {#if tokenCounts != undefined}
     <div class="content">
       <div class="header">
-        <div class="title">{data.extraction.params.length} lines</div>
+        <div class="title">{data.extraction.params.length.toLocaleString()} lines</div>
       </div>
+      {#each tokenCounts as token}
+        {#if token.token !== timestampToken}
+          <Card {data} token={token.token} tokenCount={token.count} {timestampToken} />
+        {/if}
+      {/each}
     </div>
   {/if}
 </main>
 
 <style>
+  .content {
+    margin: 5em;
+  }
   .header {
-    margin: 2em 8%;
     font-size: 2em;
     font-weight: 500;
   }
