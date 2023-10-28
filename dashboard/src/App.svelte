@@ -4,7 +4,7 @@
   import Counter from "./lib/Counter.svelte";
   import { onMount } from "svelte";
 
-  type LineExtraction = {
+  type LineParams = {
     [token: string]: string;
   };
 
@@ -12,10 +12,10 @@
     [token: string]: { [value: string]: number };
   };
 
-  function valueFreq(data: LineExtraction[]): TokenValueFreq {
+  function valueFreq(data: Data): TokenValueFreq {
     let freq: TokenValueFreq = {};
-    for (let i = 0; i < data.length; i++) {
-      for (const [token, value] of Object.entries(data[i])) {
+    for (let i = 0; i < data.params.length; i++) {
+      for (const [token, value] of Object.entries(data.params[i])) {
         if (!(token in freq)) {
           freq[token] = {};
         }
@@ -28,6 +28,11 @@
 
     console.log(freq);
     return freq;
+  }
+
+  type Data = {
+    params: LineParams[],
+    config: any
   }
 
   onMount(async () => {

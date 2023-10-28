@@ -12,14 +12,14 @@ import (
 	"github.com/tom-draper/log-analyzer/pkg/parse"
 )
 
+type Data struct {
+	Extraction *parse.Extraction `json:"extraction"`
+	Config     *parse.Config     `json:"config"`
+}
+
 func Start(extraction *parse.Extraction, config *parse.Config) {
-	data := struct {
-		extraction *parse.Extraction
-		config     *parse.Config
-	}{
-		extraction: extraction,
-		config:     config,
-	}
+	data := Data{extraction, config}
+	fmt.Println(data)
 
 	r := chi.NewRouter()
 	// Serve index.html
