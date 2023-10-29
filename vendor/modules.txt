@@ -12,7 +12,6 @@ github.com/go-chi/chi/v5
 github.com/go-chi/render
 # internal/display v1.0.0 => ./internal/display
 ## explicit; go 1.21
-internal/display
 # internal/server v1.0.0 => ./internal/server
 ## explicit; go 1.21
 internal/server

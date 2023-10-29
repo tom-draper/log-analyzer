@@ -1,7 +1,7 @@
 package test
 
 import (
-	"internal/display"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -59,7 +59,8 @@ func TestParse(t *testing.T) {
 			indicies = append(indicies, i)
 		}
 
-		display.DisplayTestLines(lines, extraction.Params, indicies)
+		fmt.Println(extraction)
+		parse.DisplayTestLines(extraction)
 	}
 }
 
@@ -74,6 +75,6 @@ func TestLogAnalyzer(t *testing.T) {
 		t.Error(err)
 	}
 
-	display.DisplayLines(extraction.Params)
-	analyze.Run(&extraction, &config)
+	parse.DisplayLines(extraction)
+	analyze.Run(extraction, &config)
 }

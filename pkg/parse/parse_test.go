@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"internal/display"
 	"testing"
 )
 
@@ -39,6 +38,6 @@ func TestParseFile(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		display.DisplayLines(extraction.Params)
+		DisplayLines(extraction)
 	}
 }

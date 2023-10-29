@@ -13,16 +13,16 @@ import (
 )
 
 type Data struct {
-	Extraction *parse.Extraction `json:"extraction"`
-	Config     *parse.Config     `json:"config"`
+	Extraction []parse.Extraction `json:"extraction"`
+	Config     *parse.Config      `json:"config"`
 }
 
-func NewData(extraction *parse.Extraction, config *parse.Config) *Data {
+func NewData(extraction []parse.Extraction, config *parse.Config) *Data {
 	data := Data{extraction, config}
 	return &data
 }
 
-func Start(extraction *parse.Extraction, config *parse.Config) {
+func Start(extraction []parse.Extraction, config *parse.Config) {
 	data := NewData(extraction, config)
 
 	r := chi.NewRouter()
