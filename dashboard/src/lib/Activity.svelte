@@ -36,10 +36,10 @@
         if (diff < best.diff) {
           best.index = j
           best.diff = diff
+        } else {
+          // Assuming timestamps sorted, we've found the closest time slot time
+          break
         }
-      }
-      if (best.index === 0) {
-        // console.log(best.diff, new Date(timestamp))
       }
       y[best.index] += 1
     }
@@ -57,7 +57,6 @@
     });
     const dateRange = moment.range(values[0], values[values.length-1]);
     const timeSlots = Array.from(dateRange.by("minutes", { step: 20 }));
-    console.log(timeSlots)
     const [x, y] = bars(values, timeSlots)
 
     Plotly.newPlot(
@@ -96,7 +95,7 @@
   let Plotly;
   onMount(async () => {
     Plotly = await import("plotly.js-dist-min");
-    setTimeout(buildPlot, 10);
+    buildPlot()
   });
   export let data: Data, token: string;
 </script>

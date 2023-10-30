@@ -79,7 +79,7 @@
   onMount(async () => {
     Plotly = await import("plotly.js-dist-min");
     isNumeric = isNumericField(data);
-    setTimeout(buildPlot, 10);
+    setTimeout(buildPlot, 0);
   });
   export let data: Data, token: string;
 </script>
