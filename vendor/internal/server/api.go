@@ -14,9 +14,9 @@ import (
 )
 
 type Data struct {
-	Extraction []parse.Extraction `json:"extraction"`
-	DataTypes  map[string]map[string]int
-	Config     *parse.Config `json:"config"`
+	Extraction []parse.Extraction        `json:"extraction"`
+	DataTypes  map[string]map[string]int `json:"types"`
+	Config     *parse.Config             `json:"config"`
 }
 
 func dataTypeCount(extraction []parse.Extraction) map[string]map[string]int {
