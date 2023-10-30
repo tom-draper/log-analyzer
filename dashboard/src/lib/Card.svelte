@@ -7,8 +7,8 @@
 
   function tokenValueFrequency(data: Data, token: string): ValueCount {
     let freq: ValueCount = {};
-    for (let i = 0; i < data.extraction.params.length; i++) {
-      for (let [_token, value] of Object.entries(data.extraction.params[i])) {
+    for (let i = 0; i < data.extraction.length; i++) {
+      for (let [_token, value] of Object.entries(data.extraction[i].params)) {
         if (_token !== token) {
           continue;
         }

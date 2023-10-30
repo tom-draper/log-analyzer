@@ -2,11 +2,11 @@
   import { onMount } from "svelte";
 
   function isNumericField(data: Data): boolean {
-    for (let i = 0; i < data.extraction.params.length; i++) {
-      if (!(token in data.extraction.params[i])) {
+    for (let i = 0; i < data.extraction.length; i++) {
+      if (!(token in data.extraction[i].params)) {
         continue;
       }
-      const value = data.extraction.params[i][token];
+      const value = data.extraction[i].params[token];
       if (typeof value === "number") {
         return true;
       }
@@ -16,11 +16,11 @@
 
   function valueCounts(data: Data): ValueCount {
     let values: ValueCount = {};
-    for (let i = 0; i < data.extraction.params.length; i++) {
-      if (!(token in data.extraction.params[i])) {
+    for (let i = 0; i < data.extraction.length; i++) {
+      if (!(token in data.extraction[i].params)) {
         continue;
       }
-      const value = data.extraction.params[i][token];
+      const value = data.extraction[i].params[token];
       if (typeof value !== "number") {
         continue;
       }

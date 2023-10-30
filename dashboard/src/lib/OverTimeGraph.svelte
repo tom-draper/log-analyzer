@@ -25,13 +25,13 @@
     });
 
     const days: ValueCounts = {};
-    for (let i = 0; i < data.extraction.params.length; i++) {
-      const params = data.extraction.params;
-      if (!(token in params[i]) || !(timestampToken in params[i])) {
+    for (let i = 0; i < data.extraction.length; i++) {
+      const params = data.extraction[i].params;
+      if (!(token in params) || !(timestampToken in params)) {
         continue;
       }
 
-      const timestamp = new Date(params[i][timestampToken]).getTime();
+      const timestamp = new Date(params[timestampToken]).getTime();
 
       // Find timeslot index
       const best = {
@@ -48,7 +48,7 @@
         }
       }
 
-      const value = params[i][token];
+      const value = params[token];
       if (!(value in days)) {
         days[value] = Array(timeSlots.length).fill(0);
       }
@@ -93,11 +93,11 @@
     let maxDate = new Date(-8640000000000000);
     let minDate = new Date(8640000000000000);
 
-    for (let i = 0; i < data.extraction.params.length; i++) {
-      if (!(timestampToken in data.extraction.params[i])) {
+    for (let i = 0; i < data.extraction.length; i++) {
+      if (!(timestampToken in data.extraction[i].params)) {
         continue;
       }
-      const timestamp = new Date(data.extraction.params[i][timestampToken]);
+      const timestamp = new Date(data.extraction[i].params[timestampToken]);
       if (timestamp > maxDate) {
         maxDate = timestamp;
       }

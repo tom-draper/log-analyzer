@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -14,11 +15,27 @@ import (
 
 type Data struct {
 	Extraction []parse.Extraction `json:"extraction"`
-	Config     *parse.Config      `json:"config"`
+	DataTypes  map[string]map[string]int
+	Config     *parse.Config `json:"config"`
+}
+
+func dataTypeCount(extraction []parse.Extraction) map[string]map[string]int {
+	dataTypes := make(map[string]map[string]int)
+	for _, e := range extraction {
+		for k, p := range e.Params {
+			dataType := reflect.TypeOf(p)
+			if _, ok := dataTypes[k]; !ok {
+				dataTypes[k] = make(map[string]int)
+			}
+			dataTypes[k][dataType.String()] += 1
+		}
+	}
+	return dataTypes
 }
 
 func NewData(extraction []parse.Extraction, config *parse.Config) *Data {
-	data := Data{extraction, config}
+	dataTypes := dataTypeCount(extraction)
+	data := Data{extraction, dataTypes, config}
 	return &data
 }
 

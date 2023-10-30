@@ -11,8 +11,8 @@
 
   function sortedTokenCounts(data: Data): {token: string, count: number}[] {
     let tokenCount: {[token: string]: number} = {}
-    for (let i = 0; i < data.extraction.params.length; i++) {
-      for (let token of Object.keys(data.extraction.params[i])) {
+    for (let i = 0; i < data.extraction.length; i++) {
+      for (let token of Object.keys(data.extraction[i].params)) {
         if (!(token in tokenCount)) {
           tokenCount[token] = 0
         }
@@ -34,8 +34,8 @@
 
   function identifyTimestampToken(data: Data): string | null {
     let dateCount: { [token: string]: number } = {};
-    for (let i = 0; i < data.extraction.params.length; i++) {
-      for (let [token, value] of Object.entries(data.extraction.params[i])) {
+    for (let i = 0; i < data.extraction.length; i++) {
+      for (let [token, value] of Object.entries(data.extraction[i].params)) {
         if (!(token in dateCount)) {
           dateCount[token] = 0;
         }
@@ -61,7 +61,7 @@
 
     // Disqualify timestamp if only on less than 50% of log lines
     // Assume there is no timestamp token
-    if (best.total < data.extraction.params.length * 0.5) {
+    if (best.total < data.extraction.length * 0.5) {
       return null;
     }
 
@@ -73,8 +73,8 @@
       return
     }
 
-    for (let i = 0; i < data.extraction.params.length; i++) {
-      const params = data.extraction.params[i];
+    for (let i = 0; i < data.extraction.length; i++) {
+      const params = data.extraction[i].params;
       for (let [token, conversion] of Object.entries(data.config.conversions)) {
         if (!(token in params) || typeof params[token] !== "number") {
           continue
@@ -113,7 +113,7 @@
   {#if tokenCounts != undefined}
     <div class="content">
       <div class="header">
-        <div class="title">{data.extraction.params.length.toLocaleString()} lines</div>
+        <div class="title">{data.extraction.length.toLocaleString()} lines</div>
       </div>
       {#each tokenCounts as token}
         {#if token.token !== timestampToken}
