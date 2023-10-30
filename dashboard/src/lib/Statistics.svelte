@@ -39,7 +39,7 @@
   }
 
   function sortedValues(data: Data): number[] {
-    let values: number[] = [];
+    const values: number[] = [];
     for (let i = 0; i < data.extraction.length; i++) {
       if (!(token in data.extraction[i].params)) {
         continue;

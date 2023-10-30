@@ -2,20 +2,20 @@
   import { onMount } from "svelte";
 
   function getFailedExtractions(extraction: Extraction[]): Extraction[] {
-    let failedLines = []
-      for (let i = 0; i < data.extraction.length; i++) {
-        if (data.extraction[i].params.length === 0) {
-          failedLines.push(data.extraction[i])
-        }
-        
+    const failedLines = [];
+    for (let i = 0; i < extraction.length; i++) {
+      if (Object.keys(extraction[i].params).length === 0) {
+        failedLines.push(extraction[i]);
       }
-      return failedLines
+    }
+    console.log(failedLines);
+    return failedLines;
   }
 
   let failedLines: Extraction[];
   onMount(() => {
-    failedLines = getFailedExtractions(data.extraction)
-  })
+    failedLines = getFailedExtractions(data.extraction);
+  });
   export let data: Data;
 </script>
 
@@ -54,4 +54,3 @@
     margin: 10px 20px;
   }
 </style>
-

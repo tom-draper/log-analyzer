@@ -10,9 +10,9 @@
   }
 
   function sortedTokenCounts(data: Data): {token: string, count: number}[] {
-    let tokenCount: {[token: string]: number} = {}
+    const tokenCount: {[token: string]: number} = {}
     for (let i = 0; i < data.extraction.length; i++) {
-      for (let token of Object.keys(data.extraction[i].params)) {
+      for (const token of Object.keys(data.extraction[i].params)) {
         if (!(token in tokenCount)) {
           tokenCount[token] = 0
         }
@@ -20,12 +20,16 @@
       }
     }
     
-    let tokens: {token: string, count: number}[] = []
-    for (let [token, count] of Object.entries(tokenCount)) {
+    const tokens: {token: string, count: number}[] = []
+    for (const [token, count] of Object.entries(tokenCount)) {
       tokens.push({token, count})
     }
 
     tokens.sort((a, b) => {
+      // Force timestamp token to top of list
+      if (a.token === timestampToken) {
+        return Number.MIN_SAFE_INTEGER
+      }
       return b.count - a.count
     })
 
@@ -33,9 +37,9 @@
   }
 
   function identifyTimestampToken(data: Data): string | null {
-    let dateCount: { [token: string]: number } = {};
+    const dateCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
-      for (let [token, value] of Object.entries(data.extraction[i].params)) {
+      for (const [token, value] of Object.entries(data.extraction[i].params)) {
         if (!(token in dateCount)) {
           dateCount[token] = 0;
         }
@@ -45,17 +49,14 @@
       }
     }
 
-    let best: { token: string | null; total: number } = {
+    const best: { token: string | null; total: number } = {
       token: null,
       total: 0,
     };
-
     for (let [token, count] of Object.entries(dateCount)) {
       if (count > best.total) {
-        best = {
-          token,
-          total: count,
-        };
+        best.token = token
+        best.total = count
       }
     }
 
@@ -116,9 +117,7 @@
         <div class="title">{data.extraction.length.toLocaleString()} lines</div>
       </div>
       {#each tokenCounts as token}
-        {#if token.token !== timestampToken}
-          <Card {data} token={token.token} lineCount={token.count} {timestampToken} />
-        {/if}
+        <Card {data} token={token.token} lineCount={token.count} {timestampToken} />
       {/each}
       <FailedLines {data} />
     </div>
@@ -137,4 +136,10 @@
     font-size: 2em;
     font-weight: 500;
   }
+
+@media screen and (max-width: 800px) {
+  .content {
+    margin: 3em 2em 2em;
+  }
+}
 </style>

@@ -34,6 +34,7 @@
   }
 
   function buildPlot() {
+    const values = valueCounts(data);
     const sortedValues = Object.keys(values).sort();
     const y = Array(sortedValues.length).fill(0);
     for (let value of sortedValues) {
@@ -73,13 +74,11 @@
   }
 
   let isNumeric = false;
-  let values: ValueCount;
   let plotDiv: HTMLDivElement;
   let Plotly;
   onMount(async () => {
     Plotly = await import("plotly.js-dist-min");
     isNumeric = isNumericField(data);
-    values = valueCounts(data);
     setTimeout(buildPlot, 10);
   });
   export let data: Data, token: string;

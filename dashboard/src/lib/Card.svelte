@@ -4,6 +4,7 @@
   import OverTimeGraph from "./OverTimeGraph.svelte";
   import Statistics from "./Statistics.svelte";
   import Distribution from "./Distribution.svelte";
+  import Activity from "./Activity.svelte";
 
   function tokenValueFrequency(data: Data, token: string): ValueCount {
     let freq: ValueCount = {};
@@ -38,12 +39,16 @@
     <div class="title">{token}</div>
     <div class="line-count">{lineCount.toLocaleString()} lines</div>
   </div>
-  <Statistics {data} {token}/>
-  <Distribution {data} {token}/>
-  {#if freq !== undefined}
-    <ValueFreqGraph {freq} />
+  {#if token === timestampToken}
+    <Activity {data} {token} />
+  {:else}
+    <Statistics {data} {token}/>
+    <Distribution {data} {token}/>
+    {#if freq !== undefined}
+      <ValueFreqGraph {freq} />
+    {/if}
+    <OverTimeGraph {data} {token} {timestampToken} />
   {/if}
-  <OverTimeGraph {data} {token} {timestampToken} />
 </div>
 
 <style scoped>
@@ -63,4 +68,10 @@
     margin: 3em 0;
     padding: 3rem;
   }
+
+@media screen and (max-width: 800px) {
+  .card {
+    padding: 2em;
+  }
+}
 </style>
