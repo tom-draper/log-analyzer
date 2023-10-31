@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"regexp"
 	"strconv"
@@ -105,6 +106,8 @@ func inferDataTypes(params map[string]string) map[string]any {
 		// Attempt to parse as datetime
 		if t, err := dateparse.ParseAny(match); err == nil {
 			typedParams[token] = t
+		} else if value := net.ParseIP(match); value != nil {
+			typedParams[token] = value
 		} else if value, err := strconv.ParseFloat(match, 64); strings.Contains(match, ".") && err == nil {
 			typedParams[token] = value
 		} else if value, err := strconv.Atoi(match); err == nil {

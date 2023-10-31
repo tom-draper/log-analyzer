@@ -2,6 +2,7 @@ package analyze
 
 import (
 	"internal/server"
+	"net"
 
 	"reflect"
 
@@ -30,6 +31,43 @@ func failedLines(extraction []parse.Extraction) map[int]string {
 		}
 	}
 	return failedLines
+}
+
+func getCountryCode(IPAddress string) string {
+	if IPAddress == "" {
+		return ""
+	}
+	db, err := geoip2.Open("GeoLite2-Country.mmdb")
+	if err != nil {
+		return ""
+	}
+	defer db.Close()
+
+	ip := net.ParseIP(IPAddress)
+	if ip == nil {
+		return ""
+	}
+	record, err := db.Country(ip)
+	if err != nil {
+		return ""
+	}
+	location := record.Country.IsoCode
+	return location
+}
+
+func ipLocations(extraction []parse.Extraction) map[int]string {
+	ipLocations := make(map[int]string)
+	for _, e := range extraction {
+		for _, p := range e.Params {
+			if ipAddress, ok := p.(net.IPAddress); ok {
+				// s is string here
+				location := getCountryCode(ipAddress)
+				ipLocations[ipAddress] = location
+			}
+
+		}
+	}
+	return ipLocations
 }
 
 func NewData(extraction []parse.Extraction, config *parse.Config) *server.Data {
