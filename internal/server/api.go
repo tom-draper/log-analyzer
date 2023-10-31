@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -16,34 +15,13 @@ import (
 type Data struct {
 	Extraction []parse.Extraction        `json:"extraction"`
 	DataTypes  map[string]map[string]int `json:"types"`
+	Failed     map[int]string            `json:"failed"`
 	Config     *parse.Config             `json:"config"`
 }
 
-func dataTypeCount(extraction []parse.Extraction) map[string]map[string]int {
-	dataTypes := make(map[string]map[string]int)
-	for _, e := range extraction {
-		for k, p := range e.Params {
-			dataType := reflect.TypeOf(p)
-			if _, ok := dataTypes[k]; !ok {
-				dataTypes[k] = make(map[string]int)
-			}
-			dataTypes[k][dataType.String()] += 1
-		}
-	}
-	return dataTypes
-}
-
-func NewData(extraction []parse.Extraction, config *parse.Config) *Data {
-	dataTypes := dataTypeCount(extraction)
-	data := Data{extraction, dataTypes, config}
-	return &data
-}
-
-func Start(extraction []parse.Extraction, config *parse.Config) {
-	data := NewData(extraction, config)
-
+func Start(data *Data) {
 	r := chi.NewRouter()
-	// Serve index.html
+	// Serve dashboard index.html
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		workDir, _ := os.Getwd()
 		filePath := filepath.Join(workDir, "dashboard", "dist", "index.html")
@@ -56,7 +34,7 @@ func Start(extraction []parse.Extraction, config *parse.Config) {
 		filePath := filepath.Join(workDir, "dashboard", "dist", filename)
 		http.ServeFile(w, r, filePath)
 	})
-	// Return lines data when requested by dashboard
+	// Return lines data when requested by dashboard on load
 	r.Get("/data", func(w http.ResponseWriter, r *http.Request) {
 		jsonString, err := json.Marshal(data)
 		if err != nil {
@@ -65,7 +43,7 @@ func Start(extraction []parse.Extraction, config *parse.Config) {
 		w.Write(jsonString)
 	})
 
-	fmt.Println("Dashboard runing at http://localhost:3000/")
+	fmt.Println("Dashboard running at http://localhost:3000/")
 	http.ListenAndServe("127.0.0.1:3000", r)
 }
 
