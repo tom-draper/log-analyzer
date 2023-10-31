@@ -306,6 +306,3 @@ func ParseFilesTest(paths []string, config *Config) ([]Extraction, error) {
 	writeConfigTest(extractions)
 	return extractions, nil
 }
-
-func BuildDataTypeProfile() {
-}
