@@ -13,16 +13,13 @@ github.com/go-chi/render
 # github.com/oschwald/geoip2-golang v1.9.0
 ## explicit; go 1.19
 github.com/oschwald/geoip2-golang
-# github.com/oschwald/maxminddb-golang v1.11.0
+# github.com/oschwald/maxminddb-golang v1.12.0
 ## explicit; go 1.19
 github.com/oschwald/maxminddb-golang
-# golang.org/x/sys v0.9.0
+# golang.org/x/sys v0.13.0
 ## explicit; go 1.17
-golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# internal/display v1.0.0 => ./internal/display
-## explicit; go 1.21
 # internal/location v1.0.0 => ./internal/location
 ## explicit; go 1.21
 internal/location
