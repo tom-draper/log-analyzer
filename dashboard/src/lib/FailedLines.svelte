@@ -1,34 +1,15 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-
-  function getFailedExtractions(extraction: Extraction[]): Extraction[] {
-    const failedLines = [];
-    for (let i = 0; i < extraction.length; i++) {
-      if (Object.keys(extraction[i].params).length === 0) {
-        failedLines.push(extraction[i]);
-      }
-    }
-    console.log(failedLines);
-    return failedLines;
-  }
-
-  let failedLines: Extraction[];
-  onMount(() => {
-    failedLines = getFailedExtractions(data.extraction);
-  });
   export let data: Data;
 </script>
 
-{#if failedLines !== undefined}
-  <div class="card">
-    {#each failedLines.slice(0, 100) as failedLine}
-      <div class="line-container">
-        <div class="lineNumber">{failedLine.lineNumber}</div>
-        <div class="line">{failedLine.line}</div>
-      </div>
-    {/each}
-  </div>
-{/if}
+<div class="card">
+  {#each Object.entries(data.failed).slice(0, 100) as [lineNumber, line]}
+    <div class="line-container">
+      <div class="lineNumber">{lineNumber}</div>
+      <div class="line">{line}</div>
+    </div>
+  {/each}
+</div>
 
 <style scoped>
   .card {
