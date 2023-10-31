@@ -90,6 +90,10 @@
     }
   }
 
+  function scrollToBottom() {
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
   let data: Data;
   let tokenCounts: {token: string, count: number}[]
   let timestampToken: string | null;
@@ -115,6 +119,9 @@
     <div class="content">
       <div class="header">
         <div class="title">{data.extraction.length.toLocaleString()} lines</div>
+        {#if Object.keys(data.failed).length >= 1}
+          <button on:click={scrollToBottom}>{Object.keys(data.failed).length} {Object.keys(data.failed).length == 1 ? 'error' : 'errors'}</button>
+        {/if}
       </div>
       {#each tokenCounts as token}
         <Card {data} token={token.token} lineCount={token.count} {timestampToken} />
@@ -135,6 +142,19 @@
   .header {
     font-size: 2em;
     font-weight: 500;
+    display: flex;
+  }
+  button {
+    margin-top: 10px;
+    margin-left: auto;
+    background: #271515;
+    color: #dd7178;
+    border: 1px solid #dd71787d;
+    padding: 5px 10px;
+    border-radius: 3px;
+    height: min-content;
+    font-size: 0.9rem;
+    outline: none
   }
 
 @media screen and (max-width: 800px) {

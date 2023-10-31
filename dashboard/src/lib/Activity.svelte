@@ -76,9 +76,10 @@
         hovermode: "closest",
         plot_bgcolor: "transparent",
         paper_bgcolor: "transparent",
-        margin: { t: 0, l: 50, b: 50, r: 20 },
+        margin: { t: 0, l: 50, b: 30, r: 10 },
         autosize: true,
         dragmode: false,
+        height: 300,
         yaxis: {
           gridcolor: "gray",
           showgrid: false,
