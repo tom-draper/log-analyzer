@@ -1,12 +1,12 @@
 package analyze
 
 import (
+	"internal/location"
 	"internal/server"
 	"net"
 
 	"reflect"
 
-	"github.com/oschwald/geoip2-golang"
 	"github.com/tom-draper/log-analyzer/pkg/parse"
 )
 
@@ -34,24 +34,6 @@ func failedLines(extraction []parse.Extraction) map[int]string {
 	return failedLines
 }
 
-func getCountryCode(ipAddress net.IP) string {
-	if ipAddress == nil {
-		return ""
-	}
-	db, err := geoip2.Open("GeoLite2-Country.mmdb")
-	if err != nil {
-		return ""
-	}
-	defer db.Close()
-
-	record, err := db.Country(ipAddress)
-	if err != nil {
-		return ""
-	}
-	location := record.Country.IsoCode
-	return location
-}
-
 func ipLocations(extraction []parse.Extraction) map[string]string {
 	ipLocations := make(map[string]string)
 	for _, e := range extraction {
@@ -62,10 +44,12 @@ func ipLocations(extraction []parse.Extraction) map[string]string {
 				if _, ok := ipLocations[ipAddressStr]; ok {
 					continue
 				}
-				location := getCountryCode(ipAddress)
-				ipLocations[ipAddress.String()] = location
+				loc, err := location.GetCountryCode(ipAddress)
+				if err != nil {
+					continue
+				}
+				ipLocations[ipAddress.String()] = loc
 			}
-
 		}
 	}
 	return ipLocations
@@ -74,7 +58,8 @@ func ipLocations(extraction []parse.Extraction) map[string]string {
 func NewData(extraction []parse.Extraction, config *parse.Config) *server.Data {
 	dataTypes := dataTypeBreakdown(extraction)
 	failed := failedLines(extraction)
-	data := server.Data{Extraction: extraction, DataTypes: dataTypes, Failed: failed, Config: config}
+	locations := ipLocations(extraction)
+	data := server.Data{Extraction: extraction, DataTypes: dataTypes, Failed: failed, Locations: locations, Config: config}
 	return &data
 }
 

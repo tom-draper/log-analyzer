@@ -5,6 +5,7 @@
   import Statistics from "./Statistics.svelte";
   import Distribution from "./Distribution.svelte";
   import Activity from "./Activity.svelte";
+  import LocationMap from "./LocationMap.svelte";
 
   function tokenValueFrequency(data: Data, token: string): ValueCount {
     let freq: ValueCount = {};
@@ -23,9 +24,25 @@
     return freq;
   }
 
+  function isIPAddressToken(data: Data, token: string): boolean {
+    for (let i = 0; i < data.extraction.length; i++) {
+      for (let [_token, value] of Object.entries(data.extraction[i].params)) {
+        if (_token !== token) {
+          continue;
+        }
+        if (value in data.locations) {
+          return true
+        }
+      }
+    }
+    return false;
+  }
+
   let freq: ValueCount;
+  let isIPAddress = false
   onMount(() => {
     freq = tokenValueFrequency(data, token);
+    isIPAddress = isIPAddressToken(data, token)
   });
 
   export let data: Data,
@@ -48,6 +65,9 @@
       <ValueFreqGraph {freq} />
     {/if}
     <OverTimeGraph {data} {token} {timestampToken} />
+    {#if isIPAddress}
+      <LocationMap {data} {token} />
+    {/if}
   {/if}
 </div>
 
@@ -60,7 +80,6 @@
   .line-count {
     margin-left: auto;
     color: #888;
-    /* color: #ededed; */
   }
   .card {
     border: 1px solid #ffffff24;

@@ -6,7 +6,7 @@
   const moment = extendMoment(Moment);
 
   function timestampValues(data: Data): Date[] {
-    let values: Date[] = [];
+    const values: Date[] = [];
     for (let i = 0; i < data.extraction.length; i++) {
       if (!(token in data.extraction[i].params)) {
         continue;

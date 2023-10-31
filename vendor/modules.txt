@@ -23,8 +23,12 @@ golang.org/x/sys/unix
 golang.org/x/sys/windows
 # internal/display v1.0.0 => ./internal/display
 ## explicit; go 1.21
+# internal/location v1.0.0 => ./internal/location
+## explicit; go 1.21
+internal/location
 # internal/server v1.0.0 => ./internal/server
 ## explicit; go 1.21
 internal/server
 # internal/display => ./internal/display
 # internal/server => ./internal/server
+# internal/location => ./internal/location

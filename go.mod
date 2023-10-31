@@ -9,6 +9,7 @@ require internal/display v1.0.0
 replace internal/display => ./internal/display
 
 require internal/server v1.0.0
+require internal/location v1.0.0
 
 require (
 	github.com/ajg/form v1.5.1 // indirect
@@ -20,3 +21,4 @@ require (
 )
 
 replace internal/server => ./internal/server
+replace internal/location => ./internal/location
