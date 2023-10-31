@@ -108,7 +108,7 @@
 <style scoped>
   .container {
     display: flex;
-    margin-bottom: 1.4em;
+    /* margin-bottom: 0.5em; */
   }
   #plotDiv {
     width: 100%;
