@@ -87,7 +87,7 @@ Finally, your dashboard is generated.
 Dashboard running at http://localhost:3000/
 ```
 
-![dashboard](https://user-images.githubusercontent.com/41476809/278841594-66be5d2d-71b8-4e4e-aec8-60acc07aac4c.png)
+![dashboard](https://user-images.githubusercontent.com/41476809/279524886-acebc2a1-519b-42e5-a31e-043efb9d012c.png)
 
 ## Advanced Config
 
