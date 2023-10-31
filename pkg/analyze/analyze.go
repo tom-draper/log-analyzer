@@ -6,6 +6,7 @@ import (
 
 	"reflect"
 
+	"github.com/oschwald/geoip2-golang"
 	"github.com/tom-draper/log-analyzer/pkg/parse"
 )
 
@@ -33,8 +34,8 @@ func failedLines(extraction []parse.Extraction) map[int]string {
 	return failedLines
 }
 
-func getCountryCode(IPAddress string) string {
-	if IPAddress == "" {
+func getCountryCode(ipAddress net.IP) string {
+	if ipAddress == nil {
 		return ""
 	}
 	db, err := geoip2.Open("GeoLite2-Country.mmdb")
@@ -43,11 +44,7 @@ func getCountryCode(IPAddress string) string {
 	}
 	defer db.Close()
 
-	ip := net.ParseIP(IPAddress)
-	if ip == nil {
-		return ""
-	}
-	record, err := db.Country(ip)
+	record, err := db.Country(ipAddress)
 	if err != nil {
 		return ""
 	}
@@ -55,14 +52,18 @@ func getCountryCode(IPAddress string) string {
 	return location
 }
 
-func ipLocations(extraction []parse.Extraction) map[int]string {
-	ipLocations := make(map[int]string)
+func ipLocations(extraction []parse.Extraction) map[string]string {
+	ipLocations := make(map[string]string)
 	for _, e := range extraction {
 		for _, p := range e.Params {
-			if ipAddress, ok := p.(net.IPAddress); ok {
-				// s is string here
+			if ipAddress, ok := p.(net.IP); ok {
+				ipAddressStr := ipAddress.String()
+				// Check if country code already exists
+				if _, ok := ipLocations[ipAddressStr]; ok {
+					continue
+				}
 				location := getCountryCode(ipAddress)
-				ipLocations[ipAddress] = location
+				ipLocations[ipAddress.String()] = location
 			}
 
 		}
