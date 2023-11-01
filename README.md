@@ -93,7 +93,7 @@ Dashboard running at http://localhost:3000/
 
 ### Wildcard
 
-Unimportant values within your log file that may still vary in value can be excluded from your dashboard by using wildcard tokens `*` or `_` within your pattern.
+Unimportant but variable values within your log file can be excluded from your dashboard by using the wildcard character `*` within your pattern.
 
 For example, if you don't want thread pool number or thread ID featured in your dashboard:
 
