@@ -136,7 +136,7 @@ Within the config, you can specify any tokens that are dependent upon other toke
 
 ### Conversions
 
-Some tokens with a numeric value may be equivalent to other token values after performing a conversion to account for different units. In order to group these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below states that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all time recording values into milliseconds.
+Some tokens with a numeric value may be equivalent to other tokens after performing a conversion to account for different units. In order to merge these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below states that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all time recording values into milliseconds.
 
 ```log
 [November 26, 2017 at 7:25p PST] LOG: function 'createAccount' took 51.13 ms
