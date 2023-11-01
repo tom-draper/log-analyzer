@@ -1,6 +1,6 @@
 # log-analyzer
 
-Turn unstructured log files into a dashboard.
+Turn unstructured log files into a dashboard in seconds.
 
 ## Example
 
