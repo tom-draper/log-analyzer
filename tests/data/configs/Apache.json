@@ -1,6 +1,7 @@
 {
   "tokens": ["ip_address", "timestamp", "method", "path",  "status", "response_time", "url", "user_agent"],
   "patterns": [
+    "ip_address - - [timestamp] \"method path *\" status response_time \"-\" \"user_agent\"",
     "ip_address - - [timestamp] \"method path *\" status response_time \"url\" \"user_agent\""
   ]
 }

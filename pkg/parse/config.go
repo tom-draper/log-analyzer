@@ -2,6 +2,7 @@ package parse
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 )
@@ -44,6 +45,7 @@ func LoadConfig(path string) (Config, error) {
 
 	var config Config
 	if err := json.Unmarshal([]byte(byteValue), &config); err != nil {
+		fmt.Println(err)
 		return Config{}, err
 	}
 

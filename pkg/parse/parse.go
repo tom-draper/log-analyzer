@@ -121,6 +121,16 @@ func inferDataTypes(params map[string]string) map[string]any {
 	return typedParams
 }
 
+func tokenCounts(pattern string, tokens []string) int {
+	var count int
+	for _, token := range tokens {
+		if strings.Contains(pattern, token) {
+			count++
+		}
+	}
+	return count
+}
+
 // parseLine extracts token parameters from each line using the most appropriate
 // pattern in the given config.
 func parseLine(line string, config *Config) (map[string]any, string) {
@@ -129,6 +139,12 @@ func parseLine(line string, config *Config) (map[string]any, string) {
 	best := make(map[string]any)
 	multiSpaceRegEx := regexp.MustCompile(`[ ]{2,}`)
 	for _, pattern := range config.Patterns {
+		// If pattern containing no tokens is a plain text match for line
+		// Ensure usage of this pattern is recorded
+		if line == pattern && tokenCounts(pattern, config.Tokens) == 0 {
+			patternUsed = pattern
+			break
+		}
 		params := tryPattern(line, pattern, config.Tokens)
 		if len(params) > len(best) {
 			best = params
@@ -164,7 +180,7 @@ func ParseFast(logtext string, config *Config) ([]Extraction, error) {
 		go func(line string, extraction []Extraction, config *Config, lineIdx int, wg *sync.WaitGroup) {
 			defer wg.Done()
 			params, patternUsed := parseLine(line, config)
-			if len(params) == 0 {
+			if patternUsed == "" {
 				log.Printf("no pattern matched line %d: \"%s\"\n", lineIdx+1, line)
 			}
 			extraction[lineIdx] = Extraction{
@@ -185,7 +201,7 @@ func Parse(logtext string, config *Config) ([]Extraction, error) {
 	extraction := make([]Extraction, len(lines))
 	for i, line := range lines {
 		params, patternUsed := parseLine(line, config)
-		if len(params) == 0 {
+		if patternUsed == "" {
 			log.Printf("no pattern matched line %d: \"%s\"\n", i+1, line)
 		}
 		extraction[i] = Extraction{
