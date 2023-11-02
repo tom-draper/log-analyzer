@@ -1,6 +1,6 @@
 # log-analyzer
 
-Turn unstructured log files into a dashboard.
+Turn unstructured log files into a dashboard in seconds.
 
 ## Example
 
@@ -93,7 +93,7 @@ Dashboard running at http://localhost:3000/
 
 ### Wildcard
 
-Unimportant values within your log file that may still vary in value can be excluded from your dashboard by using wildcard tokens `*` or `_` within your pattern.
+Unimportant but variable values within your log file can be excluded from your dashboard by using the wildcard character `*` within your pattern.
 
 For example, if you don't want thread pool number or thread ID featured in your dashboard:
 
@@ -136,7 +136,7 @@ Within the config, you can specify any tokens that are dependent upon other toke
 
 ### Conversions
 
-Some token values with a numeric value may be equivalent to other token values after performing a conversion to account for different units. In order to group these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below states that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all time recording values into milliseconds.
+Some tokens with a numeric value may be equivalent to other tokens after performing a conversion to account for different units. In order to merge these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below states that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all time recording values into milliseconds.
 
 ```log
 [November 26, 2017 at 7:25p PST] LOG: function 'createAccount' took 51.13 ms
@@ -171,7 +171,7 @@ You can specify a path to the config file containing your patterns following the
 
 ### Config Test
 
-Once you have your patterns together, you can perform a test run by including the `-t` or `--test` flag and the extracted result of each line will be saved to json file in the current directory.
+Once you have your patterns together, you can perform a test run by including the `-t` or `--test` flag and the extracted result of each line will be written to json file in the current directory.
 
 ```bash
 > ./main ./tests/data/logs/demo.log --test
