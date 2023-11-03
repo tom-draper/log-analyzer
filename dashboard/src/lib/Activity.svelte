@@ -11,37 +11,41 @@
       if (!(token in data.extraction[i].params)) {
         continue;
       }
-      const value = data.extraction[i].params[token];
-      values.push(new Date(value))
+      console.log(data.extraction[i].params[token])
+      const value = data.extraction[i].params[token].value;
+      values.push(new Date(value));
     }
 
     return values;
   }
 
-  function bars(timestamps: Date[], timeSlots: Moment.Moment[]): [Date[], number[]] {
+  function bars(
+    timestamps: Date[],
+    timeSlots: Moment.Moment[]
+  ): [Date[], number[]] {
     const timeSlotTimestamps = timeSlots.map((timeSlot) => {
       return new Date(timeSlot).getTime();
     });
 
-    const y: number[] = Array(timeSlots.length).fill(0)
+    const y: number[] = Array(timeSlots.length).fill(0);
     for (let i = 0; i < timestamps.length; i++) {
       // Find timeslot index
       const best = {
         index: -1,
         diff: Number.MAX_VALUE,
       };
-      const timestamp = timestamps[i].getTime()
+      const timestamp = timestamps[i].getTime();
       for (let j = 0; j < timeSlotTimestamps.length; j++) {
         const diff = Math.abs(timeSlotTimestamps[j] - timestamp);
         if (diff < best.diff) {
-          best.index = j
-          best.diff = diff
+          best.index = j;
+          best.diff = diff;
         } else {
           // Assuming timestamps sorted, we've found the closest time slot time
-          break
+          break;
         }
       }
-      y[best.index] += 1
+      y[best.index] += 1;
     }
 
     const x = timeSlots.map((timeSlot) => {
@@ -53,11 +57,11 @@
 
   function buildPlot() {
     const values = timestampValues(data).sort((a, b) => {
-      return a.getTime() - b.getTime()
+      return a.getTime() - b.getTime();
     });
-    const dateRange = moment.range(values[0], values[values.length-1]);
+    const dateRange = moment.range(values[0], values[values.length - 1]);
     const timeSlots = Array.from(dateRange.by("minutes", { step: 20 }));
-    const [x, y] = bars(values, timeSlots)
+    const [x, y] = bars(values, timeSlots);
 
     Plotly.newPlot(
       plotDiv,
@@ -96,7 +100,7 @@
   let Plotly;
   onMount(async () => {
     Plotly = await import("plotly.js-dist-min");
-    buildPlot()
+    buildPlot();
   });
   export let data: Data, token: string;
 </script>

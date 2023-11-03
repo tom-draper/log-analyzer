@@ -31,7 +31,7 @@
         continue;
       }
 
-      const timestamp = new Date(params[timestampToken]).getTime();
+      const timestamp = new Date(params[timestampToken].value).getTime();
 
       // Find timeslot index
       const best = {
@@ -48,7 +48,7 @@
         }
       }
 
-      const value = params[token];
+      const value = params[token].value;
       if (!(value in days)) {
         days[value] = Array(timeSlots.length).fill(0);
       }
@@ -97,7 +97,7 @@
       if (!(timestampToken in data.extraction[i].params)) {
         continue;
       }
-      const timestamp = new Date(data.extraction[i].params[timestampToken]);
+      const timestamp = new Date(data.extraction[i].params[timestampToken].value);
       if (timestamp > maxDate) {
         maxDate = timestamp;
       }

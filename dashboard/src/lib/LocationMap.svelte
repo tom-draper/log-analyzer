@@ -5,10 +5,10 @@
     const locationCount: { [location: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (let [_token, value] of Object.entries(data.extraction[i].params)) {
-        if (_token !== token) {
+        if (_token !== token || value.type != "net.IP") {
           continue;
         }
-        const location = data.locations[value];
+        const location = data.locations[value.value];
         if (!(location in locationCount)) {
           locationCount[location] = 0;
         }
@@ -57,7 +57,6 @@
       },
     ];
 
-    console.log(locations, z);
     Plotly.newPlot(
       plotDiv,
       d,

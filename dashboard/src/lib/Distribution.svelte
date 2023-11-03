@@ -7,7 +7,7 @@
         continue;
       }
       const value = data.extraction[i].params[token];
-      if (typeof value === "number") {
+      if (typeof value.value === "number") {
         return true;
       }
     }
@@ -21,13 +21,13 @@
         continue;
       }
       const value = data.extraction[i].params[token];
-      if (typeof value !== "number") {
+      if (typeof value.value !== "number") {
         continue;
       }
-      if (!(value in values)) {
-        values[value] = 0;
+      if (!(value.value in values)) {
+        values[value.value] = 0;
       }
-      values[value] += 1;
+      values[value.value] += 1;
     }
 
     return values;

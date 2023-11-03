@@ -13,11 +13,9 @@ import (
 )
 
 type Data struct {
-	Extraction []parse.Extraction        `json:"extraction"`
-	DataTypes  map[string]map[string]int `json:"types"`
-	Failed     map[int]string            `json:"failed"`
-	Locations  map[string]string         `json:"locations"`
-	Config     *parse.Config             `json:"config"`
+	Extraction []parse.Extraction `json:"extraction"`
+	Locations  map[string]string  `json:"locations"`
+	Config     *parse.Config      `json:"config"`
 }
 
 func Start(data *Data) {

@@ -14,10 +14,10 @@
         if (_token !== token) {
           continue;
         }
-        if (!(value in freq)) {
-          freq[value] = 0;
+        if (!(value.value in freq)) {
+          freq[value.value] = 0;
         }
-        freq[value] += 1;
+        freq[value.value] += 1;
       }
     }
 
@@ -30,8 +30,8 @@
         if (_token !== token) {
           continue;
         }
-        if (value in data.locations) {
-          return true
+        if (value.type == "net.IP" && value.value in data.locations) {
+          return true;
         }
       }
     }
@@ -39,10 +39,10 @@
   }
 
   let freq: ValueCount;
-  let isIPAddress = false
+  let isIPAddress = false;
   onMount(() => {
     freq = tokenValueFrequency(data, token);
-    isIPAddress = isIPAddressToken(data, token)
+    isIPAddress = isIPAddressToken(data, token);
   });
 
   export let data: Data,
@@ -59,8 +59,8 @@
   {#if token === timestampToken}
     <Activity {data} {token} />
   {:else}
-    <Statistics {data} {token}/>
-    <Distribution {data} {token}/>
+    <Statistics {data} {token} />
+    <Distribution {data} {token} />
     {#if freq !== undefined}
       <ValueFreqGraph {freq} />
     {/if}
@@ -88,9 +88,9 @@
     padding: 3rem;
   }
 
-@media screen and (max-width: 800px) {
-  .card {
-    padding: 2em;
+  @media screen and (max-width: 800px) {
+    .card {
+      padding: 2em;
+    }
   }
-}
 </style>

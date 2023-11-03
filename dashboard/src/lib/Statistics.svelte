@@ -1,14 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  const asc = (arr) => arr.sort((a, b) => a - b);
-  const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-  const mean = (arr) => sum(arr) / arr.length;
-
-  function std(arr: number[]) {
-    const mu = mean(arr);
-    const diffArr = arr.map((a) => (a - mu) ** 2);
-    return Math.sqrt(sum(diffArr) / (arr.length - 1));
+  function asc(arr: number[]) {
+    return arr.sort((a, b) => a - b);
   }
 
   function quantile(arr: number[], q: number) {
@@ -30,7 +24,7 @@
       if (!(token in data.extraction[i].params)) {
         continue;
       }
-      const value = data.extraction[i].params[token];
+      const value = data.extraction[i].params[token].value;
       if (typeof value === "number") {
         return true;
       }
@@ -44,7 +38,7 @@
       if (!(token in data.extraction[i].params)) {
         continue;
       }
-      const value = data.extraction[i].params[token];
+      const value = data.extraction[i].params[token].value;
       if (typeof value === "number") {
         values.push(value);
       }

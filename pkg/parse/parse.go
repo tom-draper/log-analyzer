@@ -19,10 +19,15 @@ import (
 )
 
 type Extraction struct {
-	Params     map[string]any `json:"params"`
-	Pattern    string         `json:"pattern"`
-	LineNumber int            `json:"lineNumber"`
-	Line       string         `json:"line"`
+	Params     map[string]Param `json:"params"`
+	Pattern    string           `json:"pattern"`
+	LineNumber int              `json:"lineNumber"`
+	Line       string           `json:"line"`
+}
+
+type Param struct {
+	Value any    `json:"value"`
+	Type  string `json:"type"`
 }
 
 // getParams extracts all possible group values contained within the regular
@@ -55,7 +60,7 @@ func escapeRegexCharacters(regEx string) string {
 // tryPattern attempts to extract the corresponding token values described by
 // the given pattern from the log text line. Any extracted values have their
 // data types inferred and then converted.
-func tryPattern(line string, pattern string, tokens []string) map[string]any {
+func tryPattern(line string, pattern string, tokens []string) map[string]Param {
 	var regEx string = pattern
 	regEx = escapeRegexCharacters(regEx)
 	// Convert wildcard asterisk into underscore _ so we only have to deal
@@ -100,22 +105,22 @@ func tryPattern(line string, pattern string, tokens []string) map[string]any {
 
 // inferDataTypes infers the intended the data type of each extracted parameter
 // value from a log text line and performs a data type conversion.
-func inferDataTypes(params map[string]string) map[string]any {
-	typedParams := make(map[string]any)
+func inferDataTypes(params map[string]string) map[string]Param {
+	typedParams := make(map[string]Param)
 	for token, match := range params {
 		// Attempt to parse as datetime
 		if t, err := dateparse.ParseAny(match); err == nil {
-			typedParams[token] = t
+			typedParams[token] = Param{Value: t, Type: "time.Time"}
 		} else if value := net.ParseIP(match); value != nil {
-			typedParams[token] = value
+			typedParams[token] = Param{Value: value, Type: "net.IP"}
 		} else if value, err := strconv.ParseFloat(match, 64); strings.Contains(match, ".") && err == nil {
-			typedParams[token] = value
+			typedParams[token] = Param{Value: value, Type: "float"}
 		} else if value, err := strconv.Atoi(match); err == nil {
-			typedParams[token] = value
+			typedParams[token] = Param{Value: value, Type: "int"}
 		} else if value, err := strconv.ParseBool(match); err == nil {
-			typedParams[token] = value
+			typedParams[token] = Param{Value: value, Type: "bool"}
 		} else {
-			typedParams[token] = match
+			typedParams[token] = Param{Value: match, Type: "string"}
 		}
 	}
 	return typedParams
@@ -133,10 +138,10 @@ func tokenCounts(pattern string, tokens []string) int {
 
 // parseLine extracts token parameters from each line using the most appropriate
 // pattern in the given config.
-func parseLine(line string, config *Config) (map[string]any, string) {
+func parseLine(line string, config *Config) (map[string]Param, string) {
 	// Attempt to parse the line against each pattern in config, only taking the best
 	var patternUsed string
-	best := make(map[string]any)
+	best := make(map[string]Param)
 	multiSpaceRegEx := regexp.MustCompile(`[ ]{2,}`)
 	for _, pattern := range config.Patterns {
 		// If pattern containing no tokens is a plain text match for line

@@ -1,8 +1,6 @@
 type Data = {
     extraction: Extraction[];
     config: Config;
-    types: DataTypes
-    failed: Failed
     locations: Locations
 };
 
@@ -25,13 +23,9 @@ type Config = {
     };
 }
 
-type DataTypes = {
-    [token: string]: {
-        [type: string]: number
-    }
-}
 
-type Failed = {
+
+type FailedLines = {
     [lineNumber: number]: string
 }
 
@@ -40,7 +34,10 @@ type Locations = {
 }
 
 type Params = {
-    [token: string]: string | number;
+    [token: string]: {
+        value: number | string
+        type: string
+    };
 };
 
 type TokenValueFreq = {
