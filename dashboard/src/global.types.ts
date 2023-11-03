@@ -23,7 +23,11 @@ type Config = {
     };
 }
 
-
+type DataTypes = {
+    [token: string]: {
+        [type: string]: number;
+    };
+};
 
 type FailedLines = {
     [lineNumber: number]: string

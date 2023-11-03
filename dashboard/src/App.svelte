@@ -102,12 +102,41 @@
     return failedLines;
   }
 
+  function getDataTypeBreakdown(data: Data) {
+    const dataTypes: DataTypes = {};
+
+    for (let i = 0; i < data.extraction.length; i++) {
+      for (let [token, params] of Object.entries(data.extraction[i].params)) {
+        if (!(token in dataTypes)) {
+          dataTypes[token] = {};
+        }
+        if (!(params.type in dataTypes[token])) {
+          dataTypes[token][params.type] = 0;
+        }
+        dataTypes[token][params.type] += 1;
+      }
+    }
+
+    return dataTypes;
+  }
+
+  function getMultiTypeTokens(dataTypes: DataTypes) {
+    const multiTypes: DataTypes = {};
+    for (let [token, types] of Object.entries(dataTypes)) {
+      if (Object.keys(types).length > 1) {
+        multiTypes[token] = types;
+      }
+    }
+    return multiTypes;
+  }
+
   function scrollToBottom() {
     window.scrollTo(0, document.body.scrollHeight);
   }
 
   let data: Data;
   let failedLines: FailedLines;
+  let multiTypeTokens: DataTypes;
   let tokenCounts: { token: string; count: number }[];
   let timestampToken: string | null;
   const production = import.meta.env.MODE === "production";
@@ -119,10 +148,15 @@
       //@ts-ignore
       data = demo;
     }
-    console.log(data);
     performConversions(data);
+    console.log(data);
+
     timestampToken = identifyTimestampToken(data);
+
     failedLines = getFailedLines(data);
+
+    const dataTypes = getDataTypeBreakdown(data);
+    multiTypeTokens = getMultiTypeTokens(dataTypes);
 
     tokenCounts = sortedTokenCounts(data);
   });
@@ -133,12 +167,20 @@
     <div class="content">
       <div class="header">
         <div class="title">{data.extraction.length.toLocaleString()} lines</div>
-        {#if Object.keys(failedLines).length >= 1}
-          <button on:click={scrollToBottom}
-            >{Object.keys(failedLines).length}
-            {Object.keys(failedLines).length == 1 ? "error" : "errors"}</button
-          >
-        {/if}
+        <div class="notifications">
+          {#if Object.keys(multiTypeTokens).length >= 1}
+            <button on:click={scrollToBottom} class="warning"
+              >{Object.keys(multiTypeTokens).length}
+              {Object.keys(multiTypeTokens).length == 1 ? "warning" : "warnings"}</button
+            >
+          {/if}
+          {#if Object.keys(failedLines).length >= 1}
+            <button on:click={scrollToBottom} class="error"
+              >{Object.keys(failedLines).length}
+              {Object.keys(failedLines).length == 1 ? "error" : "errors"}</button
+            >
+          {/if}
+        </div>
       </div>
       {#each tokenCounts as token}
         <Card
@@ -148,7 +190,7 @@
           {timestampToken}
         />
       {/each}
-      <TypeWarnings {data} />
+      <TypeWarnings {data} multiTypes={multiTypeTokens} />
       <Failed {failedLines} />
     </div>
   {/if}
@@ -167,17 +209,27 @@
     font-weight: 500;
     display: flex;
   }
-  button {
-    margin-top: 10px;
+
+  .notifications {
     margin-left: auto;
-    background: #271515;
-    color: #dd7178;
-    border: 1px solid #dd71787d;
+  }
+  button {
     padding: 5px 10px;
     border-radius: 3px;
     height: min-content;
     font-size: 0.9rem;
     outline: none;
+  }
+  
+  .error {
+    background: #271515;
+    color: #dd7178;
+    border: 1px solid #dd71787d;
+  }
+  .warning {
+    background: #5e4c15;
+    color: #ddd871;
+    border: 1px solid #ddd8717d;
   }
 
   @media screen and (max-width: 800px) {

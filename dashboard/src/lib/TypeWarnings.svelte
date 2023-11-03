@@ -1,40 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  type DataTypes = {
-    [token: string]: {
-      [type: string]: number;
-    };
-  };
-
-  function getDataTypeBreakdown(data: Data) {
-    const dataTypes: DataTypes = {};
-
-    for (let i = 0; i < data.extraction.length; i++) {
-      for (let [token, params] of Object.entries(data.extraction[i].params)) {
-        if (!(token in dataTypes)) {
-          dataTypes[token] = {};
-        }
-        if (!(params.type in dataTypes[token])) {
-          dataTypes[token][params.type] = 0;
-        }
-        dataTypes[token][params.type] += 1;
-      }
-    }
-
-    return dataTypes;
-  }
-
-  function getMultiTypeTokens(dataTypes: DataTypes) {
-    const multiTypes: DataTypes = {};
-    for (let [token, types] of Object.entries(dataTypes)) {
-      if (Object.keys(types).length > 1) {
-        multiTypes[token] = types;
-      }
-    }
-    return multiTypes;
-  }
-
   function typeString(types: { [type: string]: number }) {
     let total = 0;
     for (let count of Object.values(types)) {
@@ -81,21 +47,15 @@
     return examples;
   }
 
-  let multiTypes: DataTypes;
   let examples: { [token: string]: { [type: string]: string } };
   onMount(() => {
-    const dataTypes = getDataTypeBreakdown(data);
-    const tokens = getMultiTypeTokens(dataTypes);
-    if (Object.keys(tokens).length > 0) {
-      examples = getExamples(tokens);
-      multiTypes = tokens;
-    }
+    examples = getExamples(multiTypes);
   });
 
-  export let data: Data;
+  export let data: Data, multiTypes: DataTypes;
 </script>
 
-{#if multiTypes !== undefined}
+{#if Object.keys(multiTypes).length > 0}
   <div class="card">
     {#each Object.entries(multiTypes) as [token, dataTypes]}
       <div class="line-container">
