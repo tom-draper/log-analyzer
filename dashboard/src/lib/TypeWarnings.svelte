@@ -16,11 +16,14 @@
     return string;
   }
 
+  type Examples = { [token: string]: Example };
+  type Example = { [type: string]: { line: string; pattern: string } };
+
   function getDataTypeExamples(
     token: string,
     types: { [type: string]: number }
   ) {
-    const examples: { [type: string]: string } = {};
+    const examples: Example = {};
     for (let type of Object.keys(types)) {
       if (type in examples) {
         continue;
@@ -32,7 +35,10 @@
         if (e.params[token].type != type) {
           continue;
         }
-        examples[e.params[token].type] = e.line;
+        examples[e.params[token].type] = {
+          line: e.line,
+          pattern: e.pattern,
+        };
       }
     }
 
@@ -40,16 +46,17 @@
   }
 
   function getExamples(dataTypes: DataTypes) {
-    const examples: { [token: string]: { [type: string]: string } } = {};
+    const examples: Examples = {};
     for (let [token, types] of Object.entries(dataTypes)) {
       examples[token] = getDataTypeExamples(token, types);
     }
     return examples;
   }
 
-  let examples: { [token: string]: { [type: string]: string } };
+  let examples: Examples;
   onMount(() => {
     examples = getExamples(multiTypes);
+    console.log(examples);
   });
 
   export let data: Data, multiTypes: DataTypes;
@@ -60,9 +67,19 @@
     {#each Object.entries(multiTypes) as [token, dataTypes]}
       <div class="line-container">
         <div class="lineNumber">
-          {token} has {Object.keys(dataTypes).length} data types
+          <b>{token}</b> has {Object.keys(dataTypes).length} data types - {typeString(
+            dataTypes
+          )}
         </div>
-        <div class="line">{typeString(dataTypes)}</div>
+        {#if examples !== undefined}
+          {#each Object.entries(examples[token]) as [type, example]}
+            <div class="examples">
+              <div class="token"><b>{type}</b></div>
+              <div class="example-line">{example.line}</div>
+              <div class="example-pattern">Pattern: {example.pattern}</div>
+            </div>
+          {/each}
+        {/if}
       </div>
     {/each}
   </div>
@@ -76,19 +93,29 @@
     padding: 2rem;
   }
   .line-container {
-    display: flex;
-    background: #271515;
+    background: #5e4c1589;
     color: #ddd871;
     border-radius: 5px;
     margin: 5px;
     font-size: 0.9em;
+    padding: 20px 20px;
+  }
+  .examples,
+  .lineNumber {
+    padding: 5px 15px;
+  }
+  .examples {
+    margin-left: 20px;
   }
   .lineNumber {
-    margin: 6px 0;
-    padding: 4px 20px;
-    border-right: 1px solid #5e4c1e;
+    margin-bottom: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ddd87134;
   }
-  .line {
-    margin: 10px 20px;
+  .example-line {
+    overflow-wrap: break-word;
+  }
+  .example-pattern {
+    margin-top: 5px;
   }
 </style>

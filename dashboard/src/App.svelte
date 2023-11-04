@@ -227,7 +227,8 @@
     border: 1px solid #dd71787d;
   }
   .warning {
-    background: #5e4c15;
+    /* background: #5e4c15; */
+    background: #5e4c1589;
     color: #ddd871;
     border: 1px solid #ddd8717d;
   }

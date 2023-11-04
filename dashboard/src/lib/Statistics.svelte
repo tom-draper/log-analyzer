@@ -74,23 +74,23 @@
 {#if isNumeric}
   <div class="container">
     <div class="statistic">
-      <div class="value">{statistics.lq}</div>
+      <div class="value">{statistics.lq.toLocaleString()}</div>
       <div class="label">LQ</div>
     </div>
     <div class="statistic">
-      <div class="value">{statistics.median}</div>
+      <div class="value">{statistics.median.toLocaleString()}</div>
       <div class="label">Median</div>
     </div>
     <div class="statistic">
-      <div class="value">{statistics.uq}</div>
+      <div class="value">{statistics.uq.toLocaleString()}</div>
       <div class="label">UQ</div>
     </div>
     <div class="statistic">
-      <div class="value">{statistics.p95}</div>
+      <div class="value">{statistics.p95.toLocaleString()}</div>
       <div class="label">p95</div>
     </div>
     <div class="statistic">
-      <div class="value">{statistics.p99}</div>
+      <div class="value">{statistics.p99.toLocaleString()}</div>
       <div class="label">p99</div>
     </div>
   </div>
