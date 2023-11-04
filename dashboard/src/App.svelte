@@ -1,5 +1,5 @@
 <script lang="ts">
-  import demo from "./lib/demo.json";
+  import demo from "./lib/demo/demo.json";
   import { onMount } from "svelte";
   import moment from "moment";
   import Card from "./lib/Card.svelte";

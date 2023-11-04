@@ -1,5 +1,20 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import Plotly from "plotly.js-dist-min";
+
+  function isIPAddressToken(data: Data, token: string): boolean {
+    for (let i = 0; i < data.extraction.length; i++) {
+      for (let [_token, value] of Object.entries(data.extraction[i].params)) {
+        if (_token !== token) {
+          continue;
+        }
+        if (value.type == "net.IP" && value.value in data.locations) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
   function getLocationCount(data: Data) {
     const locationCount: { [location: string]: number } = {};
@@ -40,20 +55,23 @@
         text: locations,
         locationmode: "country names",
         colorscale: [
-          [0, '#0070f3'], [0.4, '#0070f3'], [1, '#111111']],
+          [0, "#0070f3"],
+          [0.4, "#0070f3"],
+          [1, "#111111"],
+        ],
         autocolorscale: false,
         reversescale: true,
         marker: {
-            line: {
-                color: 'rgb(90,90,90)',
-                width: 0.1
-            }
+          line: {
+            color: "rgb(90,90,90)",
+            width: 0.1,
+          },
         },
         tick0: 0,
         zmin: 0,
         colorbar: {
-            autotic: false,
-        }
+          autotic: false,
+        },
       },
     ];
 
@@ -76,35 +94,33 @@
         xaxis: {
           fixedrange: true,
         },
-        geo:{
-              showframe: false,
-                      countrycolor: 'rgb(255, 255, 255)',
-        showland: true,
-        landcolor: '#111',
-        showlakes: true,
-        lakecolor: 'black',
-        lonaxis: {},
-        lataxis: {},
-        bgcolor: 'transparent',
-      },
-      mapbox: {
-        style: "dark"
-      }
+        geo: {
+          showframe: false,
+          countrycolor: "rgb(255, 255, 255)",
+          showland: true,
+          landcolor: "#111",
+          showlakes: true,
+          lakecolor: "black",
+          lonaxis: {},
+          lataxis: {},
+          bgcolor: "transparent",
+        },
+        mapbox: {
+          style: "dark",
+        },
       },
       { responsive: true, showSendToCloud: false, displayModeBar: false }
     );
   }
 
   let plotDiv: HTMLDivElement;
-  let Plotly;
   onMount(async () => {
-    Plotly = await import("plotly.js-dist-min");
     buildPlot();
   });
   export let data: Data, token: string;
 </script>
 
-<div class="container">
+<div class="container" class:hidden={!isIPAddressToken(data, token)}>
   <div id="plotDiv" bind:this={plotDiv} />
 </div>
 

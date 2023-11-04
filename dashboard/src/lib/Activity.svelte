@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import Moment from "moment";
   import { extendMoment } from "moment-range";
+  import Plotly from "plotly.js-dist-min";
 
   const moment = extendMoment(Moment);
 
@@ -11,7 +12,7 @@
       if (!(token in data.extraction[i].params)) {
         continue;
       }
-      console.log(data.extraction[i].params[token])
+      console.log(data.extraction[i].params[token]);
       const value = data.extraction[i].params[token].value;
       values.push(new Date(value));
     }
@@ -97,9 +98,7 @@
   }
 
   let plotDiv: HTMLDivElement;
-  let Plotly;
   onMount(async () => {
-    Plotly = await import("plotly.js-dist-min");
     buildPlot();
   });
   export let data: Data, token: string;

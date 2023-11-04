@@ -19,20 +19,7 @@
     }
   }
 
-  function isNumericField(data: Data): boolean {
-    for (let i = 0; i < data.extraction.length; i++) {
-      if (!(token in data.extraction[i].params)) {
-        continue;
-      }
-      const value = data.extraction[i].params[token].value;
-      if (typeof value === "number") {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function sortedValues(data: Data): number[] {
+  function sortedNumericValues(data: Data, token: string): number[] {
     const values: number[] = [];
     for (let i = 0; i < data.extraction.length; i++) {
       if (!(token in data.extraction[i].params)) {
@@ -55,11 +42,12 @@
     p99: number;
   };
 
-  let isNumeric = false;
   let statistics: Statistics;
   onMount(() => {
-    isNumeric = isNumericField(data);
-    const values = sortedValues(data);
+    const values = sortedNumericValues(data, token);
+    if (values.length == 0) {
+      return
+    }
     statistics = {
       median: values[Math.floor(values.length / 2)],
       lq: quantile(values, 0.25),
@@ -71,7 +59,7 @@
   export let data: Data, token: string;
 </script>
 
-{#if isNumeric}
+{#if statistics}
   <div class="container">
     <div class="statistic">
       <div class="value">{statistics.lq.toLocaleString()}</div>

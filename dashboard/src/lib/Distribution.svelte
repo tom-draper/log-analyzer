@@ -1,20 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import Plotly from "plotly.js-dist-min";
 
-  function isNumericField(data: Data): boolean {
-    for (let i = 0; i < data.extraction.length; i++) {
-      if (!(token in data.extraction[i].params)) {
-        continue;
-      }
-      const value = data.extraction[i].params[token];
-      if (typeof value.value === "number") {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function valueCounts(data: Data): ValueCount {
+  function numericValueCounts(data: Data): ValueCount {
     let values: ValueCount = {};
     for (let i = 0; i < data.extraction.length; i++) {
       if (!(token in data.extraction[i].params)) {
@@ -33,8 +21,7 @@
     return values;
   }
 
-  function buildPlot() {
-    const values = valueCounts(data);
+  function buildPlot(values: ValueCount) {
     const sortedValues = Object.keys(values).sort();
     const y = Array(sortedValues.length).fill(0);
     for (let value of sortedValues) {
@@ -75,26 +62,27 @@
 
   let isNumeric = false;
   let plotDiv: HTMLDivElement;
-  let Plotly;
   onMount(async () => {
-    Plotly = await import("plotly.js-dist-min");
-    isNumeric = isNumericField(data);
-    setTimeout(buildPlot, 0);
+    const values = numericValueCounts(data);
+    if (Object.keys(values).length == 0) {
+      return
+    }
+    isNumeric = true;
+    buildPlot(values)
   });
   export let data: Data, token: string;
 </script>
 
-{#if isNumeric}
-  <div class="container">
-    <div id="plotDiv" bind:this={plotDiv} />
-  </div>
-{/if}
+<div class="container" class:hidden={!isNumeric}>
+  <div id="plotDiv" bind:this={plotDiv} />
+</div>
 
 <style scoped>
   .container {
     display: flex;
     margin-bottom: 1.4em;
   }
+
   #plotDiv {
     width: 100%;
   }

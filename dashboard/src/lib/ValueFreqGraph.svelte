@@ -43,9 +43,11 @@
 
   const numBars = 10;
   let bars: Bar[];
-  onMount(() => {
-    bars = sortedBars(freq);
-  });
+  function setBars(freq: ValueCount) {
+    bars = sortedBars(freq)
+  }
+
+  $: freq && setBars(freq)
 
   export let freq: ValueCount;
 </script>

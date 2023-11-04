@@ -56,34 +56,31 @@
   let examples: Examples;
   onMount(() => {
     examples = getExamples(multiTypes);
-    console.log(examples);
   });
 
   export let data: Data, multiTypes: DataTypes;
 </script>
 
-{#if Object.keys(multiTypes).length > 0}
-  <div class="card">
-    {#each Object.entries(multiTypes) as [token, dataTypes]}
-      <div class="line-container">
-        <div class="lineNumber">
-          <b>{token}</b> has {Object.keys(dataTypes).length} data types - {typeString(
-            dataTypes
-          )}
-        </div>
-        {#if examples !== undefined}
-          {#each Object.entries(examples[token]) as [type, example]}
-            <div class="examples">
-              <div class="token"><b>{type}</b></div>
-              <div class="example-line">{example.line}</div>
-              <div class="example-pattern">Pattern: {example.pattern}</div>
-            </div>
-          {/each}
-        {/if}
+<div class="card" class:hidden={Object.keys.length === 0}>
+  {#each Object.entries(multiTypes) as [token, dataTypes]}
+    <div class="line-container">
+      <div class="lineNumber">
+        <b>{token}</b> has {Object.keys(dataTypes).length} data types - {typeString(
+          dataTypes
+        )}
       </div>
-    {/each}
-  </div>
-{/if}
+      {#if examples !== undefined}
+        {#each Object.entries(examples[token]) as [type, example]}
+          <div class="examples">
+            <div class="token"><b>{type}</b></div>
+            <div class="example-line">{example.line}</div>
+            <div class="example-pattern">Pattern: {example.pattern}</div>
+          </div>
+        {/each}
+      {/if}
+    </div>
+  {/each}
+</div>
 
 <style scoped>
   .card {
@@ -109,8 +106,8 @@
   }
   .lineNumber {
     margin-bottom: 10px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #ddd87134;
+    /* padding-bottom: 15px; */
+    /* border-bottom: 1px solid #ddd87134; */
   }
   .example-line {
     overflow-wrap: break-word;

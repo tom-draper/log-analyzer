@@ -8,9 +8,9 @@
   import LocationMap from "./LocationMap.svelte";
 
   function tokenValueFrequency(data: Data, token: string): ValueCount {
-    let freq: ValueCount = {};
+    const freq: ValueCount = {};
     for (let i = 0; i < data.extraction.length; i++) {
-      for (let [_token, value] of Object.entries(data.extraction[i].params)) {
+      for (const [_token, value] of Object.entries(data.extraction[i].params)) {
         if (_token !== token) {
           continue;
         }
@@ -24,25 +24,9 @@
     return freq;
   }
 
-  function isIPAddressToken(data: Data, token: string): boolean {
-    for (let i = 0; i < data.extraction.length; i++) {
-      for (let [_token, value] of Object.entries(data.extraction[i].params)) {
-        if (_token !== token) {
-          continue;
-        }
-        if (value.type == "net.IP" && value.value in data.locations) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   let freq: ValueCount;
-  let isIPAddress = false;
   onMount(() => {
     freq = tokenValueFrequency(data, token);
-    isIPAddress = isIPAddressToken(data, token);
   });
 
   export let data: Data,
@@ -61,13 +45,9 @@
   {:else}
     <Statistics {data} {token} />
     <Distribution {data} {token} />
-    {#if freq !== undefined}
-      <ValueFreqGraph {freq} />
-    {/if}
+    <ValueFreqGraph {freq} />
     <OverTimeGraph {data} {token} {timestampToken} />
-    {#if isIPAddress}
-      <LocationMap {data} {token} />
-    {/if}
+    <LocationMap {data} {token} />
   {/if}
 </div>
 
