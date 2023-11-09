@@ -61,7 +61,7 @@
   export let data: Data, multiTypes: DataTypes;
 </script>
 
-<div class="card" class:hidden={Object.keys.length === 0}>
+<div class="card" class:hidden={Object.keys(multiTypes).length === 0}>
   {#each Object.entries(multiTypes) as [token, dataTypes]}
     <div class="line-container">
       <div class="lineNumber">

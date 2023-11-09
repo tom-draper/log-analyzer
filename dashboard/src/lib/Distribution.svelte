@@ -65,10 +65,12 @@
   onMount(async () => {
     const values = numericValueCounts(data);
     if (Object.keys(values).length == 0) {
-      return
+      return;
     }
     isNumeric = true;
-    buildPlot(values)
+    buildPlot(values);
+    // Resize window to snap graph to window width
+    window.dispatchEvent(new Event("resize"));
   });
   export let data: Data, token: string;
 </script>

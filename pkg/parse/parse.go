@@ -112,36 +112,26 @@ func inferDataTypes(params map[string]string) map[string]Param {
 		if strings.HasPrefix(token, "int_") {
 			if value, err := strconv.Atoi(match); err == nil {
 				typedParams[token] = Param{Value: value, Type: "int"}
-			} else {
-				typedParams[token] = Param{Value: "", Type: "str"}
 			}
 			continue
 		} else if strings.HasPrefix(token, "float_") {
 			if value, err := strconv.ParseFloat(match, 64); strings.Contains(match, ".") && err == nil {
 				typedParams[token] = Param{Value: value, Type: "float"}
-			} else {
-				typedParams[token] = Param{Value: "", Type: "str"}
 			}
 			continue
 		} else if strings.HasPrefix(token, "time_") {
 			if value, err := dateparse.ParseAny(match); err == nil {
 				typedParams[token] = Param{Value: value, Type: "time"}
-			} else {
-				typedParams[token] = Param{Value: "", Type: "str"}
 			}
 			continue
 		} else if strings.HasPrefix(token, "bool_") {
 			if value, err := strconv.ParseBool(match); err == nil {
 				typedParams[token] = Param{Value: value, Type: "bool"}
-			} else {
-				typedParams[token] = Param{Value: "", Type: "str"}
 			}
 			continue
 		} else if strings.HasPrefix(token, "ip_") {
 			if value := net.ParseIP(match); value != nil {
 				typedParams[token] = Param{Value: value, Type: "ip"}
-			} else {
-				typedParams[token] = Param{Value: "", Type: "str"}
 			}
 			continue
 		} else if strings.HasPrefix(token, "str_") {
@@ -268,7 +258,7 @@ func ParseFile(path string, config *Config) ([]Extraction, error) {
 	if err != nil {
 		return nil, err
 	}
-	extraction, err := Parse(string(body), config)
+	extraction, err := ParseFast(string(body), config)
 	if err != nil {
 		return nil, err
 	}
