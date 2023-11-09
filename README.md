@@ -14,7 +14,7 @@ An unstructured log file named `demo.log`:
 [11/Dec/2023:11:01:34] 74.6.8.121 "GET /api/data HTTP/1.1" 200 182 "python-requests/2.26.0"
 ```
 
-In `config.json`, define some simple patterns featured in your log files using a set of token values to control the extraction. These tokens can have any identifying name, and will be grouped across all patterns and targeted for extraction from the log file.
+In `config/config.json`, define some simple patterns featured in your log files using a set of token values to control the extraction. These tokens can have any identifying name, and will be grouped across all patterns and targeted for extraction from the log file.
 
 - `patterns`: a list of string patterns found in your log file    
 - `tokens`: all unique tokens used across your patterns, representing which values are important and should be targeted for extraction
@@ -40,45 +40,45 @@ The tokens are extracted from the log file and their data types inferred.
 
 ```text
 line 1
-        timestamp(time.Time): 2023-12-11 11:01:28 +0000 UTC
-        ip(string): 220.203.23.174
-        method(string): GET
-        endpoint(string): /blog/home
-        http(string): HTTP/1.1
+        timestamp(time): 2023-12-11 11:01:28 +0000 UTC
+        ip(str): 220.203.23.174
+        method(str): GET
+        endpoint(str): /blog/home
+        http(str): HTTP/1.1
         status(int): 200
         bytes(int): 182
-        user_agent(string): Mozilla/5.0 Chrome/60.0.3112.113
+        user_agent(str): Mozilla/5.0 Chrome/60.0.3112.113
 line 2
-        timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
-        ip(string): 89.238.65.53
-        method(string): POST
-        endpoint(string): /new-user/
-        http(string): HTTP/1.1
+        timestamp(time): 2023-12-11 11:01:29 +0000 UTC
+        ip(str): 89.238.65.53
+        method(str): POST
+        endpoint(str): /new-user/
+        http(str): HTTP/1.1
         status(int): 201
         bytes(int): 182
-        user_agent(string): Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36
+        user_agent(str): Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36
 line 3
-        timestamp(time.Time): 2023-12-11 11:01:29 +0000 UTC
-        ip(string): 209.51.141.74
-        method(string): GET
-        endpoint(string): /test
-        http(string): HTTP/1.1
+        timestamp(time): 2023-12-11 11:01:29 +0000 UTC
+        ip(str): 209.51.141.74
+        method(str): GET
+        endpoint(str): /test
+        http(str): HTTP/1.1
         status(int): 404
         bytes(int): 182
-        user_agent(string): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36
+        user_agent(str): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36
 line 4
-        timestamp(time.Time): 2023-12-11 11:01:32 +0000 UTC
-        ip(string): 122.161.56.36
-        message(string): request failed: error reading the headers
+        timestamp(time): 2023-12-11 11:01:32 +0000 UTC
+        ip(str): 122.161.56.36
+        message(str): request failed: error reading the headers
 line 5
-        timestamp(time.Time): 2023-12-11 11:01:34 +0000 UTC
-        ip(string): 74.6.8.121
-        method(string): GET
-        endpoint(string): /api/data
-        http(string): HTTP/1.1
+        timestamp(time): 2023-12-11 11:01:34 +0000 UTC
+        ip(str): 74.6.8.121
+        method(str): GET
+        endpoint(str): /api/data
+        http(str): HTTP/1.1
         status(int): 200
         bytes(int): 182
-        user_agent(string): python-requests/2.26.0
+        user_agent(str): python-requests/2.26.0
 ```
 
 Finally, your dashboard is generated. 
@@ -93,7 +93,7 @@ Dashboard running at http://localhost:3000/
 
 ### Data Types
 
-Data types are inferred by default, but it may not always be possible to correctly identify the intended type of a value. You can provide explicit data types to help the parser with one of the following prefixes on your token name: `int_`, `float_`, `str_`, `time_` and `ip_`.
+Data types are inferred by default, but it may not always be possible to correctly identify the intended type of a value. You can provide explicit data types to help the parser with one of the following prefixes on your token name: `int_`, `float_`, `str_`, `bool_`, `time_` and `ip_`.
 
 If a token value fails to be converted into the explicit data type specified by its prefix, the token will take a null value and be excluded from the dashboard instead of reverting to the default string data type as usual.
 
@@ -175,7 +175,7 @@ Some tokens with a numeric value may be equivalent to other tokens after perform
 
 ### Config Path
 
-You can specify a path to the config file containing your patterns following the `-c` or `--config` flag. The config path defaults to `./config.json`
+You can specify a path to the config file containing your patterns following the `-c` or `--config` flag. The config path defaults to `./config/config.json`
 
 ### Config Test
 

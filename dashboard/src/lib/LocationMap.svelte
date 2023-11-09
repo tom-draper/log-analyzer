@@ -8,7 +8,7 @@
         if (_token !== token) {
           continue;
         }
-        if (value.type == "net.IP" && value.value in data.locations) {
+        if (value.type === "ip" && value.value in data.locations) {
           return true;
         }
       }
@@ -20,7 +20,7 @@
     const locationCount: { [location: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (let [_token, value] of Object.entries(data.extraction[i].params)) {
-        if (_token !== token || value.type != "net.IP") {
+        if (_token !== token || value.type !== "ip") {
           continue;
         }
         const location = data.locations[value.value];

@@ -1,0 +1,7 @@
+{
+    "patterns": [
+        "[timestamp] ip \"method endpoint http\" status bytes \"user_agent\"",
+        "[timestamp] ip [error] message"
+    ],
+    "tokens": ["timestamp", "ip", "method", "endpoint", "http", "status", "bytes", "user_agent", "message"]
+}

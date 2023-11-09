@@ -108,11 +108,52 @@ func tryPattern(line string, pattern string, tokens []string) map[string]Param {
 func inferDataTypes(params map[string]string) map[string]Param {
 	typedParams := make(map[string]Param)
 	for token, match := range params {
+		// Check for explicit type in token name
+		if strings.HasPrefix(token, "int_") {
+			if value, err := strconv.Atoi(match); err == nil {
+				typedParams[token] = Param{Value: value, Type: "int"}
+			} else {
+				typedParams[token] = Param{Value: "", Type: "str"}
+			}
+			continue
+		} else if strings.HasPrefix(token, "float_") {
+			if value, err := strconv.ParseFloat(match, 64); strings.Contains(match, ".") && err == nil {
+				typedParams[token] = Param{Value: value, Type: "float"}
+			} else {
+				typedParams[token] = Param{Value: "", Type: "str"}
+			}
+			continue
+		} else if strings.HasPrefix(token, "time_") {
+			if value, err := dateparse.ParseAny(match); err == nil {
+				typedParams[token] = Param{Value: value, Type: "time"}
+			} else {
+				typedParams[token] = Param{Value: "", Type: "str"}
+			}
+			continue
+		} else if strings.HasPrefix(token, "bool_") {
+			if value, err := strconv.ParseBool(match); err == nil {
+				typedParams[token] = Param{Value: value, Type: "bool"}
+			} else {
+				typedParams[token] = Param{Value: "", Type: "str"}
+			}
+			continue
+		} else if strings.HasPrefix(token, "ip_") {
+			if value := net.ParseIP(match); value != nil {
+				typedParams[token] = Param{Value: value, Type: "ip"}
+			} else {
+				typedParams[token] = Param{Value: "", Type: "str"}
+			}
+			continue
+		} else if strings.HasPrefix(token, "str_") {
+			typedParams[token] = Param{Value: match, Type: "str"}
+			continue
+		}
+
 		// Attempt to parse as datetime
-		if t, err := dateparse.ParseAny(match); err == nil {
-			typedParams[token] = Param{Value: t, Type: "time.Time"}
+		if value, err := dateparse.ParseAny(match); err == nil {
+			typedParams[token] = Param{Value: value, Type: "time"}
 		} else if value := net.ParseIP(match); value != nil {
-			typedParams[token] = Param{Value: value, Type: "net.IP"}
+			typedParams[token] = Param{Value: value, Type: "ip"}
 		} else if value, err := strconv.ParseFloat(match, 64); strings.Contains(match, ".") && err == nil {
 			typedParams[token] = Param{Value: value, Type: "float"}
 		} else if value, err := strconv.Atoi(match); err == nil {
@@ -120,7 +161,7 @@ func inferDataTypes(params map[string]string) map[string]Param {
 		} else if value, err := strconv.ParseBool(match); err == nil {
 			typedParams[token] = Param{Value: value, Type: "bool"}
 		} else {
-			typedParams[token] = Param{Value: match, Type: "string"}
+			typedParams[token] = Param{Value: match, Type: "str"}
 		}
 	}
 	return typedParams
@@ -316,7 +357,7 @@ func ParseFilesTest(paths []string, config *Config) ([]Extraction, error) {
 	for _, path := range paths {
 		r, err := ParseFileTest(path, config)
 		if err != nil {
-			log.Printf("unable to read file at path %s: %s", path, fmt.Sprint(err))
+			log.Printf("unable to read file at path %s: %s\n", path, fmt.Sprint(err))
 			continue
 		}
 		parsedAny = true

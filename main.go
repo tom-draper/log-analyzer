@@ -17,13 +17,13 @@ func main() {
 	logPaths, configPath, test, printLines := getCommandLineArgs()
 	// Default to ./config.json
 	if configPath == "" {
-		configPath = "./config.json"
+		configPath = "./config/config.json"
 	}
 
 	// Retrieve log line patterns from config file
 	config, err := parse.LoadConfig(configPath)
 	if err != nil {
-		fmt.Println("failed to load log patterns from ./config.json")
+		fmt.Printf("failed to load patterns from %s\n", configPath)
 		return
 	}
 
@@ -55,7 +55,7 @@ func main() {
 		fmt.Println("no lines extracted\nensure log file path is correct")
 		return
 	} else if !tokensExtracted(extraction) {
-		fmt.Println("no tokens extracted\nensure patterns in `config.json` are correct and all tokens are named")
+		fmt.Println("no tokens extracted\nensure patterns in `config/config.json` are correct and all tokens are named")
 		return
 	}
 

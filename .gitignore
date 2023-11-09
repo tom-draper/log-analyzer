@@ -1,4 +1,4 @@
 /test.log
-/config*.json
+/config/config *.json
 /test-*.json
 .vscode

@@ -14,18 +14,6 @@ type Config struct {
 	Conversions  map[string]Conversion `json:"conversions,omitempty"`
 }
 
-type TypedConfig struct {
-	Tokens       []Token               `json:"tokens"`
-	Patterns     []string              `json:"patterns"`
-	Dependencies map[string][]string   `json:"dependencies,omitempty"`
-	Conversions  map[string]Conversion `json:"conversions,omitempty"`
-}
-
-type Token struct {
-	Value string `json:"value"`
-	Type  string `json:"type,omitempty"` // defaults to string
-}
-
 type Conversion struct {
 	Token      string  `json:"token"`
 	Multiplier float64 `json:"multiplier"`
