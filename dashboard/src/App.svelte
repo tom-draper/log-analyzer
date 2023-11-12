@@ -6,11 +6,13 @@
   import Failed from "./lib/Failed.svelte";
   import TypeWarnings from "./lib/TypeWarnings.svelte";
 
+  type TokenCount = { token: string; dependentToken?: string; count: number };
+
   function isDate(date: string): boolean {
     return moment(date, moment.ISO_8601, true).isValid();
   }
 
-  function sortedTokenCounts(data: Data): { token: string; count: number }[] {
+  function sortedTokenCounts(data: Data): TokenCount[] {
     const tokenCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (const token of Object.keys(data.extraction[i].params)) {
@@ -21,9 +23,51 @@
       }
     }
 
-    const tokens: { token: string; count: number }[] = [];
+    const tokens: TokenCount[] = [];
     for (const [token, count] of Object.entries(tokenCount)) {
       tokens.push({ token, count });
+    }
+
+    tokens.sort((a, b) => {
+      // Force timestamp token to top of list
+      if (a.token === timestampToken) {
+        return Number.MIN_SAFE_INTEGER;
+      }
+      return b.count - a.count;
+    });
+
+    return tokens;
+  }
+
+  function sortedTokenDependencyCounts(data: Data): TokenCount[] {
+    if (data.config.dependencies === undefined) {
+      return [];
+    }
+
+    const tokenCount: Map<[string, string], number> = new Map();
+    for (const token of Object.keys(data.config.dependencies)) {
+      for (const dependentToken of data.config.dependencies[token]) {
+        const key: [string, string] = [token, dependentToken];
+
+        for (let i = 0; i < data.extraction.length; i++) {
+          if (
+            token in data.extraction[i].params &&
+            dependentToken in data.extraction[i].params
+          ) {
+            if (!tokenCount.has(key)) {
+              tokenCount.set(key, 0);
+            }
+
+            tokenCount.set(key, tokenCount.get(key) + 1);
+          }
+        }
+      }
+    }
+    console.log(tokenCount);
+
+    const tokens: TokenCount[] = [];
+    for (const [[token, dependentToken], count] of tokenCount.entries()) {
+      tokens.push({ token, dependentToken, count });
     }
 
     tokens.sort((a, b) => {
@@ -44,7 +88,7 @@
         if (!(token in dateCount)) {
           dateCount[token] = 0;
         }
-        if (typeof value === "string" && isDate(value)) {
+        if (value.type === "time") {
           dateCount[token] += 1;
         }
       }
@@ -137,7 +181,7 @@
   let data: Data;
   let failedLines: FailedLines;
   let multiTypeTokens: DataTypes;
-  let tokenCounts: { token: string; count: number }[];
+  let tokenCounts: TokenCount[];
   let timestampToken: string | null;
   const production = import.meta.env.MODE === "production";
   onMount(async () => {
@@ -159,6 +203,9 @@
     multiTypeTokens = getMultiTypeTokens(dataTypes);
 
     tokenCounts = sortedTokenCounts(data);
+    const tokenDependencyCounts = sortedTokenDependencyCounts(data);
+    tokenCounts.push(...tokenDependencyCounts);
+    console.log(tokenCounts);
   });
 </script>
 
@@ -171,13 +218,17 @@
           {#if Object.keys(multiTypeTokens).length >= 1}
             <button on:click={scrollToBottom} class="warning"
               >{Object.keys(multiTypeTokens).length}
-              {Object.keys(multiTypeTokens).length == 1 ? "warning" : "warnings"}</button
+              {Object.keys(multiTypeTokens).length == 1
+                ? "warning"
+                : "warnings"}</button
             >
           {/if}
           {#if Object.keys(failedLines).length >= 1}
             <button on:click={scrollToBottom} class="error"
               >{Object.keys(failedLines).length}
-              {Object.keys(failedLines).length == 1 ? "error" : "errors"}</button
+              {Object.keys(failedLines).length == 1
+                ? "error"
+                : "errors"}</button
             >
           {/if}
         </div>
@@ -186,6 +237,7 @@
         <Card
           {data}
           token={token.token}
+          dependentToken={token.dependentToken ? token.dependentToken : null}
           lineCount={token.count}
           {timestampToken}
         />
@@ -220,7 +272,7 @@
     font-size: 0.9rem;
     outline: none;
   }
-  
+
   .error {
     background: #271515;
     color: #dd7178;

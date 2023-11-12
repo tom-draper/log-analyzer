@@ -3,5 +3,8 @@
   "patterns": [
     "ip_address - - [timestamp] \"method path *\" status int_response_time \"-\" \"user_agent\"",
     "ip_address - - [timestamp] \"method path *\" status int_response_time \"url\" \"user_agent\""
-  ]
+  ],
+  "dependencies": {
+    "path": ["status", "int_response_time"]
+  }
 }

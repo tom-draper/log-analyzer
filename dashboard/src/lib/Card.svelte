@@ -31,16 +31,19 @@
 
   export let data: Data,
     token: string,
+    dependentToken: string | null,
     lineCount: number,
     timestampToken: string | null;
 </script>
 
 <div class="card">
   <div class="header">
-    <div class="title">{token}</div>
+    <div class="title">{dependentToken ? `${token} & ${dependentToken}` : token}</div>
     <div class="line-count">{lineCount.toLocaleString()} lines</div>
   </div>
-  {#if token === timestampToken}
+  {#if dependentToken} 
+    <!-- <Distribution {data} {token} {dependentToken} /> -->
+  {:else if token === timestampToken}
     <Activity {data} {token} />
   {:else}
     <Statistics {data} {token} />

@@ -14,7 +14,9 @@ type Extraction = {
 type Config = {
     tokens: string[];
     patterns: string[];
-    dependencies?: string[];
+    dependencies?: {
+        [token: string]: string[]
+    };
     conversions?: {
         [token: string]: {
             token: string,

@@ -12,11 +12,11 @@
       if (!(token in data.extraction[i].params)) {
         continue;
       }
-      console.log(data.extraction[i].params[token]);
       const value = data.extraction[i].params[token].value;
       values.push(new Date(value));
     }
 
+    console.log(values)
     return values;
   }
 
