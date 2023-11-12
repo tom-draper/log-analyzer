@@ -167,23 +167,42 @@ func tokenCounts(pattern string, tokens []string) int {
 	return count
 }
 
+func calcExtractionRank(params map[string]Param, patternTokenCounts int) float64 {
+	if patternTokenCounts == 0 {
+		return 0
+	}
+	paramCount := float64(len(params))
+	// Penalise parameter count in favour of proportion of tokens in pattern used
+	rank := (paramCount * -0.05) + ((paramCount / float64(patternTokenCounts)) * 1)
+	return rank
+}
+
 // parseLine extracts token parameters from each line using the most appropriate
 // pattern in the given config.
 func parseLine(line string, config *Config) (map[string]Param, string) {
 	// Attempt to parse the line against each pattern in config, only taking the best
 	var patternUsed string
-	best := make(map[string]Param)
+	best := struct {
+		rank   float64
+		params map[string]Param
+	}{
+		rank:   0.0,
+		params: make(map[string]Param),
+	}
 	multiSpaceRegEx := regexp.MustCompile(`[ ]{2,}`)
 	for _, pattern := range config.Patterns {
 		// If pattern containing no tokens is a plain text match for line
 		// Ensure usage of this pattern is recorded
-		if line == pattern && tokenCounts(pattern, config.Tokens) == 0 {
+		patternTokenCounts := tokenCounts(pattern, config.Tokens)
+		if line == pattern && patternTokenCounts == 0 {
 			patternUsed = pattern
 			break
 		}
 		params := tryPattern(line, pattern, config.Tokens)
-		if len(params) > len(best) {
-			best = params
+		rank := calcExtractionRank(params, patternTokenCounts)
+		if rank > best.rank {
+			best.rank = rank
+			best.params = params
 			patternUsed = pattern
 		}
 
@@ -192,14 +211,16 @@ func parseLine(line string, config *Config) (map[string]Param, string) {
 			singleSpaceLine := multiSpaceRegEx.ReplaceAllString(strings.ReplaceAll(line, "\t", " "), " ")
 			singleSpacePattern := multiSpaceRegEx.ReplaceAllString(strings.ReplaceAll(pattern, "\t", " "), " ")
 			params = tryPattern(singleSpaceLine, singleSpacePattern, config.Tokens)
-			if len(params) > len(best) {
-				best = params
+			rank := calcExtractionRank(params, patternTokenCounts)
+			if rank > best.rank {
+				best.rank = rank
+				best.params = params
 				patternUsed = pattern
 			}
 		}
 	}
 
-	return best, patternUsed
+	return best.params, patternUsed
 }
 
 func splitLines(text string) []string {

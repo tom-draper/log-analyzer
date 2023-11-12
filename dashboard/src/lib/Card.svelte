@@ -1,33 +1,11 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import ValueFreqGraph from "./ValueFreqGraph.svelte";
   import OverTimeGraph from "./OverTimeGraph.svelte";
   import Statistics from "./Statistics.svelte";
   import Distribution from "./Distribution.svelte";
   import Activity from "./Activity.svelte";
   import LocationMap from "./LocationMap.svelte";
-
-  function tokenValueFrequency(data: Data, token: string): ValueCount {
-    const freq: ValueCount = {};
-    for (let i = 0; i < data.extraction.length; i++) {
-      for (const [_token, value] of Object.entries(data.extraction[i].params)) {
-        if (_token !== token) {
-          continue;
-        }
-        if (!(value.value in freq)) {
-          freq[value.value] = 0;
-        }
-        freq[value.value] += 1;
-      }
-    }
-
-    return freq;
-  }
-
-  let freq: ValueCount;
-  onMount(() => {
-    freq = tokenValueFrequency(data, token);
-  });
+  import ValueFreqGraphDependent from "./ValueFreqGraphDependent.svelte";
 
   export let data: Data,
     token: string,
@@ -42,13 +20,13 @@
     <div class="line-count">{lineCount.toLocaleString()} lines</div>
   </div>
   {#if dependentToken} 
-    <!-- <Distribution {data} {token} {dependentToken} /> -->
+    <ValueFreqGraphDependent {data} {token} {dependentToken} />
   {:else if token === timestampToken}
     <Activity {data} {token} />
   {:else}
     <Statistics {data} {token} />
     <Distribution {data} {token} />
-    <ValueFreqGraph {freq} />
+    <ValueFreqGraph {data} {token} />
     <OverTimeGraph {data} {token} {timestampToken} />
     <LocationMap {data} {token} />
   {/if}

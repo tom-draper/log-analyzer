@@ -41,15 +41,36 @@
     return sortedFreq;
   }
 
+  function tokenValueFrequency(data: Data, token: string): ValueCount {
+    const freq: ValueCount = {};
+    for (let i = 0; i < data.extraction.length; i++) {
+      for (const [_token, value] of Object.entries(data.extraction[i].params)) {
+        if (_token !== token) {
+          continue;
+        }
+        if (!(value.value in freq)) {
+          freq[value.value] = 0;
+        }
+        freq[value.value] += 1;
+      }
+    }
+
+    return freq;
+  }
+
   const numBars = 10;
   let bars: Bar[];
   function setBars(freq: ValueCount) {
     bars = sortedBars(freq)
   }
 
-  $: freq && setBars(freq)
+  onMount(() => {
+    const freq = tokenValueFrequency(data, token)
+    setBars(freq)
+  })
 
-  export let freq: ValueCount;
+
+  export let data: Data, token: string;
 </script>
 
 {#if bars !== undefined}

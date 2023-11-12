@@ -16,7 +16,6 @@
       values.push(new Date(value));
     }
 
-    console.log(values)
     return values;
   }
 
