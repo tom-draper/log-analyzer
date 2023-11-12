@@ -44,13 +44,12 @@
   function tokenValueFrequency(data: Data, token: string): ValueCount {
     const freq: ValueCount = {};
     for (let i = 0; i < data.extraction.length; i++) {
-      const params = data.extraction[i].params
+      const params = data.extraction[i].params;
       if (token in params) {
         if (!(params[token].value in freq)) {
           freq[params[token].value] = 0;
         }
         freq[params[token].value] += 1;
-
       }
     }
 
@@ -60,14 +59,13 @@
   const numBars = 10;
   let bars: Bar[];
   function setBars(freq: ValueCount) {
-    bars = sortedBars(freq)
+    bars = sortedBars(freq);
   }
 
   onMount(() => {
-    const freq = tokenValueFrequency(data, token)
-    setBars(freq)
-  })
-
+    const freq = tokenValueFrequency(data, token);
+    setBars(freq);
+  });
 
   export let data: Data, token: string;
 </script>

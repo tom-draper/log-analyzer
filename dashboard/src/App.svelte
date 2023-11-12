@@ -63,7 +63,6 @@
         }
       }
     }
-    console.log(tokenCount);
 
     const tokens: TokenCount[] = [];
     for (const [[token, dependentToken], count] of tokenCount.entries()) {
@@ -205,7 +204,6 @@
     tokenCounts = sortedTokenCounts(data);
     const tokenDependencyCounts = sortedTokenDependencyCounts(data);
     tokenCounts.push(...tokenDependencyCounts);
-    console.log(tokenCounts);
   });
 </script>
 

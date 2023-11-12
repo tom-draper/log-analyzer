@@ -16,10 +16,12 @@
 
 <div class="card">
   <div class="header">
-    <div class="title">{dependentToken ? `${token} & ${dependentToken}` : token}</div>
+    <div class="title">
+      {dependentToken ? `${token} & ${dependentToken}` : token}
+    </div>
     <div class="line-count">{lineCount.toLocaleString()} lines</div>
   </div>
-  {#if dependentToken} 
+  {#if dependentToken}
     <ValueFreqGraphDependent {data} {token} {dependentToken} />
   {:else if token === timestampToken}
     <Activity {data} {token} />

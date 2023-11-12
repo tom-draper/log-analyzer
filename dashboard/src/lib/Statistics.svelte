@@ -46,7 +46,7 @@
   onMount(() => {
     const values = sortedNumericValues(data, token);
     if (values.length == 0) {
-      return
+      return;
     }
     statistics = {
       median: values[Math.floor(values.length / 2)],

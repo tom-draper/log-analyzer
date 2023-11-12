@@ -5,8 +5,12 @@
   function isIPAddressToken(data: Data, token: string): boolean {
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
-      if (token in params && params[token].type == "ip" && params[token].value in data.locations) {
-        return true
+      if (
+        token in params &&
+        params[token].type == "ip" &&
+        params[token].value in data.locations
+      ) {
+        return true;
       }
     }
     return false;
@@ -17,11 +21,11 @@
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
       if (token in params && params[token].type === "ip") {
-          const location = data.locations[params[token].value];
-          if (!(location in locationCount)) {
-            locationCount[location] = 0;
-          }
-          locationCount[location] += 1;
+        const location = data.locations[params[token].value];
+        if (!(location in locationCount)) {
+          locationCount[location] = 0;
+        }
+        locationCount[location] += 1;
       }
     }
     return locationCount;

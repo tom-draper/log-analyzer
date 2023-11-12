@@ -34,17 +34,13 @@
       }
     }
 
-    console.log(sortedFreq);
-
     // Sort descending
     for (const token of Object.keys(sortedFreq)) {
       sortedFreq[token].sort((a, b) => {
         return b.count - a.count;
       });
-      // Cap at 10 values
-      sortedFreq[token] = sortedFreq[token].slice(0, numBars);
     }
-
+    
     let maxBar = 0;
     for (const token of Object.keys(sortedFreq)) {
       for (let i = 0; i < sortedFreq[token].length; i++) {
@@ -58,28 +54,38 @@
     for (const token of Object.keys(sortedFreq)) {
       for (let i = 0; i < sortedFreq[token].length; i++) {
         sortedFreq[token][i].width =
-          (sortedFreq[token][i].count / maxBar) * 100;
+        (sortedFreq[token][i].count / maxBar) * 100;
       }
+      // Cap at 10 values
+      sortedFreq[token] = sortedFreq[token].slice(0, numBars);
     }
-    let bars: { [token: string]: Bar[] }[] = [];
+
+    const tokenBarsCounts: {[token: string]: number} = {}
     for (const token of Object.keys(sortedFreq)) {
-      const bar = {};
-      bar[token] = sortedFreq[token];
-      bars.push(bar);
+      let tokenBarsTotal = 0
+      for (const bar of sortedFreq[token]) {
+        tokenBarsTotal += bar.count
+      }
+      tokenBarsCounts[token] = tokenBarsTotal
     }
-    bars.sort((a, b) => {
-      let aTotal = 0;
-      for (const key of Object.keys(a)) {
-        for (let i = 0; i < a[key].length; i++) {
-          aTotal += a[key][i].count;
-        }
+    console.log(tokenBarsCounts)
+
+    const bars: { [token: string]: Bar[] }[] = [];
+    for (const token of Object.keys(sortedFreq)) {
+      const tokenBars = {};
+      tokenBars[token] = sortedFreq[token];
+      bars.push(tokenBars);
+    }
+
+    bars.sort((tokenBars1, tokenBars2) => {
+      let aTotal = 0
+      for (const token of Object.keys(tokenBars1)) {
+        aTotal += tokenBarsCounts[token];
       }
 
       let bTotal = 0;
-      for (const key of Object.keys(b)) {
-        for (let i = 0; i < b[key].length; i++) {
-          bTotal += b[key][i].count;
-        }
+      for (const token of Object.keys(tokenBars2)) {
+        bTotal += tokenBarsCounts[token];
       }
 
       return bTotal - aTotal;

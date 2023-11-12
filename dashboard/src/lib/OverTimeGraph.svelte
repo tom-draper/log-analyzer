@@ -8,7 +8,7 @@
   type SortableValueCount = {
     value: string;
     total: number;
-  }
+  };
 
   function valueByTimeSlot(
     data: Data,
@@ -41,8 +41,8 @@
       for (let j = 0; j < timeSlotTimestamps.length; j++) {
         const diff = Math.abs(timeSlotTimestamps[j] - timestamp);
         if (diff < best.diff) {
-          best.index = j
-          best.diff = diff
+          best.index = j;
+          best.diff = diff;
         } else {
           break;
         }
@@ -59,7 +59,9 @@
     return days;
   }
 
-  function sortedValueByTimeSlot(valueByTimeSlot: ValueCounts): SortableValueCount[] {
+  function sortedValueByTimeSlot(
+    valueByTimeSlot: ValueCounts
+  ): SortableValueCount[] {
     let sortedValues: { value: string; total: number }[] = [];
     for (let [value, counts] of Object.entries(valueByTimeSlot)) {
       const total = counts.reduce((partialSum, a) => partialSum + a, 0);
@@ -94,7 +96,7 @@
     let minDate = new Date(8640000000000000);
 
     for (let i = 0; i < data.extraction.length; i++) {
-      const params = data.extraction[i].params
+      const params = data.extraction[i].params;
       if (!(timestampToken in params)) {
         continue;
       }
