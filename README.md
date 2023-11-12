@@ -122,7 +122,7 @@ For example, if you don't want thread pool number or thread ID featured in your 
 
 ### Dependencies
 
-Within the config, you can specify any tokens that are dependent upon other tokens. For example, elapsed running time may depend on the function name. Each dependency specified allows for a richer dashboard that considers this relationship and explores the combinations of values.
+Within the config, you can specify any tokens that are dependent upon other tokens. For example, elapsed running time may depend on the function name. Each dependency specified allows for a richer dashboard that considers this relationship and explores the value combinations.
 
 ```log
 2023-10-25 20:44:07 - LOG: genUUID() duration 44.29 ms
