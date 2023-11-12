@@ -146,7 +146,9 @@
   <div class="freq-graph">
     {#each bars.slice(0, 10) as group}
       {#each Object.keys(group) as tokenValue}
-        {tokenValue}
+        <div class="value-name">
+          {tokenValue}
+        </div>
         {#each group[tokenValue] as bar}
           <div class="token-frequency" title={bar.count}>
             <div class="bar" style="width: {bar.width}%">
@@ -178,5 +180,10 @@
   }
   .token-frequency {
     position: relative;
+  }
+  .value-name {
+    font-size: 0.85em;
+    margin-top: 5px;
+    margin-bottom: -2px;
   }
 </style>
