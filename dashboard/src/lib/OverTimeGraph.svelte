@@ -94,10 +94,11 @@
     let minDate = new Date(8640000000000000);
 
     for (let i = 0; i < data.extraction.length; i++) {
-      if (!(timestampToken in data.extraction[i].params)) {
+      const params = data.extraction[i].params
+      if (!(timestampToken in params)) {
         continue;
       }
-      const timestamp = new Date(data.extraction[i].params[timestampToken].value);
+      const timestamp = new Date(params[timestampToken].value);
       if (timestamp > maxDate) {
         maxDate = timestamp;
       }

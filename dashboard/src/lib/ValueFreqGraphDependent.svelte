@@ -84,7 +84,6 @@
 
       return bTotal - aTotal;
     });
-    console.log(bars);
 
     return bars;
   }

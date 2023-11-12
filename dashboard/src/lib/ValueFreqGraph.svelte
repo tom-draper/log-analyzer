@@ -44,14 +44,13 @@
   function tokenValueFrequency(data: Data, token: string): ValueCount {
     const freq: ValueCount = {};
     for (let i = 0; i < data.extraction.length; i++) {
-      for (const [_token, value] of Object.entries(data.extraction[i].params)) {
-        if (_token !== token) {
-          continue;
+      const params = data.extraction[i].params
+      if (token in params) {
+        if (!(params[token].value in freq)) {
+          freq[params[token].value] = 0;
         }
-        if (!(value.value in freq)) {
-          freq[value.value] = 0;
-        }
-        freq[value.value] += 1;
+        freq[params[token].value] += 1;
+
       }
     }
 

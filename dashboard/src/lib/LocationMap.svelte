@@ -4,13 +4,9 @@
 
   function isIPAddressToken(data: Data, token: string): boolean {
     for (let i = 0; i < data.extraction.length; i++) {
-      for (let [_token, value] of Object.entries(data.extraction[i].params)) {
-        if (_token !== token) {
-          continue;
-        }
-        if (value.type === "ip" && value.value in data.locations) {
-          return true;
-        }
+      const params = data.extraction[i].params;
+      if (token in params && params[token].type == "ip" && params[token].value in data.locations) {
+        return true
       }
     }
     return false;
@@ -19,15 +15,13 @@
   function getLocationCount(data: Data) {
     const locationCount: { [location: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
-      for (let [_token, value] of Object.entries(data.extraction[i].params)) {
-        if (_token !== token || value.type !== "ip") {
-          continue;
-        }
-        const location = data.locations[value.value];
-        if (!(location in locationCount)) {
-          locationCount[location] = 0;
-        }
-        locationCount[location] += 1;
+      const params = data.extraction[i].params;
+      if (token in params && params[token].type === "ip") {
+          const location = data.locations[params[token].value];
+          if (!(location in locationCount)) {
+            locationCount[location] = 0;
+          }
+          locationCount[location] += 1;
       }
     }
     return locationCount;
