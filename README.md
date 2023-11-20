@@ -99,7 +99,7 @@ If a token value fails to be converted into the explicit data type specified by 
 
 Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can help you decide whether your patterns could benefit from explicit data types. 
 
-### Wildcard
+### Wildcards
 
 Unimportant but variable values within your log file can be excluded from your dashboard by using the wildcard character `*` within your pattern.
 
