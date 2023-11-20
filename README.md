@@ -22,10 +22,10 @@ In `config/config.json`, define some simple patterns featured in your log files 
 ```json
 {
     "patterns": [
-        "[timestamp] ip \"method endpoint http\" status bytes \"user_agent\"",
-        "[timestamp] ip [error] message"
+        "[timestamp] ip_address \"method endpoint http\" status bytes \"user_agent\"",
+        "[timestamp] ip_address [error] message"
     ],
-    "tokens": ["timestamp", "ip", "method", "endpoint", "http", "status", "bytes", "user_agent", "message"]
+    "tokens": ["timestamp", "ip_address", "method", "endpoint", "http", "status", "bytes", "user_agent", "message"]
 }
 ```
 
@@ -41,7 +41,7 @@ The tokens are extracted from the log file and their data types inferred.
 ```text
 line 1
         timestamp(time): 2023-12-11 11:01:28 +0000 UTC
-        ip(str): 220.203.23.174
+        ip_address(ip): 220.203.23.174
         method(str): GET
         endpoint(str): /blog/home
         http(str): HTTP/1.1
@@ -50,7 +50,7 @@ line 1
         user_agent(str): Mozilla/5.0 Chrome/60.0.3112.113
 line 2
         timestamp(time): 2023-12-11 11:01:29 +0000 UTC
-        ip(str): 89.238.65.53
+        ip_address(ip): 89.238.65.53
         method(str): POST
         endpoint(str): /new-user/
         http(str): HTTP/1.1
@@ -59,7 +59,7 @@ line 2
         user_agent(str): Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36
 line 3
         timestamp(time): 2023-12-11 11:01:29 +0000 UTC
-        ip(str): 209.51.141.74
+        ip_address(ip): 209.51.141.74
         method(str): GET
         endpoint(str): /test
         http(str): HTTP/1.1
@@ -68,11 +68,11 @@ line 3
         user_agent(str): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36
 line 4
         timestamp(time): 2023-12-11 11:01:32 +0000 UTC
-        ip(str): 122.161.56.36
+        ip_address(ip): 122.161.56.36
         message(str): request failed: error reading the headers
 line 5
         timestamp(time): 2023-12-11 11:01:34 +0000 UTC
-        ip(str): 74.6.8.121
+        ip_address(ip): 74.6.8.121
         method(str): GET
         endpoint(str): /api/data
         http(str): HTTP/1.1
