@@ -101,7 +101,7 @@ Data type warnings can be found at the bottom of your dashboard, highlighting to
 
 ### Wildcards
 
-Unimportant but variable values within your log file can be excluded from your dashboard by using the wildcard character `*` within your pattern.
+Unimportant yet variable values within your log file can be excluded from your dashboard by using the wildcard character `*` within your pattern.
 
 For example, if you don't want thread pool number or thread ID featured in your dashboard:
 
