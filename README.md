@@ -95,7 +95,7 @@ Dashboard running at http://localhost:3000/
 
 Data types are inferred by default, but it may not always be possible to correctly identify the intended type of a value. You can provide explicit data types to help the parser with one of the following prefixes on your token name: `int_`, `float_`, `str_`, `bool_`, `time_` and `ip_`.
 
-If a token value fails to be converted into the explicit data type specified by its prefix, the token will take a null value and be excluded from the dashboard instead of reverting to the default string data type as usual.
+If a token value fails to be converted into the explicit data type specified by its prefix, the value is excluded from the dashboard instead of reverting to the default string type.
 
 Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can help you decide whether your patterns could benefit from explicit data types. 
 
