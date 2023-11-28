@@ -12,18 +12,20 @@ func ipLocations(extraction []parse.Extraction) map[string]string {
 	ipLocations := make(map[string]string)
 	for _, e := range extraction {
 		for _, p := range e.Params {
-			if ipAddress, ok := p.Value.(net.IP); ok {
-				ipAddressStr := ipAddress.String()
-				// Check if country code already exists
-				if _, ok := ipLocations[ipAddressStr]; ok {
-					continue
-				}
-				loc, err := location.GetCountryCode(ipAddress)
-				if err != nil {
-					continue
-				}
-				ipLocations[ipAddress.String()] = loc
+			ipAddress, ok := p.Value.(net.IP)
+			if !ok {
+				continue
 			}
+			ipAddressStr := ipAddress.String()
+			// Check if country code already exists
+			if _, ok := ipLocations[ipAddressStr]; ok {
+				continue
+			}
+			loc, err := location.GetCountryCode(ipAddress)
+			if err != nil {
+				continue
+			}
+			ipLocations[ipAddress.String()] = loc
 		}
 	}
 	return ipLocations
