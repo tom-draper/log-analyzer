@@ -18,7 +18,7 @@
     return 0;
   }
 
-  function numericValues(data: Data, token: string): number[] {
+  function numericValues(data: Data, token: string) {
     const values: number[] = [];
     for (let i = 0; i < data.extraction.length; i++) {
       if (!(token in data.extraction[i].params)) continue;

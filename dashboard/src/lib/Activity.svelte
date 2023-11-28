@@ -6,12 +6,10 @@
 
   const moment = extendMoment(Moment);
 
-  function timestampValues(data: Data): Date[] {
+  function timestampValues(data: Data) {
     const values: Date[] = [];
     for (let i = 0; i < data.extraction.length; i++) {
-      if (!(token in data.extraction[i].params)) {
-        continue;
-      }
+      if (!(token in data.extraction[i].params)) continue;
       const value = data.extraction[i].params[token].value;
       values.push(new Date(value));
     }
@@ -22,7 +20,7 @@
   function bars(
     timestamps: Date[],
     timeSlots: Moment.Moment[]
-  ): [Date[], number[]] {
+  ) {
     const timeSlotTimestamps = timeSlots.map((timeSlot) => {
       return new Date(timeSlot).getTime();
     });
@@ -52,7 +50,7 @@
       return new Date(timeSlot);
     });
 
-    return [x, y];
+    return [x, y] as const;
   }
 
   function buildPlot() {

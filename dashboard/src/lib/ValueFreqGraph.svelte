@@ -3,7 +3,7 @@
 
   type Bar = { token: string; count: number; width: number };
 
-  function sortedBars(freq: ValueCount): Bar[] {
+  function sortedBars(freq: ValueCount) {
     let sortedFreq: Bar[] = [];
     for (let [token, count] of Object.entries(freq)) {
       sortedFreq.push({ token, count, width: 0 });
@@ -41,7 +41,7 @@
     return sortedFreq;
   }
 
-  function tokenValueFrequency(data: Data, token: string): ValueCount {
+  function tokenValueFrequency(data: Data, token: string) {
     const freq: ValueCount = {};
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;

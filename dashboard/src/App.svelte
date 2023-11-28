@@ -7,7 +7,7 @@
 
   type TokenCount = { token: string; dependentToken?: string; count: number };
 
-  function sortedTokenCounts(data: Data): TokenCount[] {
+  function sortedTokenCounts(data: Data) {
     const tokenCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (const token in data.extraction[i].params) {
@@ -34,7 +34,7 @@
     return tokens;
   }
 
-  function sortedTokenDependencyCounts(data: Data): TokenCount[] {
+  function sortedTokenDependencyCounts(data: Data) {
     if (data.config.dependencies === undefined) return []
 
     const tokenCount: Map<readonly [string, string], number> = new Map();
@@ -70,7 +70,7 @@
     return tokens;
   }
 
-  function identifyTimestampToken(data: Data): string | null {
+  function identifyTimestampToken(data: Data) {
     const dateCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (const [token, value] of Object.entries(data.extraction[i].params)) {

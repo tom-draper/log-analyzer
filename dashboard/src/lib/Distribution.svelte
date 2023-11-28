@@ -2,8 +2,8 @@
   import { onMount } from "svelte";
   import Plotly from "plotly.js-dist-min";
 
-  function numericValueCounts(data: Data): ValueCount {
-    let values: ValueCount = {};
+  function numericValueCounts(data: Data) {
+    const values: ValueCount = {};
     for (let i = 0; i < data.extraction.length; i++) {
       if (!(token in data.extraction[i].params)) continue;
       const value = data.extraction[i].params[token];

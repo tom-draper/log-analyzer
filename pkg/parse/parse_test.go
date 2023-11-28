@@ -30,6 +30,18 @@ var profiles = []Profile{
 	{
 		config: Config{
 			Patterns: []string{
+				"starting...",
+				"time_timestamp :: threadint_thread_number - starting",
+				"time_timestamp :: threadint_thread_number - exiting",
+				"time_timestamp :: complete",
+			},
+			Tokens: []string{"time_timestamp", "int_thread_number"},
+		},
+		logpath: logPath("test.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
 				"[timestamp] ip:dbname LOG: duration: elapsed ms statement: query",
 				"[timestamp] ip:dbname LOG: statement: query",
 			},
@@ -63,7 +75,7 @@ var profiles = []Profile{
 		},
 		logpath: logPath("test3.log"),
 	},
-		{
+	{
 		config: Config{
 			Patterns: []string{
 				"[INFO ] [float_taken_msms] result found: page=str_url status=int_status_code size=int_bytes",

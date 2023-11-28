@@ -2,12 +2,12 @@
   import { onMount } from "svelte";
   import Plotly from "plotly.js-dist-min";
 
-  function isIPAddressToken(data: Data, token: string): boolean {
+  function isIPAddressToken(data: Data, token: string) {
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
       if (
         token in params &&
-        params[token].type == "ip" &&
+        params[token].type === "ip" &&
         params[token].value in data.locations
       ) {
         return true;

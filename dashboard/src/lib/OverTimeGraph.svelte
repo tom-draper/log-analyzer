@@ -15,7 +15,7 @@
     token: string,
     timestampToken: string | null,
     timeSlots: Moment.Moment[]
-  ): ValueCounts {
+  ) {
     if (timestampToken === null) {
       return {};
     }
@@ -59,8 +59,8 @@
 
   function sortedValueByTimeSlot(
     valueByTimeSlot: ValueCounts
-  ): SortableValueCount[] {
-    const sortedValues: { value: string; total: number }[] = [];
+  ) {
+    const sortedValues: SortableValueCount[] = [];
     for (let [value, counts] of Object.entries(valueByTimeSlot)) {
       const total = counts.reduce((partialSum, a) => partialSum + a, 0);
       sortedValues.push({ value, total });
@@ -73,7 +73,7 @@
     return sortedValues;
   }
 
-  function valueCountMax(days: any): ValueCount {
+  function valueCountMax(days: any) {
     const valueMax: ValueCount = {};
     for (const value in days) {
       valueMax[value] = Math.max(...days[value]);
@@ -85,9 +85,9 @@
   function timestampRange(
     data: Data,
     timestampToken: string | null
-  ): [Date | null, Date | null] {
+  ) {
     if (timestampToken === null) {
-      return [null, null];
+      return [null, null] as const;
     }
 
     let maxDate = new Date(-8640000000000000);
@@ -105,7 +105,7 @@
       }
     }
 
-    return [minDate, maxDate];
+    return [minDate, maxDate] as const;
   }
 
   let sortedValueCounts: SortableValueCount[];
