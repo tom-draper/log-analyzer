@@ -12,13 +12,13 @@
   type Bar = { dependentTokenValue: string; count: number; width: number };
 
   function sortedBars(freq: DependentTokenValueCounts) {
-    let sortedFreq: { [tokenValue: string]: Bar[] } = {};
-    for (let tokenCounts of Object.values(freq)) {
-      for (let valueCounts of Object.values(tokenCounts)) {
-        for (let [tokenValue, dependentTokenValueCounts] of Object.entries(
+    const sortedFreq: { [tokenValue: string]: Bar[] } = {};
+    for (const tokenCounts of Object.values(freq)) {
+      for (const valueCounts of Object.values(tokenCounts)) {
+        for (const [tokenValue, dependentTokenValueCounts] of Object.entries(
           valueCounts
         )) {
-          for (let [dependentTokenValue, count] of Object.entries(
+          for (const [dependentTokenValue, count] of Object.entries(
             dependentTokenValueCounts
           )) {
             if (!(tokenValue in sortedFreq)) {
@@ -35,14 +35,14 @@
     }
 
     // Sort descending
-    for (const token of Object.keys(sortedFreq)) {
+    for (const token in sortedFreq) {
       sortedFreq[token].sort((a, b) => {
         return b.count - a.count;
       });
     }
-    
+
     let maxBar = 0;
-    for (const token of Object.keys(sortedFreq)) {
+    for (const token in sortedFreq) {
       for (let i = 0; i < sortedFreq[token].length; i++) {
         if (sortedFreq[token][i].count > maxBar) {
           maxBar = sortedFreq[token][i].count;
@@ -51,40 +51,39 @@
     }
 
     // Set widths
-    for (const token of Object.keys(sortedFreq)) {
+    for (const token in sortedFreq) {
       for (let i = 0; i < sortedFreq[token].length; i++) {
         sortedFreq[token][i].width =
-        (sortedFreq[token][i].count / maxBar) * 100;
+          (sortedFreq[token][i].count / maxBar) * 100;
       }
       // Cap at 10 values
       sortedFreq[token] = sortedFreq[token].slice(0, numBars);
     }
 
-    const tokenBarsCounts: {[token: string]: number} = {}
-    for (const token of Object.keys(sortedFreq)) {
-      let tokenBarsTotal = 0
+    const tokenBarsCounts: { [token: string]: number } = {};
+    for (const token in sortedFreq) {
+      let tokenBarsTotal = 0;
       for (const bar of sortedFreq[token]) {
-        tokenBarsTotal += bar.count
+        tokenBarsTotal += bar.count;
       }
-      tokenBarsCounts[token] = tokenBarsTotal
+      tokenBarsCounts[token] = tokenBarsTotal;
     }
-    console.log(tokenBarsCounts)
 
     const bars: { [token: string]: Bar[] }[] = [];
-    for (const token of Object.keys(sortedFreq)) {
-      const tokenBars = {};
+    for (const token in sortedFreq) {
+      const tokenBars: (typeof bars)[number] = {};
       tokenBars[token] = sortedFreq[token];
       bars.push(tokenBars);
     }
 
     bars.sort((tokenBars1, tokenBars2) => {
-      let aTotal = 0
-      for (const token of Object.keys(tokenBars1)) {
+      let aTotal = 0;
+      for (const token in tokenBars1) {
         aTotal += tokenBarsCounts[token];
       }
 
       let bTotal = 0;
-      for (const token of Object.keys(tokenBars2)) {
+      for (const token in tokenBars2) {
         bTotal += tokenBarsCounts[token];
       }
 
@@ -129,7 +128,9 @@
   }
 
   const numBars = 10;
-  let bars: {}[];
+  let bars: {
+    [token: string]: Bar[];
+  }[] = [];
   function setBars(freq: DependentTokenValueCounts) {
     bars = sortedBars(freq);
   }
@@ -150,7 +151,7 @@
           {tokenValue}
         </div>
         {#each group[tokenValue] as bar}
-          <div class="token-frequency" title={bar.count}>
+          <div class="token-frequency" title={bar.count.toString()}>
             <div class="bar" style="width: {bar.width}%">
               {bar.dependentTokenValue}
             </div>

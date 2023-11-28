@@ -5,13 +5,9 @@
   function numericValueCounts(data: Data): ValueCount {
     let values: ValueCount = {};
     for (let i = 0; i < data.extraction.length; i++) {
-      if (!(token in data.extraction[i].params)) {
-        continue;
-      }
+      if (!(token in data.extraction[i].params)) continue;
       const value = data.extraction[i].params[token];
-      if (typeof value.value !== "number") {
-        continue;
-      }
+      if (typeof value.value !== "number") continue;
       if (!(value.value in values)) {
         values[value.value] = 0;
       }
@@ -64,9 +60,7 @@
   let plotDiv: HTMLDivElement;
   onMount(async () => {
     const values = numericValueCounts(data);
-    if (Object.keys(values).length == 0) {
-      return;
-    }
+    if (Object.keys(values).length == 0) return;
     isNumeric = true;
     buildPlot(values);
     // Resize window to snap graph to window width

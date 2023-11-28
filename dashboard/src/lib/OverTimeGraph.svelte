@@ -27,9 +27,7 @@
     const days: ValueCounts = {};
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
-      if (!(token in params) || !(timestampToken in params)) {
-        continue;
-      }
+      if (!(token in params) || !(timestampToken in params)) continue;
 
       const timestamp = new Date(params[timestampToken].value).getTime();
 
@@ -62,7 +60,7 @@
   function sortedValueByTimeSlot(
     valueByTimeSlot: ValueCounts
   ): SortableValueCount[] {
-    let sortedValues: { value: string; total: number }[] = [];
+    const sortedValues: { value: string; total: number }[] = [];
     for (let [value, counts] of Object.entries(valueByTimeSlot)) {
       const total = counts.reduce((partialSum, a) => partialSum + a, 0);
       sortedValues.push({ value, total });
@@ -77,7 +75,7 @@
 
   function valueCountMax(days: any): ValueCount {
     const valueMax: ValueCount = {};
-    for (let value of Object.keys(days)) {
+    for (const value in days) {
       valueMax[value] = Math.max(...days[value]);
     }
 
@@ -97,9 +95,7 @@
 
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
-      if (!(timestampToken in params)) {
-        continue;
-      }
+      if (!(timestampToken in params)) continue;
       const timestamp = new Date(params[timestampToken].value);
       if (timestamp > maxDate) {
         maxDate = timestamp;
@@ -118,9 +114,7 @@
   let timeSlots: Moment.Moment[];
   onMount(() => {
     const [minDate, maxDate] = timestampRange(data, timestampToken);
-    if (minDate === null || maxDate === null) {
-      return;
-    }
+    if (minDate === null || maxDate === null) return;
     const dateRange = moment.range(minDate, maxDate);
     timeSlots = Array.from(dateRange.by("minutes", { step: 50 }));
 

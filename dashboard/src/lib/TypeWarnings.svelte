@@ -24,17 +24,10 @@
     types: { [type: string]: number }
   ) {
     const examples: Example = {};
-    for (let type of Object.keys(types)) {
-      if (type in examples) {
-        continue;
-      }
-      for (let e of data.extraction) {
-        if (!(token in e.params)) {
-          continue;
-        }
-        if (e.params[token].type != type) {
-          continue;
-        }
+    for (const type in types) {
+      if (type in examples) continue;
+      for (const e of data.extraction) {
+        if (!(token in e.params) || (e.params[token].type != type)) continue;
         examples[e.params[token].type] = {
           line: e.line,
           pattern: e.pattern,
@@ -106,8 +99,6 @@
   }
   .lineNumber {
     margin-bottom: 10px;
-    /* padding-bottom: 15px; */
-    /* border-bottom: 1px solid #ddd87134; */
   }
   .example-line {
     overflow-wrap: break-word;

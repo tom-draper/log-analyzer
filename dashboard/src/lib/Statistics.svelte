@@ -14,24 +14,21 @@
       return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
     } else if (sorted[base] != undefined) {
       return sorted[base];
-    } else {
-      return 0;
     }
+    return 0;
   }
 
-  function sortedNumericValues(data: Data, token: string): number[] {
+  function numericValues(data: Data, token: string): number[] {
     const values: number[] = [];
     for (let i = 0; i < data.extraction.length; i++) {
-      if (!(token in data.extraction[i].params)) {
-        continue;
-      }
+      if (!(token in data.extraction[i].params)) continue;
       const value = data.extraction[i].params[token].value;
       if (typeof value === "number") {
         values.push(value);
       }
     }
 
-    return values.sort();
+    return values;
   }
 
   type Statistics = {
@@ -44,10 +41,9 @@
 
   let statistics: Statistics;
   onMount(() => {
-    const values = sortedNumericValues(data, token);
-    if (values.length == 0) {
-      return;
-    }
+    const values = numericValues(data, token);
+    values.sort()
+    if (values.length == 0) return;
     statistics = {
       median: values[Math.floor(values.length / 2)],
       lq: quantile(values, 0.25),

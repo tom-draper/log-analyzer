@@ -1,21 +1,16 @@
 <script lang="ts">
-  import demo from "./lib/demo/demo.json";
+  import demo from "./assets/demo/demo.json";
   import { onMount } from "svelte";
-  import moment from "moment";
   import Card from "./lib/Card.svelte";
   import Failed from "./lib/Failed.svelte";
   import TypeWarnings from "./lib/TypeWarnings.svelte";
 
   type TokenCount = { token: string; dependentToken?: string; count: number };
 
-  function isDate(date: string): boolean {
-    return moment(date, moment.ISO_8601, true).isValid();
-  }
-
   function sortedTokenCounts(data: Data): TokenCount[] {
     const tokenCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
-      for (const token of Object.keys(data.extraction[i].params)) {
+      for (const token in data.extraction[i].params) {
         if (!(token in tokenCount)) {
           tokenCount[token] = 0;
         }
@@ -40,25 +35,22 @@
   }
 
   function sortedTokenDependencyCounts(data: Data): TokenCount[] {
-    if (data.config.dependencies === undefined) {
-      return [];
-    }
+    if (data.config.dependencies === undefined) return []
 
-    const tokenCount: Map<[string, string], number> = new Map();
-    for (const token of Object.keys(data.config.dependencies)) {
+    const tokenCount: Map<readonly [string, string], number> = new Map();
+    for (const token in data.config.dependencies) {
       for (const dependentToken of data.config.dependencies[token]) {
-        const key: [string, string] = [token, dependentToken];
+        const key = [token, dependentToken] as const;
 
         for (let i = 0; i < data.extraction.length; i++) {
           if (
             token in data.extraction[i].params &&
             dependentToken in data.extraction[i].params
           ) {
-            if (!tokenCount.has(key)) {
-              tokenCount.set(key, 0);
+            if (!tokenCount.has(key))  {
+              tokenCount.set(key, 1);
             }
-
-            tokenCount.set(key, tokenCount.get(key) + 1);
+            tokenCount.set(key, (tokenCount.get(key) || 0) + 1);
           }
         }
       }
@@ -71,9 +63,7 @@
 
     tokens.sort((a, b) => {
       // Force timestamp token to top of list
-      if (a.token === timestampToken) {
-        return Number.MIN_SAFE_INTEGER;
-      }
+      if (a.token === timestampToken) return Number.MIN_SAFE_INTEGER;
       return b.count - a.count;
     });
 
@@ -121,14 +111,9 @@
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
       for (let [token, conversion] of Object.entries(data.config.conversions)) {
-        if (!(token in params) || typeof params[token] !== "number") {
-          continue;
-        }
+        if (!(token in params) || typeof params[token] !== "number") continue;
         const value = params[token];
-        if (typeof value !== "number") {
-          continue;
-        }
-        params[conversion.token].value = conversion.multiplier * value;
+        if (typeof value !== "number") continue;
         params[conversion.token].value = conversion.multiplier * value;
         delete params[token];
       }
@@ -277,7 +262,6 @@
     border: 1px solid #dd71787d;
   }
   .warning {
-    /* background: #5e4c15; */
     background: #5e4c1589;
     color: #ddd871;
     border: 1px solid #ddd8717d;
