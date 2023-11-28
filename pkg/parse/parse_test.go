@@ -40,6 +40,16 @@ var profiles = []Profile{
 	{
 		config: Config{
 			Patterns: []string{
+				"[time_timestamp] ip_address:str_dbname LOG: duration: float_elapsed ms statement: str_query",
+				"[time_timestamp] ip_address:str_dbname LOG: statement: str_query",
+			},
+			Tokens: []string{"time_timestamp", "ip_address", "str_dbname", "float_elapsed", "str_query"},
+		},
+		logpath: logPath("test2.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
 				"[INFO ] [taken_msms] result found: page=url status=status_code size=bytes",
 				"[INFO ] [taken_ss] result found: page=url status=status_code size=bytes",
 			},
@@ -52,6 +62,79 @@ var profiles = []Profile{
 			},
 		},
 		logpath: logPath("test3.log"),
+	},
+		{
+		config: Config{
+			Patterns: []string{
+				"[INFO ] [float_taken_msms] result found: page=str_url status=int_status_code size=int_bytes",
+				"[INFO ] [float_taken_ss] result found: page=str_url status=int_status_code size=int_bytes",
+			},
+			Tokens: []string{"float_taken_ms", "float_taken_s", "str_url", "str_status_code", "str_bytes"},
+		},
+		logpath: logPath("test3.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"[timestamp] rest",
+			},
+			Tokens: []string{"timestamp", "rest"},
+		},
+		logpath: logPath("test2.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"[time_timestamp] str_rest",
+			},
+			Tokens: []string{"time_timestamp", "str_rest"},
+		},
+		logpath: logPath("test2.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"[timestamp] *",
+			},
+			Tokens: []string{"timestamp"},
+		},
+		logpath: logPath("test2.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"*",
+			},
+			Tokens: []string{},
+		},
+		logpath: logPath("test2.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"all",
+			},
+			Tokens: []string{"all"},
+		},
+		logpath: logPath("test2.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"str_all",
+			},
+			Tokens: []string{"str_all"},
+		},
+		logpath: logPath("test2.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"rest query",
+			},
+			Tokens: []string{"query"},
+		},
+		logpath: logPath("test2.log"),
 	},
 }
 
