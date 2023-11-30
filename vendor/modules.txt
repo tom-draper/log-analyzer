@@ -1,5 +1,9 @@
 # github.com/adrg/strutil v0.3.1
 ## explicit; go 1.14
+github.com/adrg/strutil/internal/mathutil
+github.com/adrg/strutil/internal/ngram
+github.com/adrg/strutil/internal/stringutil
+github.com/adrg/strutil/metrics
 # github.com/ajg/form v1.5.1
 ## explicit
 github.com/ajg/form

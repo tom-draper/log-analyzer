@@ -1,10 +1,11 @@
 package similarity
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 
-	"github.com/adrg/strutil"
+	"github.com/adrg/strutil/metrics"
 )
 
 type Line struct {
@@ -43,7 +44,8 @@ func getNearestCluster(line Line, clusters []Line) struct {
 		line     Line
 	}{distance: math.MaxFloat64}
 	for i, cluster := range clusters {
-		var distance float64 = strutil.Similarity(line, cluster, strutil.metrics.NewLevenshtein())
+		var distance float64 = metrics.NewLevenshtein().Distance(line.line, cluster.line)
+		fmt.Println(distance)
 		if distance < best.distance {
 			best = struct {
 				distance float64
@@ -66,15 +68,50 @@ func buildLines(strings []string) []Line {
 	return lines
 }
 
-func CreateGroups(strings []string) []Group {
-	lines := buildLines(strings)
+type Node struct {
+	id          int
+	value       string
+	connections []Connection
+}
 
-	k := 3
-	centroids := getStartingCentroids(lines, k)
+type Connection struct {
+	weight int
+	node   *Node
+}
 
-	groups := make([][]Line, k)
-	for _, line := range lines {
-		nearest := getNearestCluster(line, centroids)
-		groups[nearest.index] = append(groups[nearest.index], nearest.line)
+func FindGroups(lines []string) []Group {
+	// lines := buildLines(strings)
+
+	// k := 3
+	// centroids := getStartingCentroids(lines, k)
+
+	// groups := make([][]Line, k)
+	// for _, line := range lines {
+	// 	nearest := getNearestCluster(line, centroids)
+	// 	groups[nearest.index] = append(groups[nearest.index], nearest.line)
+	// }
+	// return []Group{}
+
+	nodes := make([]Node, len(lines))
+	for i, line := range lines {
+		// create new node
+		node := Node{
+			i,
+			line,
+			[]Connection{},
+		}
+		nodes[i] = node
 	}
+
+	for i, line1 := range lines {
+		for j, line2 := range lines {
+			distance := metrics.NewLevenshtein().Distance(line1, line2)
+			nodes[i].connections = append(nodes[i].connections, Connection{distance, &nodes[j]})
+		}
+	}
+
+	// Find minimum spanning tree
+	mst := Kruskal(nodes)
+
+	return []Group
 }
