@@ -2,116 +2,63 @@ package similarity
 
 import (
 	"fmt"
-	"math"
-	"math/rand"
 
 	"github.com/adrg/strutil/metrics"
 )
 
-type Line struct {
-	lineIndex int
-	line      string
-}
-
 type Group struct {
-	examples []string
-}
-
-func getStartingCentroids(lines []Line, k int) []Line {
-	linesCopy := append(lines[:0:0], lines...)
-	samples := make([]Line, k)
-
-	for i := 0; i < k; i++ {
-		r := int(rand.Int63n(int64(len(linesCopy))))
-		samples[i] = linesCopy[r]
-
-		// remove the sample from the copy slice
-		linesCopy[r], linesCopy[len(linesCopy)-1] = linesCopy[len(linesCopy)-1], linesCopy[r]
-		linesCopy = linesCopy[:len(linesCopy)-1]
-	}
-
-	return samples
-}
-
-func getNearestCluster(line Line, clusters []Line) struct {
-	distance float64
-	index    int
-	line     Line
-} {
-	best := struct {
-		distance float64
-		index    int
-		line     Line
-	}{distance: math.MaxFloat64}
-	for i, cluster := range clusters {
-		var distance float64 = metrics.NewLevenshtein().Distance(line.line, cluster.line)
-		fmt.Println(distance)
-		if distance < best.distance {
-			best = struct {
-				distance float64
-				index    int
-				line     Line
-			}{distance, i, line}
-		}
-	}
-	return best
-}
-
-func buildLines(strings []string) []Line {
-	lines := make([]Line, len(strings))
-	for i, line := range strings {
-		lines[i] = Line{
-			i,
-			line,
-		}
-	}
-	return lines
+	Members []string
 }
 
 type Node struct {
-	id          int
-	value       string
-	connections []Connection
+	id    int
+	value string
 }
 
-type Connection struct {
+func (n Node) String() string {
+	return fmt.Sprintf("[%d]%s", n.id, n.value)
+}
+
+type Edge struct {
 	weight int
-	node   *Node
+	node1  *Node
+	node2  *Node
+}
+
+func (e Edge) String() string {
+	return fmt.Sprintf("[%d]%s [%d]%s = %d", e.node1.id, e.node1.value, e.node2.id, e.node2.value, e.weight)
+}
+
+func extractGroups(edges []Edge) []Group {
+	return []Group{}
 }
 
 func FindGroups(lines []string) []Group {
-	// lines := buildLines(strings)
-
-	// k := 3
-	// centroids := getStartingCentroids(lines, k)
-
-	// groups := make([][]Line, k)
-	// for _, line := range lines {
-	// 	nearest := getNearestCluster(line, centroids)
-	// 	groups[nearest.index] = append(groups[nearest.index], nearest.line)
-	// }
-	// return []Group{}
-
+	// Create node for each line
 	nodes := make([]Node, len(lines))
 	for i, line := range lines {
-		// create new node
-		node := Node{
+		nodes[i] = Node{
 			i,
 			line,
-			[]Connection{},
 		}
-		nodes[i] = node
 	}
 
-	for i, line1 := range lines {
-		for j, line2 := range lines {
-			distance := metrics.NewLevenshtein().Distance(line1, line2)
-			nodes[i].connections = append(nodes[i].connections, Connection{distance, &nodes[j]})
+	// Build edges weighted by Levenshtein distance between strings
+	edges := make([]Edge, 0)
+	for i, node1 := range nodes {
+		for j, node2 := range nodes {
+			if node1.id == node2.id {
+				continue
+			}
+			distance := metrics.NewLevenshtein().Distance(node1.value, node2.value)
+			edges = append(edges, Edge{distance, &nodes[i], &nodes[j]})
 		}
 	}
 
 	// Find minimum spanning tree
-	mst := Kruskal(nodes)
+	mst := Kruskal(len(nodes), edges)
 
-	return []Group
+	groups := extractGroups(mst)
+
+	return groups
 }
