@@ -148,6 +148,73 @@ var profiles = []Profile{
 		},
 		logpath: logPath("test2.log"),
 	},
+	{
+		config: Config{
+			Patterns: []string{
+				"[time] ip rest",
+			},
+			Tokens: []string{"time", "ip", "rest"},
+		},
+		logpath: logPath("demo.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"*",
+			},
+			Tokens: []string{},
+		},
+		logpath: logPath("demo.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"***",
+			},
+			Tokens: []string{},
+		},
+		logpath: logPath("demo.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"[*] *",
+			},
+			Tokens: []string{},
+		},
+		logpath: logPath("demo.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"[*] * *",
+			},
+			Tokens: []string{},
+		},
+		logpath: logPath("demo.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"timestamp x y z source: message",
+			},
+			Tokens: []string{"timestamp", "x", "y", "z", "source", "message"},
+		},
+		logpath: logPath("loghub/Android_v1.log"),
+	},
+	{
+		config: Config{
+			Patterns: []string{
+				"[timestamp] [type] jk2_init() Found child child_number in scoreboard slot slot_number",
+				"[timestamp] [type] [client ip] message",
+				"[timestamp] [type] mod_jk child workerEnv in error state state_number",
+				"[timestamp] [type] workerEnv.init() ok /etc/httpd/conf/workers2.properties",
+				"[timestamp] [type] other",
+			},
+			Tokens: []string{"timestamp", "type", "child_number", "slot_number", "ip", "message", "state_number", "other"},
+		},
+		logpath: logPath("loghub/Apache.log"),
+	},
 }
 
 func loadConfig(file string) Config {
