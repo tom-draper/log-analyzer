@@ -21,9 +21,7 @@
           for (const [dependentTokenValue, count] of Object.entries(
             dependentTokenValueCounts
           )) {
-            if (!(tokenValue in sortedFreq)) {
-              sortedFreq[tokenValue] = [];
-            }
+            tokenValue in sortedFreq || (sortedFreq[tokenValue] = []);
             sortedFreq[tokenValue].push({
               dependentTokenValue,
               count,
@@ -104,22 +102,15 @@
         token in data.extraction[i].params &&
         dependentToken in data.extraction[i].params
       ) {
-        if (!(token in freq)) {
-          freq[token] = {};
-        }
-        if (!(dependentToken in freq[token])) {
-          freq[token][dependentToken] = {};
-        }
-
+        token in freq || (freq[token] = {});
+        dependentToken in freq[token] || (freq[token][dependentToken] = {});
         const tokenValue = data.extraction[i].params[token].value;
-        if (!(tokenValue in freq[token][dependentToken])) {
-          freq[token][dependentToken][tokenValue] = {};
-        }
+        tokenValue in freq[token][dependentToken] ||
+          (freq[token][dependentToken][tokenValue] = {});
         const dependentTokenValue =
           data.extraction[i].params[dependentToken].value;
-        if (!(dependentTokenValue in freq[token][dependentToken][tokenValue])) {
-          freq[token][dependentToken][tokenValue][dependentTokenValue] = 0;
-        }
+        dependentTokenValue in freq[token][dependentToken][tokenValue] ||
+          (freq[token][dependentToken][tokenValue][dependentTokenValue] = 0);
         freq[token][dependentToken][tokenValue][dependentTokenValue] += 1;
       }
     }

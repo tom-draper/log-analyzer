@@ -8,9 +8,7 @@
       if (!(token in data.extraction[i].params)) continue;
       const value = data.extraction[i].params[token];
       if (typeof value.value !== "number") continue;
-      if (!(value.value in values)) {
-        values[value.value] = 0;
-      }
+      (value.value in values) || (values[value.value] = 0);
       values[value.value] += 1;
     }
 
@@ -20,7 +18,7 @@
   function buildPlot(values: ValueCount) {
     const sortedValues = Object.keys(values).sort();
     const y = Array(sortedValues.length).fill(0);
-    for (let value of sortedValues) {
+    for (const value of sortedValues) {
       y[sortedValues.indexOf(value)] = values[value];
     }
 
@@ -60,7 +58,7 @@
   let plotDiv: HTMLDivElement;
   onMount(async () => {
     const values = numericValueCounts(data);
-    if (Object.keys(values).length == 0) return;
+    if (Object.keys(values).length === 0) return;
     isNumeric = true;
     buildPlot(values);
     // Resize window to snap graph to window width

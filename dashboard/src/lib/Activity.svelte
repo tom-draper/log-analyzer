@@ -17,10 +17,7 @@
     return values;
   }
 
-  function bars(
-    timestamps: Date[],
-    timeSlots: Moment.Moment[]
-  ) {
+  function bars(timestamps: Date[], timeSlots: Moment.Moment[]) {
     const timeSlotTimestamps = timeSlots.map((timeSlot) => {
       return new Date(timeSlot).getTime();
     });

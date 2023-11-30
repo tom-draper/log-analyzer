@@ -11,9 +11,7 @@
     const tokenCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (const token in data.extraction[i].params) {
-        if (!(token in tokenCount)) {
-          tokenCount[token] = 0;
-        }
+        token in tokenCount || (tokenCount[token] = 0);
         tokenCount[token] += 1;
       }
     }
@@ -35,21 +33,18 @@
   }
 
   function sortedTokenDependencyCounts(data: Data) {
-    if (data.config.dependencies === undefined) return []
+    if (data.config.dependencies === undefined) return [];
 
     const tokenCount: Map<readonly [string, string], number> = new Map();
     for (const token in data.config.dependencies) {
       for (const dependentToken of data.config.dependencies[token]) {
         const key = [token, dependentToken] as const;
-
         for (let i = 0; i < data.extraction.length; i++) {
           if (
             token in data.extraction[i].params &&
             dependentToken in data.extraction[i].params
           ) {
-            if (!tokenCount.has(key))  {
-              tokenCount.set(key, 1);
-            }
+            tokenCount.has(key) || tokenCount.set(key, 0);
             tokenCount.set(key, (tokenCount.get(key) || 0) + 1);
           }
         }
@@ -74,9 +69,7 @@
     const dateCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (const [token, value] of Object.entries(data.extraction[i].params)) {
-        if (!(token in dateCount)) {
-          dateCount[token] = 0;
-        }
+        token in dateCount || (dateCount[token] = 0);
         if (value.type === "time") {
           dateCount[token] += 1;
         }
@@ -135,12 +128,8 @@
 
     for (let i = 0; i < data.extraction.length; i++) {
       for (let [token, params] of Object.entries(data.extraction[i].params)) {
-        if (!(token in dataTypes)) {
-          dataTypes[token] = {};
-        }
-        if (!(params.type in dataTypes[token])) {
-          dataTypes[token][params.type] = 0;
-        }
+        token in dataTypes || (dataTypes[token] = {});
+        params.type in dataTypes[token] || (dataTypes[token][params.type] = 0);
         dataTypes[token][params.type] += 1;
       }
     }
@@ -193,7 +182,7 @@
 </script>
 
 <main>
-  {#if tokenCounts != undefined}
+  {#if tokenCounts !== undefined}
     <div class="content">
       <div class="header">
         <div class="title">{data.extraction.length.toLocaleString()} lines</div>
@@ -220,7 +209,7 @@
         <Card
           {data}
           token={token.token}
-          dependentToken={token.dependentToken ? token.dependentToken : null}
+          dependentToken={token.dependentToken ?? null}
           lineCount={token.count}
           {timestampToken}
         />

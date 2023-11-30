@@ -10,9 +10,9 @@
     const pos = (sorted.length - 1) * q;
     const base = Math.floor(pos);
     const rest = pos - base;
-    if (sorted[base + 1] != undefined) {
+    if (sorted[base + 1] !== undefined) {
       return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
-    } else if (sorted[base] != undefined) {
+    } else if (sorted[base] !== undefined) {
       return sorted[base];
     }
     return 0;
@@ -42,7 +42,7 @@
   let statistics: Statistics;
   onMount(() => {
     const values = numericValues(data, token);
-    values.sort()
+    values.sort();
     if (values.length == 0) return;
     statistics = {
       median: values[Math.floor(values.length / 2)],

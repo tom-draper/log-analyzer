@@ -3,12 +3,12 @@
 
   function typeString(types: { [type: string]: number }) {
     let total = 0;
-    for (let count of Object.values(types)) {
+    for (const count of Object.values(types)) {
       total += count;
     }
 
     let string = "";
-    for (let [type, count] of Object.entries(types)) {
+    for (const [type, count] of Object.entries(types)) {
       string += type + ": " + count.toLocaleString() + ", ";
     }
     // Remove final comma and space
@@ -40,7 +40,7 @@
 
   function getExamples(dataTypes: DataTypes) {
     const examples: Examples = {};
-    for (let [token, types] of Object.entries(dataTypes)) {
+    for (const [token, types] of Object.entries(dataTypes)) {
       examples[token] = getDataTypeExamples(token, types);
     }
     return examples;

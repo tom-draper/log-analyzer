@@ -16,9 +16,7 @@
     timestampToken: string | null,
     timeSlots: Moment.Moment[]
   ) {
-    if (timestampToken === null) {
-      return {};
-    }
+    if (timestampToken === null) return {};
 
     const timeSlotTimestamps = timeSlots.map((timeSlot) => {
       return new Date(timeSlot).getTime();
@@ -27,7 +25,7 @@
     const days: ValueCounts = {};
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
-      if (!(token in params) || !(timestampToken in params)) continue;
+      if (token in params && timestampToken in params) continue;
 
       const timestamp = new Date(params[timestampToken].value).getTime();
 
@@ -47,9 +45,7 @@
       }
 
       const value = params[token].value;
-      if (!(value in days)) {
-        days[value] = Array(timeSlots.length).fill(0);
-      }
+      value in days || (days[value] = Array(timeSlots.length).fill(0));
 
       days[value][best.index] += 1;
     }
@@ -57,9 +53,7 @@
     return days;
   }
 
-  function sortedValueByTimeSlot(
-    valueByTimeSlot: ValueCounts
-  ) {
+  function sortedValueByTimeSlot(valueByTimeSlot: ValueCounts) {
     const sortedValues: SortableValueCount[] = [];
     for (let [value, counts] of Object.entries(valueByTimeSlot)) {
       const total = counts.reduce((partialSum, a) => partialSum + a, 0);
@@ -82,10 +76,7 @@
     return valueMax;
   }
 
-  function timestampRange(
-    data: Data,
-    timestampToken: string | null
-  ) {
+  function timestampRange(data: Data, timestampToken: string | null) {
     if (timestampToken === null) {
       return [null, null] as const;
     }

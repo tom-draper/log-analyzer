@@ -22,9 +22,7 @@
       const params = data.extraction[i].params;
       if (token in params && params[token].type === "ip") {
         const location = data.locations[params[token].value];
-        if (!(location in locationCount)) {
-          locationCount[location] = 0;
-        }
+        location in locationCount || (locationCount[location] = 0);
         locationCount[location] += 1;
       }
     }
@@ -34,7 +32,7 @@
   function unpackObject(obj: Object) {
     const locations: string[] = [];
     const z: number[] = [];
-    for (let [k, v] of Object.entries(obj)) {
+    for (const [k, v] of Object.entries(obj)) {
       locations.push(k);
       z.push(v);
     }
@@ -45,7 +43,7 @@
     const locationCount = getLocationCount(data);
     const [locations, z] = unpackObject(locationCount);
 
-    let d = [
+    const d = [
       {
         type: "choropleth",
         locations: locations,

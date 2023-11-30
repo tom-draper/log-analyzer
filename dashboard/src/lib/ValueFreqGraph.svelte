@@ -46,9 +46,7 @@
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
       if (token in params) {
-        if (!(params[token].value in freq)) {
-          freq[params[token].value] = 0;
-        }
+        (params[token].value in freq) || (freq[params[token].value] = 0);
         freq[params[token].value] += 1;
       }
     }
