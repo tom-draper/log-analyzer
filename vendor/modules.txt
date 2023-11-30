@@ -1,3 +1,5 @@
+# github.com/adrg/strutil v0.3.1
+## explicit; go 1.14
 # github.com/ajg/form v1.5.1
 ## explicit
 github.com/ajg/form

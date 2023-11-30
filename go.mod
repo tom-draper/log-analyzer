@@ -11,6 +11,7 @@ require internal/server v1.0.0
 require internal/location v1.0.0
 
 require (
+	github.com/adrg/strutil v0.3.1 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.10 // indirect
 	github.com/go-chi/render v1.0.3 // indirect
