@@ -40,7 +40,62 @@ func (e Edge) String() string {
 }
 
 func extractGroups(edges []Edge) []Group {
+	best := struct {
+		node        Node
+		totalWeight int
+	}{}
+	for _, edge := range edges {
+		node1Connections := GetNodeConnections(*edge.node1, edges)
+		if node1Connections > best.totalWeight {
+			best.totalWeight = node1Connections
+			best.node = *edge.node1
+		}
+		node2Connections := GetNodeConnections(*edge.node2, edges)
+		if node2Connections > best.totalWeight {
+			best.totalWeight = node2Connections
+			best.node = *edge.node2
+		}
+	}
+
+	seen := make(map[int]string)
+	extractNodeGroup(best.node, edges, seen, best.totalWeight)
+
 	return []Group{}
+}
+
+func extractNodeGroup(node Node, graph Graph, seen map[int]string, weight int) Group {
+	edges := GetNodeEdges(node, graph)
+	for _, edge := range edges {
+		// If node has not been visited yet and the edge will take us to a more similar string
+		if _, ok := seen[edge.node1.id]; !ok && edge.weight < weight {
+			seen[edge.node1.id] = edge.node1.value
+			extractNodeGroup(*edge.node2, graph, seen, edge.weight)
+		}
+		if _, ok := seen[edge.node2.id]; !ok && edge.weight < weight {
+			seen[edge.node2.id] = edge.node2.value
+			extractNodeGroup(*edge.node1, graph, seen, edge.weight)
+		}
+	}
+
+	//convert seen to group
+	group := Group{}
+	for id := range seen {
+		group.Members = append(group.Members, seen[id])
+	}
+	return group
+}
+
+func GetNode(id int, graph Graph) (Node, error) {
+	for _, edge := range graph {
+		if edge.node1.id == id {
+			return *edge.node1, nil
+		}
+		if edge.node2.id == id {
+			return *edge.node2, nil
+		}
+	}
+
+	return Node{}, fmt.Errorf("Node with id %d not found", id)
 }
 
 func GetNodes(graph Graph) []Node {
@@ -60,6 +115,17 @@ func GetNodes(graph Graph) []Node {
 	}
 
 	return nodesSlice
+}
+
+func GetNodeEdges(node Node, graph Graph) []Edge {
+	edges := make([]Edge, 0)
+	for _, edge := range graph {
+		if edge.node1.id == node.id || edge.node2.id == node.id {
+			edges = append(edges, edge)
+		}
+	}
+
+	return edges
 }
 
 func GetNodeConnections(node Node, graph Graph) int {
