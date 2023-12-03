@@ -19,6 +19,16 @@ func (n Node) String() string {
 	return fmt.Sprintf("[%d]%s", n.id, n.value)
 }
 
+type Graph []Edge
+
+func (g Graph) String() string {
+	s := ""
+	for _, edge := range g {
+		s += edge.String() + "\n"
+	}
+	return s
+}
+
 type Edge struct {
 	weight int
 	node1  *Node
