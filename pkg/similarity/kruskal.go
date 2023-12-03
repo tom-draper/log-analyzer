@@ -1,7 +1,6 @@
 package similarity
 
 import (
-	"fmt"
 	"sort"
 )
 
@@ -36,22 +35,22 @@ func Kruskal(v int, graph Graph) Graph {
 		x := findParent(parent, u.id)
 		y := findParent(parent, v.id)
 
-		if x != y {
-			e += 1
-			result = append(result, Edge{weight, u, v})
-			// Union of the two sets x and y
-			if rank[x] > rank[y] {
-				parent[y] = x
-			} else if rank[x] < rank[y] {
-				parent[x] = y
-			} else {
-				parent[x] = y
-				rank[y] += 1
-			}
+		if x == y {
+			continue
+		}
+
+		e += 1
+		result = append(result, Edge{weight, u, v})
+		// Union of the two sets x and y
+		if rank[x] > rank[y] {
+			parent[y] = x
+		} else if rank[x] < rank[y] {
+			parent[x] = y
+		} else {
+			parent[x] = y
+			rank[y] += 1
 		}
 	}
-
-	fmt.Println(graph.String())
 
 	return result
 }

@@ -68,6 +68,8 @@ func FindGroups(lines []string) []Group {
 	// Find minimum spanning tree
 	mst := Kruskal(len(nodes), edges)
 
+	fmt.Println(mst.String())
+
 	groups := extractGroups(mst)
 
 	return groups
