@@ -43,6 +43,35 @@ func extractGroups(edges []Edge) []Group {
 	return []Group{}
 }
 
+func GetNodes(graph Graph) []Node {
+	// Set of nodes
+	nodes := make(map[int]string)
+	for _, edge := range graph {
+		nodes[edge.node1.id] = edge.node1.value
+		nodes[edge.node2.id] = edge.node2.value
+	}
+
+	//convert to slice
+	nodesSlice := make([]Node, len(nodes))
+	i := 0
+	for id, value := range nodes {
+		nodesSlice[i] = Node{id, value}
+		i++
+	}
+
+	return nodesSlice
+}
+
+func GetNodeConnections(node Node, graph Graph) int {
+	totalWeight := 0
+	for _, edge := range graph {
+		if edge.node1.id == node.id || edge.node2.id == node.id {
+			totalWeight += edge.weight
+		}
+	}
+	return totalWeight
+}
+
 func FindGroups(lines []string) []Group {
 	// Create node for each line
 	nodes := make([]Node, len(lines))
