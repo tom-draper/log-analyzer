@@ -184,3 +184,13 @@ Once you have your patterns together, you can perform a test run by including th
 ```bash
 > ./main ./tests/data/logs/demo.log --test
 ```
+
+## Contributions
+
+Contributions, issues and feature requests are welcome.
+
+- Fork it (https://github.com/tom-draper/api-analytics)
+- Create your feature branch (`git checkout -b my-new-feature`)
+- Commit your changes (`git commit -am 'Add some feature'`)
+- Push to the branch (`git push origin my-new-feature`)
+- Create a new Pull Request
