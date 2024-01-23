@@ -97,7 +97,7 @@ Data types are inferred by default, but it may not always be possible to correct
 
 If a token value fails to be converted into the explicit data type specified by its prefix, the value is excluded from the dashboard instead of reverting to the default string type.
 
-Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can help you decide whether your patterns could benefit from explicit data types. 
+Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can be used to help you decide whether your patterns could benefit from explicit data types. 
 
 ### Wildcards
 
@@ -183,6 +183,30 @@ Once you have your patterns together, you can perform a test run by including th
 
 ```bash
 > ./main ./tests/data/logs/demo.log --test
+```
+
+## Parser
+
+The project can also be used without the dashboard, as a parser for your log files to extract values.
+
+```text
+go get "github.com/tom-draper/log-analyzer/pkg/parse"
+```
+
+```go
+import "github.com/tom-draper/log-analyzer/pkg/parse"
+
+config, err := parse.LoadConfig("./data/config.json")
+if err != nil {
+    panic(err)
+}
+
+extraction, err := parse.ParseFile("./data/test.log", &config)
+if err != nil {
+    panic(err)
+}
+
+parse.DisplayLines(extraction)
 ```
 
 ## Contributions
