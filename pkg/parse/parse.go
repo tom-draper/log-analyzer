@@ -230,6 +230,11 @@ func splitLines(text string) []string {
 // ParseFast is identical to Parse but run concurrently.
 func ParseFast(logtext string, config *Config) ([]Extraction, error) {
 	lines := splitLines(logtext)
+	return ParseLinesFast(lines, config)
+}
+
+// ParseLinesFast is identical to ParseLines but run concurrently.
+func ParseLinesFast(lines []string, config *Config) ([]Extraction, error) {
 	extraction := make([]Extraction, len(lines))
 	var wg sync.WaitGroup
 	for i, line := range lines {
@@ -255,6 +260,12 @@ func ParseFast(logtext string, config *Config) ([]Extraction, error) {
 // parameters from each line using the most appropriate pattern in the given config.
 func Parse(logtext string, config *Config) ([]Extraction, error) {
 	lines := splitLines(logtext)
+	return ParseLines(lines, config)
+}
+
+// ParseLines attempts to extract tokens parameters from each line using the 
+// most appropriate pattern in the given config.
+func ParseLines(lines []string, config *Config) ([]Extraction, error) {
 	extraction := make([]Extraction, len(lines))
 	for i, line := range lines {
 		params, patternUsed := parseLine(line, config)
@@ -279,7 +290,7 @@ func ParseFile(path string, config *Config) ([]Extraction, error) {
 	if err != nil {
 		return nil, err
 	}
-	extraction, err := ParseFast(string(body), config)
+	extraction, err := Parse(string(body), config)
 	if err != nil {
 		return nil, err
 	}
