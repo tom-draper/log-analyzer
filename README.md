@@ -90,7 +90,7 @@ Finally, your dashboard is generated.
 Dashboard running at http://localhost:3000/
 ```
 
-![dashboard](https://user-images.githubusercontent.com/41476809/279524886-acebc2a1-519b-42e5-a31e-043efb9d012c.png)
+![dashboard](https://github-production-user-asset-6210df.s3.amazonaws.com/41476809/299095717-850aee79-ef62-4248-82bd-1d97e23005ac.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240123%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240123T203739Z&X-Amz-Expires=300&X-Amz-Signature=4092ab91cffefcc78d6815085e7f8c8168ee92acf0da97b9455d0bf46744a078&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=0)
 
 ## Advanced Config
 
