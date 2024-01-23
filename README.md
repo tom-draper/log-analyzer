@@ -2,6 +2,9 @@
 
 Turn unstructured log files into a dashboard in seconds.
 
+![log analyzer](https://github-production-user-asset-6210df.s3.amazonaws.com/41476809/299078375-fd5fcd2e-9902-4349-acd7-6c94b2e1fbf1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240123%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240123T192458Z&X-Amz-Expires=300&X-Amz-Signature=f13c7596d324bdb8753c94ef9f8c8cfcef335bd537fd54e5fee978db0aa5d32f&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=0)
+
+
 ## Example
 
 An unstructured log file named `demo.log`:
