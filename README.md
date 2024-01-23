@@ -201,8 +201,7 @@ if err != nil {
     return nil, err
 }
 
-lines = strings.Split(strings.ReplaceAll(string(body), "\r\n", "\n"), "\n")
-groups := FindGroups(lines)
+groups := FindGroups(string(body))
 ```
 
 ## Parser
