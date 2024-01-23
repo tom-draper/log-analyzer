@@ -196,7 +196,7 @@ go get "github.com/tom-draper/log-analyzer/pkg/similarity"
 ```go
 import "github.com/tom-draper/log-analyzer/pkg/similarity"
 
-body, err := os.ReadFile("./data/test.log")
+body, err := os.ReadFile("./tests/data/logs/demo.log")
 if err != nil {
     return nil, err
 }
@@ -221,7 +221,7 @@ if err != nil {
     panic(err)
 }
 
-extraction, err := parse.ParseFile("./data/test.log", &config)
+extraction, err := parse.ParseFile("./tests/data/logs/demo.log", &config)
 if err != nil {
     panic(err)
 }
