@@ -17,7 +17,7 @@ An unstructured log file named `demo.log`:
 In `config/config.json`, define some simple patterns featured in your log files using a set of token values to control the extraction. These tokens can have any identifying name, and will be grouped across all patterns and targeted for extraction from the log file.
 
 - `patterns`: a list of string patterns found in your log file    
-- `tokens`: all unique tokens used across your patterns, representing the important values that should be targeted for extraction
+- `tokens`: all unique tokens used across your patterns, representing the values that should be targeted for extraction
 
 ```json
 {
