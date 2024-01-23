@@ -138,7 +138,16 @@ func GetNodeConnections(node Node, graph Graph) int {
 	return totalWeight
 }
 
-func FindGroups(lines []string) []Group {
+func splitLines(text string) []string {
+	return strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n")
+}
+
+func FindGroups(logtext string) []Group {
+	lines := splitLines(logtext)
+	return FindGroupsFromLines(lines)
+}
+
+func FindGroupsFromLines(lines []string) []Group {
 	// Create node for each line
 	nodes := make([]Node, len(lines))
 	for i, line := range lines {
