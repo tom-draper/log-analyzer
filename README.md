@@ -185,6 +185,26 @@ Once you have your patterns together, you can perform a test run by including th
 > ./main ./tests/data/logs/demo.log --test
 ```
 
+## Pattern Identification
+
+With larger, more complex log files, identifying the patterns to extract may be challenging. To help create these patterns, the similarity tool can be used to group the lines of a log file by similarity.
+
+```text
+go get "github.com/tom-draper/log-analyzer/pkg/similarity"
+```
+
+```go
+import "github.com/tom-draper/log-analyzer/pkg/similarity"
+
+body, err := os.ReadFile("./data/test.log")
+if err != nil {
+    return nil, err
+}
+
+lines = strings.Split(strings.ReplaceAll(string(body), "\r\n", "\n"), "\n")
+groups := FindGroups(lines)
+```
+
 ## Parser
 
 The project can also be used without the dashboard, as a parser for your log files to extract values.
@@ -196,7 +216,7 @@ go get "github.com/tom-draper/log-analyzer/pkg/parse"
 ```go
 import "github.com/tom-draper/log-analyzer/pkg/parse"
 
-config, err := parse.LoadConfig("./data/config.json")
+config, err := parse.LoadConfig("./config/config.json")
 if err != nil {
     panic(err)
 }
