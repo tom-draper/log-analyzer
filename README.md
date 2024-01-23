@@ -193,7 +193,7 @@ Once you have your patterns together, you can perform a test run by including th
 With larger, more complex log files, identifying the patterns to extract may be challenging. To help create these patterns, the similarity tool can be used to group the lines of a log file by similarity.
 
 ```text
-go get "github.com/tom-draper/log-analyzer/pkg/similarity"
+go get github.com/tom-draper/log-analyzer/pkg/similarity
 ```
 
 ```go
@@ -203,8 +203,9 @@ body, err := os.ReadFile("./tests/data/logs/demo.log")
 if err != nil {
     return nil, err
 }
+logtext := string(body)
 
-groups := FindGroups(string(body))
+groups := FindGroups(logtext)
 ```
 
 ## Parser
@@ -212,7 +213,7 @@ groups := FindGroups(string(body))
 The project can also be used without the dashboard, as a parser for your log files to extract values.
 
 ```text
-go get "github.com/tom-draper/log-analyzer/pkg/parse"
+go get github.com/tom-draper/log-analyzer/pkg/parse
 ```
 
 ```go
