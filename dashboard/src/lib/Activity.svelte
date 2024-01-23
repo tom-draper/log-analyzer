@@ -66,7 +66,8 @@
           y: y,
           type: "bar",
           marker: {
-            color: "#0070f3",
+            // color: "#0070f3",
+            color: '#e2b269'
           },
         },
       ],

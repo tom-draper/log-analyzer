@@ -185,7 +185,10 @@
   {#if tokenCounts !== undefined}
     <div class="content">
       <div class="header">
-        <div class="title">{data.extraction.length.toLocaleString()} lines</div>
+        <div class="title">
+          <div class="logo">Log Analyzer</div>
+          <div class="line-count">{data.extraction.length.toLocaleString()} lines</div>
+        </div>
         <div class="notifications">
           {#if Object.keys(multiTypeTokens).length >= 1}
             <button on:click={scrollToBottom} class="warning"
@@ -227,6 +230,14 @@
 
   .title {
     margin: 0 0 20px;
+    font-family: Poppins;
+  }
+  .logo {
+    margin-bottom: 0.2em;
+  }
+  .line-count {
+    font-size: 1.4rem;
+    color: #888
   }
   .header {
     font-size: 2em;

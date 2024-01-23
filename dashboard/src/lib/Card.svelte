@@ -37,15 +37,21 @@
 <style scoped>
   .header {
     margin-bottom: 20px;
-    color: white;
+    /* color: ; */
     display: flex;
   }
   .line-count {
     margin-left: auto;
     color: #888;
   }
+  .title,
+  .line-count {
+    font-family: Poppins;
+    font-weight: 500;
+  }
   .card {
     border: 1px solid #ffffff24;
+    border: 1px solid rgb(42, 42, 42);
     border-radius: 5px;
     margin: 3em 0;
     padding: 3rem;

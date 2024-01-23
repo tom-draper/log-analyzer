@@ -83,6 +83,7 @@
 <style scoped>
   .container {
     border: 1px solid #ffffff24;
+    border: 1px solid rgb(42,42,42);
     border-radius: 5px;
     margin: 3em 0 2em;
     padding: 2rem;
@@ -93,6 +94,7 @@
     font-size: 1.6em;
     display: grid;
     place-items: center;
+    font-family: Poppins;
   }
   .value {
     font-weight: 600;

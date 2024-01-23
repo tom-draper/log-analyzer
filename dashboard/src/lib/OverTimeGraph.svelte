@@ -160,7 +160,8 @@
     flex: 1;
     margin: 0 1px;
     border-radius: 2px;
-    background: #0070f3;
+    /* background: #0070f3; */
+    background: #e2b269;
   }
   .value-name {
     font-size: 0.85em;

@@ -162,6 +162,7 @@
   }
   .bar {
     background: #0070f3;
+    background: #e2b269;
     border-radius: 4px;
     margin: 5px 0;
     padding: 1px 10px;

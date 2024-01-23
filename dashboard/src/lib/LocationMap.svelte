@@ -51,8 +51,10 @@
         text: locations,
         locationmode: "country names",
         colorscale: [
-          [0, "#0070f3"],
-          [0.4, "#0070f3"],
+          // [0, "#0070f3"],
+          [0, "#e2b269"],
+          [0.4, "#e2b269"],
+          // [0.4, "#0070f3"],
           [1, "#111111"],
         ],
         autocolorscale: false,
