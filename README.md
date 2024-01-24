@@ -235,7 +235,7 @@ parse.DisplayLines(extraction)
 
 Contributions, issues and feature requests are welcome.
 
-- Fork it (https://github.com/tom-draper/api-analytics)
+- Fork it (https://github.com/tom-draper/log-analyzer)
 - Create your feature branch (`git checkout -b my-new-feature`)
 - Commit your changes (`git commit -am 'Add some feature'`)
 - Push to the branch (`git push origin my-new-feature`)
