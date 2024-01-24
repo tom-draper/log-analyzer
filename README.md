@@ -187,7 +187,9 @@ Once you have your patterns together, you can perform a test run by including th
 > ./main ./tests/data/logs/demo.log --test
 ```
 
-## Pattern Identification
+## Additional Tools
+
+### Pattern Identification
 
 With larger, more complex log files, identifying the patterns to extract may be challenging. To help create these patterns, the similarity tool can be used to group the lines of a log file by similarity.
 
@@ -207,7 +209,7 @@ logtext := string(body)
 groups := FindGroups(logtext)
 ```
 
-## Parser
+### Parser
 
 The project can also be used without the dashboard, as a parser for your log files to extract values.
 
