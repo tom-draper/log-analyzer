@@ -2,6 +2,7 @@ package similarity
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/adrg/strutil/metrics"
 )
