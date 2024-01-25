@@ -21,7 +21,9 @@
   function numericValues(data: Data, token: string) {
     const values: number[] = [];
     for (let i = 0; i < data.extraction.length; i++) {
-      if (!(token in data.extraction[i].params)) continue;
+      if (!(token in data.extraction[i].params)) {
+        continue;
+      }
       const value = data.extraction[i].params[token].value;
       if (typeof value === "number") {
         values.push(value);

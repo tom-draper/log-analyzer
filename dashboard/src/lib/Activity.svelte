@@ -9,7 +9,9 @@
   function timestampValues(data: Data) {
     const values: Date[] = [];
     for (let i = 0; i < data.extraction.length; i++) {
-      if (!(token in data.extraction[i].params)) continue;
+      if (!(token in data.extraction[i].params)) {
+        continue;
+      }
       const value = data.extraction[i].params[token].value;
       values.push(new Date(value));
     }
@@ -67,7 +69,7 @@
           type: "bar",
           marker: {
             // color: "#0070f3",
-            color: '#e2b269'
+            color: 'rgb(226, 174, 31)'
           },
         },
       ],

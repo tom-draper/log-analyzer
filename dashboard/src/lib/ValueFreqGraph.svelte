@@ -5,7 +5,7 @@
 
   function sortedBars(freq: ValueCount) {
     let sortedFreq: Bar[] = [];
-    for (let [token, count] of Object.entries(freq)) {
+    for (const [token, count] of Object.entries(freq)) {
       sortedFreq.push({ token, count, width: 0 });
     }
 
@@ -46,7 +46,7 @@
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
       if (token in params) {
-        (params[token].value in freq) || (freq[params[token].value] = 0);
+        freq[params[token].value] ||= 0;
         freq[params[token].value] += 1;
       }
     }
@@ -55,7 +55,7 @@
   }
 
   const numBars = 10;
-  let bars: Bar[];
+  let bars: Bar[] = [];
   function setBars(freq: ValueCount) {
     bars = sortedBars(freq);
   }
@@ -68,7 +68,7 @@
   export let data: Data, token: string;
 </script>
 
-{#if bars !== undefined}
+{#if bars.length > 0}
   <div class="freq-graph">
     {#each bars as bar}
       <div class="token-frequency" title={bar.count.toLocaleString()}>
@@ -87,7 +87,7 @@
   }
   .bar {
     background: #0070f3;
-    background: #e2b269;
+    background: var(--highlight);
     color: #555;
     
     border-radius: 4px;

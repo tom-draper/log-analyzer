@@ -16,7 +16,9 @@
     timestampToken: string | null,
     timeSlots: Moment.Moment[]
   ) {
-    if (timestampToken === null) return {};
+    if (timestampToken === null) {
+      return {};
+    }
 
     const timeSlotTimestamps = timeSlots.map((timeSlot) => {
       return new Date(timeSlot).getTime();
@@ -25,7 +27,10 @@
     const days: ValueCounts = {};
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
-      if (token in params && timestampToken in params) continue;
+      // if (token in params && timestampToken in params) continue;
+      if (!(token in params)) {
+        continue;
+      }
 
       const timestamp = new Date(params[timestampToken].value).getTime();
 
@@ -45,7 +50,7 @@
       }
 
       const value = params[token].value;
-      value in days || (days[value] = Array(timeSlots.length).fill(0));
+      days[value] ||= Array(timeSlots.length).fill(0);
 
       days[value][best.index] += 1;
     }
@@ -86,7 +91,9 @@
 
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
-      if (!(timestampToken in params)) continue;
+      if (!(timestampToken in params)) {
+        continue;
+      }
       const timestamp = new Date(params[timestampToken].value);
       if (timestamp > maxDate) {
         maxDate = timestamp;
@@ -161,7 +168,7 @@
     margin: 0 1px;
     border-radius: 2px;
     /* background: #0070f3; */
-    background: #e2b269;
+    background: var(--highlight);
   }
   .value-name {
     font-size: 0.85em;
@@ -173,6 +180,7 @@
     display: flex;
     font-size: 0.75em;
     color: #a1a1a1;
+    color: rgb(68, 68, 68);
   }
   .time {
     flex: 1;

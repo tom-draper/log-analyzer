@@ -12,6 +12,12 @@
   color: #e8e8e8;
   background-color: #000000;
   background-color: #101010;
+  --text: #e8e8e8;
+  --background: #101010;
+  --highlight: #e2b269;
+  --highlight: #f5d8ac;
+  --highlight: rgb(226, 174, 31);
+  /* --highlight: #fce2bb; */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -19,7 +25,6 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
-
 
 a {
   font-weight: 500;

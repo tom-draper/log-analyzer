@@ -21,7 +21,7 @@
           for (const [dependentTokenValue, count] of Object.entries(
             dependentTokenValueCounts
           )) {
-            tokenValue in sortedFreq || (sortedFreq[tokenValue] = []);
+            sortedFreq[tokenValue] ||= []
             sortedFreq[tokenValue].push({
               dependentTokenValue,
               count,
@@ -60,10 +60,10 @@
 
     const tokenBarsCounts: { [token: string]: number } = {};
     for (const token in sortedFreq) {
-      let tokenBarsTotal = 0;
-      for (const bar of sortedFreq[token]) {
-        tokenBarsTotal += bar.count;
-      }
+      const tokenBarsTotal = sortedFreq[token].reduce(
+        (total, bar) => total + bar.count,
+        0
+      );
       tokenBarsCounts[token] = tokenBarsTotal;
     }
 
@@ -75,16 +75,14 @@
     }
 
     bars.sort((tokenBars1, tokenBars2) => {
-      let aTotal = 0;
-      for (const token in tokenBars1) {
-        aTotal += tokenBarsCounts[token];
-      }
-
-      let bTotal = 0;
-      for (const token in tokenBars2) {
-        bTotal += tokenBarsCounts[token];
-      }
-
+      const aTotal = Object.keys(tokenBars1).reduce(
+        (total, token) => total + tokenBarsCounts[token],
+        0
+      );
+      const bTotal = Object.keys(tokenBars2).reduce(
+        (total, token) => total + tokenBarsCounts[token],
+        0
+      );
       return bTotal - aTotal;
     });
 
@@ -102,15 +100,12 @@
         token in data.extraction[i].params &&
         dependentToken in data.extraction[i].params
       ) {
-        token in freq || (freq[token] = {});
-        dependentToken in freq[token] || (freq[token][dependentToken] = {});
         const tokenValue = data.extraction[i].params[token].value;
-        tokenValue in freq[token][dependentToken] ||
-          (freq[token][dependentToken][tokenValue] = {});
-        const dependentTokenValue =
-          data.extraction[i].params[dependentToken].value;
-        dependentTokenValue in freq[token][dependentToken][tokenValue] ||
-          (freq[token][dependentToken][tokenValue][dependentTokenValue] = 0);
+        const dependentTokenValue = data.extraction[i].params[dependentToken].value;
+        freq[token] ||= {};
+        freq[token][dependentToken] ||= {};
+        freq[token][dependentToken][tokenValue] ||= {};
+        freq[token][dependentToken][tokenValue][dependentTokenValue] ||= 0;
         freq[token][dependentToken][tokenValue][dependentTokenValue] += 1;
       }
     }
@@ -134,7 +129,7 @@
   export let data: Data, token: string, dependentToken: string;
 </script>
 
-{#if bars !== undefined}
+{#if bars.length > 0}
   <div class="freq-graph">
     {#each bars.slice(0, 10) as group}
       {#each Object.keys(group) as tokenValue}
@@ -162,7 +157,7 @@
   }
   .bar {
     background: #0070f3;
-    background: #e2b269;
+    background: var(--highlight);
     border-radius: 4px;
     margin: 5px 0;
     padding: 1px 10px;
@@ -170,6 +165,7 @@
     font-weight: 500;
     text-wrap: nowrap;
     box-sizing: border-box;
+    color: #555;
   }
   .token-frequency {
     position: relative;

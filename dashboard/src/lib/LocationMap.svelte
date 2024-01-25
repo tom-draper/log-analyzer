@@ -22,7 +22,7 @@
       const params = data.extraction[i].params;
       if (token in params && params[token].type === "ip") {
         const location = data.locations[params[token].value];
-        location in locationCount || (locationCount[location] = 0);
+        locationCount[location] ||= 0
         locationCount[location] += 1;
       }
     }
@@ -51,10 +51,8 @@
         text: locations,
         locationmode: "country names",
         colorscale: [
-          // [0, "#0070f3"],
-          [0, "#e2b269"],
-          [0.4, "#e2b269"],
-          // [0.4, "#0070f3"],
+          [0, "rgb(226, 174, 31)"],
+          [0.4, "rgb(226, 174, 31)"],
           [1, "#111111"],
         ],
         autocolorscale: false,

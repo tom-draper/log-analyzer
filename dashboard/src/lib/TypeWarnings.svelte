@@ -2,11 +2,6 @@
   import { onMount } from "svelte";
 
   function typeString(types: { [type: string]: number }) {
-    let total = 0;
-    for (const count of Object.values(types)) {
-      total += count;
-    }
-
     let string = "";
     for (const [type, count] of Object.entries(types)) {
       string += type + ": " + count.toLocaleString() + ", ";
@@ -25,9 +20,13 @@
   ) {
     const examples: Example = {};
     for (const type in types) {
-      if (type in examples) continue;
+      if (type in examples) {
+        continue
+      }
       for (const e of data.extraction) {
-        if (!(token in e.params) || (e.params[token].type != type)) continue;
+        if (!(token in e.params) || (e.params[token].type != type)) {
+          continue;
+        }
         examples[e.params[token].type] = {
           line: e.line,
           pattern: e.pattern,
