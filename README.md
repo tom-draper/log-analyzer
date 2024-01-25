@@ -179,6 +179,10 @@ Some tokens with a numeric value may be equivalent to other tokens after perform
 
 You can specify a path to the config file containing your patterns following the `-c` or `--config` flag. The config path defaults to `./config/config.json`
 
+```bash
+> ./main -c ./tests/data/configs/config.json ./tests/data/logs/demo.log
+```
+
 ### Config Test
 
 Once you have your patterns together, you can perform a test run by including the `-t` or `--test` flag and the extracted result of each line will be written to json file in the current directory.
