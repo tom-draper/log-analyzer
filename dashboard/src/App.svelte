@@ -186,7 +186,11 @@
     <div class="content">
       <div class="header">
         <div class="title">
-          <div class="logo">Log Analyzer</div>
+          <!-- <img src="./logo.png" style="width: 10em;"/> -->
+          <div class="logo-container">
+            <div class="logo">Log Analyzer</div>
+            <img alt="" src="./icon.png" />
+          </div>
           <div class="line-count">{data.extraction.length.toLocaleString()} lines</div>
         </div>
         <div class="notifications">
@@ -232,12 +236,21 @@
     margin: 0 0 20px;
     font-family: Poppins;
   }
+  .logo-container {
+    display: flex;
+    align-items: center;
+  }
+  .logo-container>img {
+    margin-left: 0.5em;
+    width: 1.25em;
+  }
   .logo {
-    margin-bottom: 0.2em;
+    font-weight: 600;
   }
   .line-count {
     font-size: 1.4rem;
-    color: #888
+    color: #888;
+    margin-top: 0.5em;
   }
   .header {
     font-size: 2em;
