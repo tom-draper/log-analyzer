@@ -35,7 +35,7 @@
           type: "bar",
           marker: {
             // color: "#0070f3",
-            color: 'rgb(226, 174, 31)'
+            color: '#ffdfaf'
           },
         },
       ],

@@ -88,7 +88,7 @@
   .bar {
     background: #0070f3;
     background: var(--highlight);
-    color: #555;
+    color: #444;
     
     border-radius: 4px;
     margin: 5px 0;

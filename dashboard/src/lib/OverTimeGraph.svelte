@@ -112,7 +112,9 @@
   let timeSlots: Moment.Moment[];
   onMount(() => {
     const [minDate, maxDate] = timestampRange(data, timestampToken);
-    if (minDate === null || maxDate === null) return;
+    if (minDate === null || maxDate === null) {
+      return;
+    }
     const dateRange = moment.range(minDate, maxDate);
     timeSlots = Array.from(dateRange.by("minutes", { step: 50 }));
 
@@ -136,7 +138,7 @@
               valueCounts[value.value][i]
             } occurances`}
             style={valueCounts[value.value][i] == 0
-              ? `background: #111`
+              ? `background: #101010`
               : `opacity: ${
                   (valueCounts[value.value][i] / valueMax[value.value]) * 100
                 }%`}
@@ -174,6 +176,7 @@
     font-size: 0.85em;
     margin-top: 8px;
     text-wrap: nowrap;
+    color: #888;
   }
 
   .time-range {

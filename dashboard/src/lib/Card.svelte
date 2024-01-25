@@ -17,7 +17,11 @@
 <div class="card">
   <div class="header">
     <div class="title">
-      {dependentToken ? `${token} & ${dependentToken}` : token}
+      {#if dependentToken}
+        {token} & {dependentToken}
+      {:else}
+        {token}
+      {/if}
     </div>
     <div class="line-count">{lineCount.toLocaleString()} lines</div>
   </div>

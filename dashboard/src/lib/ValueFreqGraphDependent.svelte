@@ -165,7 +165,7 @@
     font-weight: 500;
     text-wrap: nowrap;
     box-sizing: border-box;
-    color: #555;
+    color: #444;
   }
   .token-frequency {
     position: relative;
@@ -174,5 +174,6 @@
     font-size: 0.85em;
     margin-top: 5px;
     margin-bottom: -2px;
+  color: #888
   }
 </style>

@@ -1,9 +1,11 @@
 <script lang="ts">
   import demo from "./assets/demo/demo.json";
   import { onMount } from "svelte";
+  import Header from "./lib/Header.svelte";
   import Card from "./lib/Card.svelte";
   import Failed from "./lib/Failed.svelte";
   import TypeWarnings from "./lib/TypeWarnings.svelte";
+  import Footer from "./lib/Footer.svelte";
 
   type TokenCount = { token: string; dependentToken?: string; count: number };
 
@@ -11,7 +13,7 @@
     const tokenCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (const token in data.extraction[i].params) {
-        token in tokenCount || (tokenCount[token] = 0);
+        tokenCount[token] ||= 0
         tokenCount[token] += 1;
       }
     }
@@ -33,7 +35,9 @@
   }
 
   function sortedTokenDependencyCounts(data: Data) {
-    if (data.config.dependencies === undefined) return [];
+    if (data.config.dependencies === undefined) {
+      return [];
+    }
 
     const tokenCount: Map<readonly [string, string], number> = new Map();
     for (const token in data.config.dependencies) {
@@ -45,7 +49,7 @@
             dependentToken in data.extraction[i].params
           ) {
             tokenCount.has(key) || tokenCount.set(key, 0);
-            tokenCount.set(key, (tokenCount.get(key) || 0) + 1);
+            tokenCount.set(key, (tokenCount.get(key) ?? 0) + 1);
           }
         }
       }
@@ -58,7 +62,9 @@
 
     tokens.sort((a, b) => {
       // Force timestamp token to top of list
-      if (a.token === timestampToken) return Number.MIN_SAFE_INTEGER;
+      if (a.token === timestampToken) {
+        return Number.MIN_SAFE_INTEGER;
+      }
       return b.count - a.count;
     });
 
@@ -69,7 +75,7 @@
     const dateCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (const [token, value] of Object.entries(data.extraction[i].params)) {
-        token in dateCount || (dateCount[token] = 0);
+        dateCount[token] ||= 0
         if (value.type === "time") {
           dateCount[token] += 1;
         }
@@ -104,9 +110,13 @@
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
       for (let [token, conversion] of Object.entries(data.config.conversions)) {
-        if (!(token in params) || typeof params[token] !== "number") continue;
+        if (!(token in params) || typeof params[token] !== "number") {
+          continue;
+        }
         const value = params[token];
-        if (typeof value !== "number") continue;
+        if (typeof value !== "number") {
+          continue;
+        }
         params[conversion.token].value = conversion.multiplier * value;
         delete params[token];
       }
@@ -127,9 +137,9 @@
     const dataTypes: DataTypes = {};
 
     for (let i = 0; i < data.extraction.length; i++) {
-      for (let [token, params] of Object.entries(data.extraction[i].params)) {
-        token in dataTypes || (dataTypes[token] = {});
-        params.type in dataTypes[token] || (dataTypes[token][params.type] = 0);
+      for (const [token, params] of Object.entries(data.extraction[i].params)) {
+        dataTypes[token] ||= {};
+        dataTypes[token][params.type] ||= 0;
         dataTypes[token][params.type] += 1;
       }
     }
@@ -139,16 +149,12 @@
 
   function getMultiTypeTokens(dataTypes: DataTypes) {
     const multiTypes: DataTypes = {};
-    for (let [token, types] of Object.entries(dataTypes)) {
+    for (const [token, types] of Object.entries(dataTypes)) {
       if (Object.keys(types).length > 1) {
         multiTypes[token] = types;
       }
     }
     return multiTypes;
-  }
-
-  function scrollToBottom() {
-    window.scrollTo(0, document.body.scrollHeight);
   }
 
   let data: Data;
@@ -184,34 +190,7 @@
 <main>
   {#if tokenCounts !== undefined}
     <div class="content">
-      <div class="header">
-        <div class="title">
-          <!-- <img src="./logo.png" style="width: 10em;"/> -->
-          <div class="logo-container">
-            <div class="logo">Log Analyzer</div>
-            <img alt="" src="./icon.png" />
-          </div>
-          <div class="line-count">{data.extraction.length.toLocaleString()} lines</div>
-        </div>
-        <div class="notifications">
-          {#if Object.keys(multiTypeTokens).length >= 1}
-            <button on:click={scrollToBottom} class="warning"
-              >{Object.keys(multiTypeTokens).length}
-              {Object.keys(multiTypeTokens).length == 1
-                ? "warning"
-                : "warnings"}</button
-            >
-          {/if}
-          {#if Object.keys(failedLines).length >= 1}
-            <button on:click={scrollToBottom} class="error"
-              >{Object.keys(failedLines).length}
-              {Object.keys(failedLines).length == 1
-                ? "error"
-                : "errors"}</button
-            >
-          {/if}
-        </div>
-      </div>
+      <Header {failedLines} {multiTypeTokens} lineCount={data.extraction.length} />
       {#each tokenCounts as token}
         <Card
           {data}
@@ -223,61 +202,14 @@
       {/each}
       <TypeWarnings {data} multiTypes={multiTypeTokens} />
       <Failed {failedLines} />
+      <Footer />
     </div>
   {/if}
 </main>
 
 <style>
   .content {
-    margin: 4em;
-  }
-
-  .title {
-    margin: 0 0 20px;
-    font-family: Poppins;
-  }
-  .logo-container {
-    display: flex;
-    align-items: center;
-  }
-  .logo-container>img {
-    margin-left: 0.5em;
-    width: 1.25em;
-  }
-  .logo {
-    font-weight: 600;
-  }
-  .line-count {
-    font-size: 1.4rem;
-    color: #888;
-    margin-top: 0.5em;
-  }
-  .header {
-    font-size: 2em;
-    font-weight: 500;
-    display: flex;
-  }
-
-  .notifications {
-    margin-left: auto;
-  }
-  button {
-    padding: 5px 10px;
-    border-radius: 3px;
-    height: min-content;
-    font-size: 0.9rem;
-    outline: none;
-  }
-
-  .error {
-    background: #271515;
-    color: #dd7178;
-    border: 1px solid #dd71787d;
-  }
-  .warning {
-    background: #5e4c1589;
-    color: #ddd871;
-    border: 1px solid #ddd8717d;
+    margin: 4em 4em 2em 4em;
   }
 
   @media screen and (max-width: 800px) {

@@ -51,9 +51,9 @@
         text: locations,
         locationmode: "country names",
         colorscale: [
-          [0, "rgb(226, 174, 31)"],
-          [0.4, "rgb(226, 174, 31)"],
-          [1, "#111111"],
+          [0, "#ffdfaf"],
+          [0.4, "#ffdfaf"],
+          [1, "#101010"],
         ],
         autocolorscale: false,
         reversescale: true,
