@@ -90,7 +90,7 @@ var demoLines = [][]string{
 
 func TestFindGroups(t *testing.T) {
 	for _, lines := range demoLines {
-		groups := FindGroups(lines)
+		groups := FindGroupsFromLines(lines)
 		fmt.Println(groups)
 	}
 }

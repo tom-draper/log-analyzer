@@ -215,6 +215,10 @@ var profiles = []Profile{
 		},
 		logpath: logPath("loghub/Apache.log"),
 	},
+	{
+		config:  loadConfig("multiline.json"),
+		logpath: logPath("multiline.log"),
+	},
 }
 
 func loadConfig(file string) Config {

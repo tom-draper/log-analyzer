@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -67,6 +68,10 @@ func tryPattern(line string, pattern string, tokens []string) map[string]Param {
 	// with one wildcard char
 	regEx = strings.ReplaceAll(regEx, "*", "_")
 	tokens = append(tokens, "_")
+	// Sort tokens to try largest first and avoid matching substrings
+	sort.Slice(tokens, func(i, j int) bool {
+		return len(tokens[i]) > len(tokens[j])
+	})
 	for _, token := range tokens {
 		// Encode token value to create temporary token ID as hex as any
 		// brackets in token may break regex
@@ -177,22 +182,24 @@ func calcExtractionRank(params map[string]Param, patternTokenCounts int) float64
 	return rank
 }
 
+type PatternRank struct {
+	rank   float64
+	params map[string]Param
+}
+
 // parseLine extracts token parameters from each line using the most appropriate
 // pattern in the given config.
-func parseLine(line string, config *Config) (map[string]Param, string) {
+func parseLineOld(line string, config *Config) (map[string]Param, string) {
 	// Attempt to parse the line against each pattern in config, only taking the best
 	var patternUsed string
-	best := struct {
-		rank   float64
-		params map[string]Param
-	}{
+	best := PatternRank{
 		rank:   0.0,
 		params: make(map[string]Param),
 	}
 	multiSpaceRegEx := regexp.MustCompile(`[ ]{2,}`)
 	for _, pattern := range config.Patterns {
 		// If pattern containing no tokens is a plain text match for line
-		// Ensure usage of this pattern is recorded
+		// Ensure usage of this pattern is recorded even if rank may not be best
 		patternTokenCounts := tokenCounts(pattern, config.Tokens)
 		if line == pattern && patternTokenCounts == 0 {
 			patternUsed = pattern
@@ -223,6 +230,117 @@ func parseLine(line string, config *Config) (map[string]Param, string) {
 	return best.params, patternUsed
 }
 
+func parseLine(lines []string, index int, config *Config) (map[string]Param, string) {
+	// Attempt to parse the line against each pattern in config, only taking the best
+	var patternUsed string
+	best := PatternRank{
+		rank:   0.0,
+		params: make(map[string]Param),
+	}
+	line := lines[index]
+	for _, pattern := range config.Patterns {
+		lineCount := patternLineCount(pattern)
+		// If not enough lines remaining for multi-line pattern
+		if lineCount > 1 && index+lineCount > len(lines) {
+			continue
+		}
+
+		var snippet string
+		if lineCount == 1 {
+			snippet = line
+		} else {
+			snippet = strings.Join(lines[index:min(len(lines)+1, index+lineCount)], "\n")
+		}
+		// If pattern contains no tokens is a perfect match for line,
+		// ensure usage of this pattern is recorded even if rank would be zero
+		// due to lack of tokens to base rank on
+		patternTokenCounts := tokenCounts(pattern, config.Tokens)
+		if snippet == pattern && patternTokenCounts == 0 {
+			patternUsed = pattern // Force line to take this pattern
+			break
+		}
+
+		// Measure how well this pattern fits the line(s)
+		var lineRank PatternRank
+		if lineCount == 1 {
+			lineRank = parseSingleLine(line, pattern, config)
+		} else {
+			lineRank = parseMultiLine(lines, index, pattern, config)
+		}
+		// Record if this pattern is better than others seen so far
+		if lineRank.rank > best.rank {
+			best.rank = lineRank.rank
+			best.params = lineRank.params
+			patternUsed = pattern
+		}
+	}
+
+	return best.params, patternUsed
+}
+
+func parseSingleLine(line string, pattern string, config *Config) PatternRank {
+	multiSpaceRegEx := regexp.MustCompile(`[ ]{2,}`)
+	lineRank := PatternRank{
+		rank:   0.0,
+		params: make(map[string]Param),
+	}
+
+	// If pattern containing no tokens is a plain text match for line
+	// Ensure usage of this pattern is recorded
+	patternTokenCounts := tokenCounts(pattern, config.Tokens)
+	params := tryPattern(line, pattern, config.Tokens)
+	rank := calcExtractionRank(params, patternTokenCounts)
+	if rank > lineRank.rank {
+		lineRank.rank = rank
+		lineRank.params = params
+	}
+
+	// Try pattern again after eliminating multi-spaces and tab characters
+	if multiSpaceRegEx.MatchString(line) {
+		singleSpaceLine := multiSpaceRegEx.ReplaceAllString(strings.ReplaceAll(line, "\t", " "), " ")
+		singleSpacePattern := multiSpaceRegEx.ReplaceAllString(strings.ReplaceAll(pattern, "\t", " "), " ")
+		params = tryPattern(singleSpaceLine, singleSpacePattern, config.Tokens)
+		rank := calcExtractionRank(params, patternTokenCounts)
+		if rank > lineRank.rank {
+			lineRank.rank = rank
+			lineRank.params = params
+		}
+	}
+
+	return lineRank
+}
+
+func parseMultiLine(lines []string, index int, pattern string, config *Config) PatternRank {
+	patternLines := splitLines(pattern)
+	lineRanks := make([]PatternRank, len(patternLines))
+	for i, patternLine := range patternLines {
+		line := lines[index+i]
+		lineBest := parseSingleLine(line, patternLine, config)
+		lineRanks[i] = lineBest
+	}
+
+	return avgRank(lineRanks)
+}
+
+func avgRank(ranks []PatternRank) PatternRank {
+	var avg PatternRank = PatternRank{
+		rank:   0.0,
+		params: make(map[string]Param),
+	}
+	for _, rank := range ranks {
+		avg.rank += rank.rank
+		for k, v := range rank.params {
+			avg.params[k] = v
+		}
+	}
+	avg.rank = avg.rank / float64(len(ranks))
+	return avg
+}
+
+func patternLineCount(pattern string) int {
+	return strings.Count(pattern, "\n") + 1
+}
+
 func splitLines(text string) []string {
 	return strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n")
 }
@@ -241,7 +359,7 @@ func ParseLinesFast(lines []string, config *Config) ([]Extraction, error) {
 		wg.Add(1)
 		go func(line string, extraction []Extraction, config *Config, lineIdx int, wg *sync.WaitGroup) {
 			defer wg.Done()
-			params, patternUsed := parseLine(line, config)
+			params, patternUsed := parseLineOld(line, config)
 			if patternUsed == "" {
 				log.Printf("no pattern matched line %d: \"%s\"\n", lineIdx+1, line)
 			}
@@ -263,12 +381,17 @@ func Parse(logtext string, config *Config) ([]Extraction, error) {
 	return ParseLines(lines, config)
 }
 
-// ParseLines attempts to extract tokens parameters from each line using the 
+// ParseLines attempts to extract tokens parameters from each line using the
 // most appropriate pattern in the given config.
 func ParseLines(lines []string, config *Config) ([]Extraction, error) {
 	extraction := make([]Extraction, len(lines))
+	var skipLines int
 	for i, line := range lines {
-		params, patternUsed := parseLine(line, config)
+		if skipLines > 0 {
+			skipLines--
+			continue
+		}
+		params, patternUsed := parseLine(lines, i, config)
 		if patternUsed == "" {
 			log.Printf("no pattern matched line %d: \"%s\"\n", i+1, line)
 		}
@@ -278,6 +401,8 @@ func ParseLines(lines []string, config *Config) ([]Extraction, error) {
 			LineNumber: i,
 			Line:       line,
 		}
+		// If patten used was multi-line, skip the next lines
+		skipLines = patternLineCount(patternUsed) - 1
 	}
 	return extraction, nil
 }
@@ -366,7 +491,7 @@ func ParseFileTest(path string, config *Config) ([]Extraction, error) {
 		return nil, err
 	}
 
-	writeConfigTest(extractions)
+	// writeConfigTest(extractions)
 	return extractions, nil
 }
 
@@ -390,6 +515,6 @@ func ParseFilesTest(paths []string, config *Config) ([]Extraction, error) {
 		return nil, errors.New("unable to read log file path provided")
 	}
 
-	writeConfigTest(extractions)
+	// writeConfigTest(extractions)
 	return extractions, nil
 }
