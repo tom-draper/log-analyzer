@@ -361,7 +361,7 @@ func ParseLinesFast(lines []string, config *Config) ([]Extraction, error) {
 		wg.Add(1)
 		go func(line string, extraction []Extraction, config *Config, lineIdx int, wg *sync.WaitGroup) {
 			defer wg.Done()
-			params, patternUsed := parseLineOld(line, config)
+			params, patternUsed := parseLineSingle(line, config)
 			if patternUsed == "" {
 				log.Printf("no pattern matched line %d: \"%s\"\n", lineIdx+1, line)
 			}
