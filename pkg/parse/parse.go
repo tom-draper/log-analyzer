@@ -189,7 +189,7 @@ type PatternRank struct {
 
 // parseLine extracts token parameters from each line using the most appropriate
 // pattern in the given config.
-func parseLineOld(line string, config *Config) (map[string]Param, string) {
+func parseLineSingle(line string, config *Config) (map[string]Param, string) {
 	// Attempt to parse the line against each pattern in config, only taking the best
 	var patternUsed string
 	best := PatternRank{
@@ -230,6 +230,8 @@ func parseLineOld(line string, config *Config) (map[string]Param, string) {
 	return best.params, patternUsed
 }
 
+// parseLine extracts token parameters from each line using the most appropriate
+// pattern in the given config.
 func parseLine(lines []string, index int, config *Config) (map[string]Param, string) {
 	// Attempt to parse the line against each pattern in config, only taking the best
 	var patternUsed string
@@ -491,7 +493,6 @@ func ParseFileTest(path string, config *Config) ([]Extraction, error) {
 		return nil, err
 	}
 
-	// writeConfigTest(extractions)
 	return extractions, nil
 }
 
@@ -515,6 +516,5 @@ func ParseFilesTest(paths []string, config *Config) ([]Extraction, error) {
 		return nil, errors.New("unable to read log file path provided")
 	}
 
-	// writeConfigTest(extractions)
 	return extractions, nil
 }
