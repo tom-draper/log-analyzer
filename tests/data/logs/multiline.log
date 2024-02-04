@@ -1,0 +1,18 @@
+2015-07-12 14:59:23 :: process1 - starting process 1
+2015-07-12 14:59:23 :: process2 - starting process 2
+2015-07-12 14:59:23 :: process3 - starting process 3
+2015-07-12 14:59:23 :: process4 - starting process 4
+2015-07-12 14:59:24 :: process1 - WARNING
+    -> warning from process 1
+2015-07-12 14:59:25 :: process2 - WARNING
+    -> warning from process 2
+2015-07-12 14:59:27 :: process4 - CRITICAL ERROR
+    -> error in process 4
+    -> shutting down
+2015-07-12 14:59:27 :: process4 - stopping process 4
+2015-07-12 14:59:30 :: process3 - complete
+2015-07-12 14:59:30 :: process3 - stopping process 3
+2015-07-12 14:59:31 :: process1 - complete
+2015-07-12 14:59:31 :: process1 - stopping process 1
+2015-07-12 14:59:33 :: process2 - complete
+2015-07-12 14:59:33 :: process2 - stopping process 2

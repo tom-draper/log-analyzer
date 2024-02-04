@@ -1,0 +1,8 @@
+{
+  "tokens": ["timestamp", "process", "message", "error_msg", "action", "status"],
+  "patterns": [
+    "timestamp :: process - message",
+    "timestamp :: process - status\n    -> error_msg",
+    "timestamp :: process - status\n    -> error_msg\n    -> action"
+  ]
+}
