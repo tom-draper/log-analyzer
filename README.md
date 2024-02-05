@@ -116,7 +116,7 @@ Patterns that match multiple lines in a log file can be created simply by includ
 {
     "patterns": [
         "timestamp - log_level thread_id: message",
-        "timestamp - log_level thread_id: error\n  --> critical error on thread_id: error_message
+        "timestamp - log_level thread_id: error\n  --> critical error on thread_id: error_message"
     ],
     "tokens": ["timestamp", "log_level", "thread_id", "message", "error_message"]
 }
