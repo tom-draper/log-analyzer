@@ -106,10 +106,10 @@ Data type warnings can be found at the bottom of your dashboard, highlighting to
 Patterns that match multiple lines in a log file can be created simply by including newline characters `\n` in your pattern.
 
 ```log
-2023-10-25T16:24:31+00:00 - DEBUG thread1: success
-2023-10-25T16:24:32+00:00 - DEBUG thread2: error
+2022-01-11T12:15:06+00:00 - DEBUG thread1: success
+2022-01-11T12:15:09+00:00 - DEBUG thread2: error
   --> critical error on thread2: index 44 out of range
-2023-10-25T16:24:31+00:00 - DEBUG thread3: success
+2022-01-11T12:15:12+00:00 - DEBUG thread3: success
 ```
 
 ```json
