@@ -137,9 +137,9 @@ For example, if you don't want thread pool number or thread ID featured in your 
 ```json
 {
     "patterns": [
-        "[timestamp] pool-*-thread-* INFO: function() duration elapsed ms"
+        "[<timestamp>] pool-*-thread-* INFO: <function>() duration <elapsed> ms"
     ],
-    "tokens": ["timestamp", "function", "elapsed"]
+    "tokens": ["<timestamp>", "<function>", "<elapsed>"]
 }
 ```
 
