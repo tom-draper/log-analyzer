@@ -10,7 +10,7 @@
     <!-- <img src="./logo.png" style="width: 10em;"/> -->
     <div class="logo-container">
       <div class="logo">Log Analyzer</div>
-      <img alt="" src="./icon.png" />
+      <!-- <img alt="" src="./icon.png" /> -->
     </div>
     <div class="line-count">{lineCount.toLocaleString()} lines</div>
   </div>
@@ -43,10 +43,10 @@
     display: flex;
     align-items: center;
   }
-  .logo-container>img {
+  /* .logo-container>img {
     margin-left: 0.5em;
     width: 1.25em;
-  }
+  } */
   .logo {
     font-weight: 600;
   }
