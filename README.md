@@ -101,9 +101,30 @@ If a token value fails to be converted into the explicit data type specified by 
 
 Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can be used to help you decide whether your patterns could benefit from explicit data types. 
 
+### Multi-line Patterns
+
+Patterns that match multiple lines in a log file can be created simply by including newline characters `\n` in your pattern.
+
+```log
+2023-10-25T16:24:31+00:00 - DEBUG thread1: success
+2023-10-25T16:24:32+00:00 - DEBUG thread2: error
+  --> critical error on thread2: index 44 out of range
+2023-10-25T16:24:31+00:00 - DEBUG thread3: success
+```
+
+```json
+{
+    "patterns": [
+        "timestamp - log_level thread_id: message",
+        "timestamp - log_level thread_id: error\n  --> critical error on thread_id: error_message
+    ],
+    "tokens": ["timestamp", "log_level", "thread_id", "message", "error_message"]
+}
+```
+
 ### Wildcards
 
-Unimportant yet variable values within your log file can be excluded from your dashboard by using the wildcard character `*` within your pattern.
+Any unimportant yet variable values within your log file can be excluded from your dashboard by using the wildcard token `*` within your pattern.
 
 For example, if you don't want thread pool number or thread ID featured in your dashboard:
 
