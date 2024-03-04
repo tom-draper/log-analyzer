@@ -237,7 +237,7 @@ func main() {
     }
     logtext := string(body)
 
-    groups := FindGroups(logtext)
+    groups := similarity.FindGroups(logtext)
 }
 ```
 
