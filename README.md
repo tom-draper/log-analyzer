@@ -223,18 +223,22 @@ go get github.com/tom-draper/log-analyzer/pkg/similarity
 ```
 
 ```go
+package main
+
 import (
     "os"
     "github.com/tom-draper/log-analyzer/pkg/similarity"
 )
 
-body, err := os.ReadFile("./tests/data/logs/demo.log")
-if err != nil {
-    return nil, err
-}
-logtext := string(body)
+func main() {
+    body, err := os.ReadFile("./tests/data/logs/demo.log")
+    if err != nil {
+        panic(err)
+    }
+    logtext := string(body)
 
-groups := FindGroups(logtext)
+    groups := FindGroups(logtext)
+}
 ```
 
 ### Parser
@@ -246,19 +250,23 @@ go get github.com/tom-draper/log-analyzer/pkg/parse
 ```
 
 ```go
+package main
+
 import "github.com/tom-draper/log-analyzer/pkg/parse"
 
-config, err := parse.LoadConfig("./config/config.json")
-if err != nil {
-    panic(err)
-}
+func main() {
+    config, err := parse.LoadConfig("./config/config.json")
+    if err != nil {
+        panic(err)
+    }
 
-extraction, err := parse.ParseFile("./tests/data/logs/demo.log", &config)
-if err != nil {
-    panic(err)
-}
+    extraction, err := parse.ParseFile("./tests/data/logs/demo.log", &config)
+    if err != nil {
+        panic(err)
+    }
 
-parse.DisplayLines(extraction)
+    parse.DisplayLines(extraction)
+}
 ```
 
 ## Contributions
