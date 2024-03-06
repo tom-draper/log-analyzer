@@ -16,7 +16,7 @@ An unstructured log file named `demo.log`:
 [11/Dec/2023:11:01:34] 74.6.8.121 "GET /api/data HTTP/1.1" 200 182 "python-requests/2.26.0"
 ```
 
-In `config/config.json`, define some simple patterns featured in your log files using a set of token values to control the extraction. These tokens can have any identifying name, and will be grouped across all patterns and targeted for extraction from the log file.
+In `config/config.json`, define some simple patterns featured in your log files using a set of tokens to control the values to extract. These tokens can have any identifying name, and will be grouped across all patterns and targeted for extraction from the log file.
 
 - `patterns`: a list of string patterns found in your log file    
 - `tokens`: all unique tokens used across your patterns, representing the values that should be targeted for extraction
