@@ -99,7 +99,7 @@ Data types are inferred by default, but it may not always be possible to correct
 
 If a token value fails to be converted into the explicit data type specified by its prefix, the value is excluded from the dashboard instead of reverting to the default string type.
 
-Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can be used to help you decide whether your patterns could benefit from explicit data types. 
+Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can be used to help you decide whether your patterns are incorrect or could benefit from explicit data types. 
 
 ### Multi-line Patterns
 
@@ -116,7 +116,7 @@ Patterns that match multiple lines in a log file can be created simply by includ
 {
     "patterns": [
         "timestamp - log_level thread_id: message",
-        "timestamp - log_level thread_id: error\n  --> critical error on thread_id: error_message"
+        "timestamp - log_level thread_id: error\n  --> critical error on threadthread_id: error_message"
     ],
     "tokens": ["timestamp", "log_level", "thread_id", "message", "error_message"]
 }
@@ -167,7 +167,7 @@ Within the config, you can specify any tokens that are dependent upon other toke
 
 ### Conversions
 
-Some tokens with a numeric value may be equivalent to other tokens after performing a simple conversion to account for different units. In order to merge these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below describes that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all possible time recording values into milliseconds and display them under the `elapsed_ms` token.
+Some tokens with a numeric value may be equivalent to other tokens after performing a simple conversion to account for different units. In order to merge these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below describes that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all elapsed time values into milliseconds and display them under the `elapsed_ms` token.
 
 ```log
 [November 26, 2017 at 7:25p PST] LOG: function 'createAccount' took 51.13 ms
