@@ -13,7 +13,7 @@
     const tokenCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (const token in data.extraction[i].params) {
-        tokenCount[token] ||= 0
+        tokenCount[token] ||= 0;
         tokenCount[token] += 1;
       }
     }
@@ -75,7 +75,7 @@
     const dateCount: { [token: string]: number } = {};
     for (let i = 0; i < data.extraction.length; i++) {
       for (const [token, value] of Object.entries(data.extraction[i].params)) {
-        dateCount[token] ||= 0
+        dateCount[token] ||= 0;
         if (value.type === "time") {
           dateCount[token] += 1;
         }
@@ -86,7 +86,7 @@
       token: null,
       total: 0,
     };
-    for (let [token, count] of Object.entries(dateCount)) {
+    for (const [token, count] of Object.entries(dateCount)) {
       if (count > best.total) {
         best.token = token;
         best.total = count;
@@ -124,9 +124,9 @@
   }
 
   function getFailedLines(data: Data) {
-    let failedLines: FailedLines = {};
+    const failedLines: FailedLines = {};
     for (let i = 0; i < data.extraction.length; i++) {
-      if (data.extraction[i].pattern == "") {
+      if (data.extraction[i].pattern === "") {
         failedLines[data.extraction[i].lineNumber] = data.extraction[i].line;
       }
     }
@@ -162,6 +162,7 @@
   let multiTypeTokens: DataTypes;
   let tokenCounts: TokenCount[];
   let timestampToken: string | null;
+  let hex: string = "#ffdfaf";
   const production = import.meta.env.MODE === "production";
   onMount(async () => {
     if (production) {
@@ -190,7 +191,12 @@
 <main>
   {#if tokenCounts !== undefined}
     <div class="content">
-      <Header {failedLines} {multiTypeTokens} lineCount={data.extraction.length} />
+      <Header
+        {failedLines}
+        {multiTypeTokens}
+        lineCount={data.extraction.length}
+        bind:hex
+      />
       {#each tokenCounts as token}
         <Card
           {data}
@@ -198,6 +204,7 @@
           dependentToken={token.dependentToken ?? null}
           lineCount={token.count}
           {timestampToken}
+          {hex}
         />
       {/each}
       <TypeWarnings {data} multiTypes={multiTypeTokens} />

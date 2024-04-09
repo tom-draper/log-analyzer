@@ -22,7 +22,7 @@
       const params = data.extraction[i].params;
       if (token in params && params[token].type === "ip") {
         const location = data.locations[params[token].value];
-        locationCount[location] ||= 0
+        locationCount[location] ||= 0;
         locationCount[location] += 1;
       }
     }
@@ -43,7 +43,7 @@
     const locationCount = getLocationCount(data);
     const [locations, z] = unpackObject(locationCount);
 
-    const d = [
+    plotData = [
       {
         type: "choropleth",
         locations: locations,
@@ -51,8 +51,8 @@
         text: locations,
         locationmode: "country names",
         colorscale: [
-          [0, "#ffdfaf"],
-          [0.4, "#ffdfaf"],
+          [0, hex],
+          [0.4, hex],
           [1, "#101010"],
         ],
         autocolorscale: false,
@@ -73,7 +73,7 @@
 
     Plotly.newPlot(
       plotDiv,
-      d,
+      plotData,
       {
         title: false,
         hovermode: "closest",
@@ -109,11 +109,22 @@
     );
   }
 
+  $: hex && updatePlotColour();
+
+  function updatePlotColour() {
+    if (plotDiv) {
+      plotData[0].colorscale[0][1] = hex;
+      plotData[0].colorscale[1][1] = hex;
+      Plotly.redraw(plotDiv);
+    }
+  }
+
   let plotDiv: HTMLDivElement;
+  let plotData;
   onMount(async () => {
     buildPlot();
   });
-  export let data: Data, token: string;
+  export let data: Data, token: string, hex: string;
 </script>
 
 <div class="container" class:hidden={!isIPAddressToken(data, token)}>

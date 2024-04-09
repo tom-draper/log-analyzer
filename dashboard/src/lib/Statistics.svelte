@@ -99,7 +99,7 @@
   }
   .value {
     font-weight: 600;
-    font-family: Poppins;
+    /* font-family: Poppins; */
   }
   .label {
     font-size: 0.62em;

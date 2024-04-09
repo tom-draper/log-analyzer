@@ -21,7 +21,7 @@
           for (const [dependentTokenValue, count] of Object.entries(
             dependentTokenValueCounts
           )) {
-            sortedFreq[tokenValue] ||= []
+            sortedFreq[tokenValue] ||= [];
             sortedFreq[tokenValue].push({
               dependentTokenValue,
               count,
@@ -101,7 +101,8 @@
         dependentToken in data.extraction[i].params
       ) {
         const tokenValue = data.extraction[i].params[token].value;
-        const dependentTokenValue = data.extraction[i].params[dependentToken].value;
+        const dependentTokenValue =
+          data.extraction[i].params[dependentToken].value;
         freq[token] ||= {};
         freq[token][dependentToken] ||= {};
         freq[token][dependentToken][tokenValue] ||= {};
@@ -174,6 +175,6 @@
     font-size: 0.85em;
     margin-top: 5px;
     margin-bottom: -2px;
-  color: #888
+    color: #888;
   }
 </style>

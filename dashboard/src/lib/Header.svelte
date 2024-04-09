@@ -1,8 +1,25 @@
 <script lang="ts">
+  import ColorPicker, { ChromeVariant } from "svelte-awesome-color-picker";
+
+  let prev: number | null = null;
+
+  function updateColorScheme() {
+    const now = new Date().getTime();
+    // Avoid updating too frequently if dragging colour
+    if (prev !== null && now - prev < 100) {
+      return;
+    }
+    prev = now;
+    document.documentElement.style.setProperty("--highlight", hex);
+  }
+
   function scrollToBottom() {
     window.scrollTo(0, document.body.scrollHeight);
   }
-  export let multiTypeTokens: DataTypes, failedLines: FailedLines, lineCount: number;
+  export let multiTypeTokens: DataTypes,
+    failedLines: FailedLines,
+    lineCount: number,
+    hex: string;
 </script>
 
 <div class="header">
@@ -10,44 +27,52 @@
     <!-- <img src="./logo.png" style="width: 10em;"/> -->
     <div class="logo-container">
       <div class="logo">Log Analyzer</div>
-      <img alt="" src="./icon.png" />
+      <!-- <img alt="" src="./icon.png" /> -->
     </div>
     <div class="line-count">{lineCount.toLocaleString()} lines</div>
   </div>
   <div class="notifications">
+    <div class="color-picker">
+      <ColorPicker
+        bind:hex
+        components={ChromeVariant}
+        sliderDirection="horizontal"
+        label=""
+        on:input={updateColorScheme}
+      />
+    </div>
+
     {#if Object.keys(multiTypeTokens).length >= 1}
-    <button on:click={scrollToBottom} class="warning"
-      >{Object.keys(multiTypeTokens).length}
-      {Object.keys(multiTypeTokens).length == 1
-      ? "warning"
-      : "warnings"}</button
-    >
+      <button on:click={scrollToBottom} class="warning"
+        >{Object.keys(multiTypeTokens).length}
+        {Object.keys(multiTypeTokens).length == 1
+          ? "warning"
+          : "warnings"}</button
+      >
     {/if}
     {#if Object.keys(failedLines).length >= 1}
-    <button on:click={scrollToBottom} class="error"
-      >{Object.keys(failedLines).length}
-      {Object.keys(failedLines).length == 1
-      ? "error"
-      : "errors"}</button
-    >
+      <button on:click={scrollToBottom} class="error"
+        >{Object.keys(failedLines).length}
+        {Object.keys(failedLines).length == 1 ? "error" : "errors"}</button
+      >
     {/if}
   </div>
 </div>
 
-<style>
+<style scoped>
   .title {
     margin: 0 0 20px;
-    font-family: Poppins;
   }
   .logo-container {
     display: flex;
     align-items: center;
   }
-  .logo-container>img {
-    margin-left: 0.5em;
-    width: 1.25em;
+  .color-picker {
+    margin-top: -20px;
+    margin-right: 10px;
   }
   .logo {
+    font-family: "Poppins";
     font-weight: 600;
   }
   .line-count {
@@ -63,6 +88,7 @@
 
   .notifications {
     margin-left: auto;
+    display: flex;
   }
   button {
     padding: 5px 10px;
@@ -82,5 +108,8 @@
     color: #ddd871;
     border: 1px solid #ddd8717d;
   }
+  .error,
+  .warning {
+    margin-left: 10px;
+  }
 </style>
-

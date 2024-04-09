@@ -35,7 +35,7 @@
           type: "bar",
           marker: {
             // color: "#0070f3",
-            color: '#ffdfaf'
+            color: hex,
           },
         },
       ],
@@ -59,6 +59,20 @@
     );
   }
 
+  $: hex && updatePlotColour();
+
+  function updatePlotColour() {
+    if (plotDiv) {
+      try {
+        Plotly.restyle(plotDiv, {
+          "marker.color": hex,
+        });
+      } catch (e) {
+        // console.error(e);
+      }
+    }
+  }
+
   let isNumeric = false;
   let plotDiv: HTMLDivElement;
   onMount(async () => {
@@ -71,7 +85,7 @@
     // Resize window to snap graph to window width
     window.dispatchEvent(new Event("resize"));
   });
-  export let data: Data, token: string;
+  export let data: Data, token: string, hex: string;
 </script>
 
 <div class="container" class:hidden={!isNumeric}>

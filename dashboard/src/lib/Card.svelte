@@ -11,7 +11,8 @@
     token: string,
     dependentToken: string | null,
     lineCount: number,
-    timestampToken: string | null;
+    timestampToken: string | null,
+    hex: string;
 </script>
 
 <div class="card">
@@ -28,13 +29,13 @@
   {#if dependentToken}
     <ValueFreqGraphDependent {data} {token} {dependentToken} />
   {:else if token === timestampToken}
-    <Activity {data} {token} />
+    <Activity {data} {token} {hex} />
   {:else}
     <Statistics {data} {token} />
-    <Distribution {data} {token} />
+    <Distribution {data} {token} {hex} />
     <ValueFreqGraph {data} {token} />
     <OverTimeGraph {data} {token} {timestampToken} />
-    <LocationMap {data} {token} />
+    <LocationMap {data} {token} {hex} />
   {/if}
 </div>
 
@@ -50,7 +51,6 @@
   }
   .title,
   .line-count {
-    font-family: Poppins;
     font-weight: 500;
   }
   .card {

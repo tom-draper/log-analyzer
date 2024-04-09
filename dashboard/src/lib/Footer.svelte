@@ -22,10 +22,11 @@
   .logo-container {
     display: flex;
     align-items: center;
+    font-family: "Poppins";
     /* margin: 0.5em 0; */
   }
   .icon {
-    width: 1.4em;
+    width: 1.2em;
     margin-left: 0.5em;
   }
   .github-icon:hover {

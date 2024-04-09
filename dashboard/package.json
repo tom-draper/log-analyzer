@@ -22,6 +22,7 @@
   "dependencies": {
     "moment": "^2.29.4",
     "moment-range": "^4.0.2",
-    "plotly.js-dist-min": "^2.27.0"
+    "plotly.js-dist-min": "^2.27.0",
+    "svelte-awesome-color-picker": "^3.0.6"
   }
 }

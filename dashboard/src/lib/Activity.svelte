@@ -69,7 +69,8 @@
           type: "bar",
           marker: {
             // color: "#0070f3",
-            color: "#ffdfaf",
+            color: hex,
+            // color: "var(--highlight)",
           },
         },
       ],
@@ -94,11 +95,21 @@
     );
   }
 
+  $: hex && updatePlotColour();
+
+  function updatePlotColour() {
+    if (plotDiv) {
+      Plotly.restyle(plotDiv, {
+        "marker.color": hex,
+      });
+    }
+  }
+
   let plotDiv: HTMLDivElement;
   onMount(async () => {
     buildPlot();
   });
-  export let data: Data, token: string;
+  export let data: Data, token: string, hex: string;
 </script>
 
 <div class="container">
@@ -108,7 +119,6 @@
 <style scoped>
   .container {
     display: flex;
-    /* margin-bottom: 0.5em; */
   }
   #plotDiv {
     width: 100%;
