@@ -67,17 +67,10 @@
     display: flex;
     align-items: center;
   }
-<<<<<<< HEAD
   .color-picker {
     margin-top: -20px;
     margin-right: 10px;
   }
-=======
-  /* .logo-container>img {
-    margin-left: 0.5em;
-    width: 1.25em;
-  } */
->>>>>>> 1f7f2e989298616ec008273c3ea9487c2ad13b5d
   .logo {
     font-family: "Poppins";
     font-weight: 600;
