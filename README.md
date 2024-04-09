@@ -16,7 +16,7 @@ An unstructured log file named `demo.log`:
 [11/Dec/2023:11:01:34] 74.6.8.121 "GET /api/data HTTP/1.1" 200 182 "python-requests/2.26.0"
 ```
 
-In `config/config.json`, define some simple patterns featured in your log files using a set of token values to control the extraction. These tokens can have any identifying name, and will be grouped across all patterns and targeted for extraction from the log file.
+In `config/config.json`, define some simple patterns featured in your log files using a set of tokens to control the values to extract. These tokens can have any identifying name, and will be grouped across all patterns and targeted for extraction from the log file.
 
 - `patterns`: a list of string patterns found in your log file    
 - `tokens`: all unique tokens used across your patterns, representing the values that should be targeted for extraction
@@ -99,11 +99,32 @@ Data types are inferred by default, but it may not always be possible to correct
 
 If a token value fails to be converted into the explicit data type specified by its prefix, the value is excluded from the dashboard instead of reverting to the default string type.
 
-Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can be used to help you decide whether your patterns could benefit from explicit data types. 
+Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can be used to help you decide whether your patterns are incorrect or could benefit from explicit data types. 
+
+### Multi-line Patterns
+
+Patterns that match multiple lines in a log file can be created simply by including newline characters `\n` in your pattern.
+
+```log
+2022-01-11T12:15:06+00:00 - DEBUG thread1: success
+2022-01-11T12:15:09+00:00 - DEBUG thread2: error
+  --> critical error on thread2: index 44 out of range
+2022-01-11T12:15:12+00:00 - DEBUG thread3: success
+```
+
+```json
+{
+    "patterns": [
+        "timestamp - log_level thread_id: message",
+        "timestamp - log_level thread_id: error\n  --> critical error on threadthread_id: error_message"
+    ],
+    "tokens": ["timestamp", "log_level", "thread_id", "message", "error_message"]
+}
+```
 
 ### Wildcards
 
-Unimportant yet variable values within your log file can be excluded from your dashboard by using the wildcard character `*` within your pattern.
+Any unimportant yet variable values within your log file can be excluded from your dashboard by using the wildcard token `*` within your pattern.
 
 For example, if you don't want thread pool number or thread ID featured in your dashboard:
 
@@ -116,9 +137,9 @@ For example, if you don't want thread pool number or thread ID featured in your 
 ```json
 {
     "patterns": [
-        "[timestamp] pool-*-thread-* INFO: function() duration elapsed ms"
+        "[<timestamp>] pool-*-thread-* INFO: <function>() duration <elapsed> ms"
     ],
-    "tokens": ["timestamp", "function", "elapsed"]
+    "tokens": ["<timestamp>", "<function>", "<elapsed>"]
 }
 ```
 
@@ -146,7 +167,7 @@ Within the config, you can specify any tokens that are dependent upon other toke
 
 ### Conversions
 
-Some tokens with a numeric value may be equivalent to other tokens after performing a simple conversion to account for different units. In order to merge these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below describes that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all possible time recording values into milliseconds and display them under the `elapsed_ms` token.
+Some tokens with a numeric value may be equivalent to other tokens after performing a simple conversion to account for different units. In order to merge these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below describes that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all elapsed time values into milliseconds and display them under the `elapsed_ms` token.
 
 ```log
 [November 26, 2017 at 7:25p PST] LOG: function 'createAccount' took 51.13 ms
@@ -202,18 +223,22 @@ go get github.com/tom-draper/log-analyzer/pkg/similarity
 ```
 
 ```go
+package main
+
 import (
     "os"
     "github.com/tom-draper/log-analyzer/pkg/similarity"
 )
 
-body, err := os.ReadFile("./tests/data/logs/demo.log")
-if err != nil {
-    return nil, err
-}
-logtext := string(body)
+func main() {
+    body, err := os.ReadFile("./tests/data/logs/demo.log")
+    if err != nil {
+        panic(err)
+    }
+    logtext := string(body)
 
-groups := FindGroups(logtext)
+    groups := similarity.FindGroups(logtext)
+}
 ```
 
 ### Parser
@@ -225,19 +250,23 @@ go get github.com/tom-draper/log-analyzer/pkg/parse
 ```
 
 ```go
+package main
+
 import "github.com/tom-draper/log-analyzer/pkg/parse"
 
-config, err := parse.LoadConfig("./config/config.json")
-if err != nil {
-    panic(err)
-}
+func main() {
+    config, err := parse.LoadConfig("./config/config.json")
+    if err != nil {
+        panic(err)
+    }
 
-extraction, err := parse.ParseFile("./tests/data/logs/demo.log", &config)
-if err != nil {
-    panic(err)
-}
+    extraction, err := parse.ParseFile("./tests/data/logs/demo.log", &config)
+    if err != nil {
+        panic(err)
+    }
 
-parse.DisplayLines(extraction)
+    parse.DisplayLines(extraction)
+}
 ```
 
 ## Contributions
