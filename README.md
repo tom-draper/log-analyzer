@@ -38,7 +38,7 @@ Run the log analyzer, providing the path to your log file.
 > ./main ./tests/data/logs/demo.log
 ```
 
-The tokens are extracted from the log file and their data types inferred.
+The tokens are extracted from the log file and their data types inferred. Any timestamps are parsed without needing to specify any format.
 
 ```text
 line 1
@@ -99,11 +99,11 @@ Data types are inferred by default, but it may not always be possible to correct
 
 If a token value fails to be converted into the explicit data type specified by its prefix, the value is excluded from the dashboard instead of reverting to the default string type.
 
-Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can be used to help you decide whether your patterns are incorrect or could benefit from explicit data types. 
+Data type warnings can be found at the bottom of your dashboard, highlighting tokens with inconsistently inferred data types. This can be used to help you decide whether your patterns need improving or you could benefit from explicit data types. 
 
 ### Multi-line Patterns
 
-Patterns that match multiple lines in a log file can be created simply by including newline characters `\n` in your pattern.
+Patterns that can match multiple lines of a log file can be created simply by including newline characters `\n` in your pattern. Although the reliability of this pattern may be variable if the log file is being written to by multiple threads.
 
 ```log
 2022-01-11T12:15:06+00:00 - DEBUG thread1: success
@@ -145,7 +145,7 @@ For example, if you don't want thread pool number or thread ID featured in your 
 
 ### Dependencies
 
-Within the config, you can specify any tokens that are dependent upon other tokens. For example, elapsed running time may depend on the function name. Each dependency specified allows for a richer dashboard that considers this relationship and explores the value combinations.
+Within the config, you can specify any tokens that are dependent upon other tokens. For example, elapsed running time may depend on the function name. Each dependency specified allows for a richer dashboard that considers this relationship and explores the combinations of values.
 
 ```log
 2023-10-25 20:44:07 - LOG: genUUID() duration 44.29 ms
@@ -167,7 +167,7 @@ Within the config, you can specify any tokens that are dependent upon other toke
 
 ### Conversions
 
-Some tokens with a numeric value may be equivalent to other tokens after performing a simple conversion to account for different units. In order to merge these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below describes that `elapsed_ns` can be converted into `elapsed_ms` by multiplying by `0.001`, and `elapsed_s` can be converted into `elapsed_ms` by multiplying by 1000. With this config, the dashboard will convert and group all elapsed time values into milliseconds and display them under the `elapsed_ms` token.
+Some tokens with a numeric value may be equivalent to other tokens after performing a simple conversion to account for different units. In order to merge these tokens together in your dashboard, your config needs to specify how to convert them from one to another. The example below describes that `elapsed_ns` and `elapsed_s` can both be converted into `elapsed_ms` by multiplying by 0.001 and 1000 respectively. With this config, the dashboard will convert and group all elapsed time values into milliseconds and display them under the `elapsed_ms` token.
 
 ```log
 [November 26, 2017 at 7:25p PST] LOG: function 'createAccount' took 51.13 ms
@@ -198,7 +198,7 @@ Some tokens with a numeric value may be equivalent to other tokens after perform
 
 ### Config Path
 
-You can specify a path to the config file containing your patterns following the `-c` or `--config` flag. The config path defaults to `./config/config.json`
+You can specify a path to the config file containing your patterns following the `-c` or `--config` flag. The config path defaults to `config/config.json`
 
 ```bash
 > ./main -c ./tests/data/configs/config.json ./tests/data/logs/demo.log
