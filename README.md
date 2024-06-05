@@ -38,7 +38,7 @@ Run the log analyzer, providing the path to your log file.
 > ./main ./tests/data/logs/demo.log
 ```
 
-The tokens are extracted from the log file and their data types inferred. Any timestamps are parsed without needing to specify any format.
+The tokens are extracted from the log file and their data types inferred. Any timestamps are parsed without needing to specify a format.
 
 ```text
 line 1
