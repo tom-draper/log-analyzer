@@ -1,4 +1,4 @@
-# log-analyzer
+# Log Analyzer
 
 Turn unstructured log files into a dashboard in seconds.
 
