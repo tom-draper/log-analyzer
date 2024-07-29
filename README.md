@@ -6,7 +6,7 @@ Turn unstructured log files into a dashboard in seconds.
 
 ## Example
 
-An unstructured log file named `demo.log`:
+A log file named `demo.log`:
 
 ```log
 [11/Dec/2023:11:01:28] 220.203.23.174 "GET /blog/home HTTP/1.1" 200 182 "Mozilla/5.0 Chrome/60.0.3112.113"
