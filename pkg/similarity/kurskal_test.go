@@ -125,6 +125,13 @@ func numberOfNodes(graph Graph) int {
 }
 
 func TestKruskal(t *testing.T) {
+	// Expected MST/MSF edge counts per test graph:
+	//   edges[0]: 11 nodes, 1 component  → 10 edges
+	//   edges[1]:  5 nodes, 1 component  →  4 edges
+	//   edges[2]: 10 nodes, 2 components →  8 edges
+	//   edges[3]: 10 nodes, 2 components →  8 edges
+	expectedEdges := []int{10, 4, 8, 8}
+
 	for i := range edges {
 		mst := Kruskal(numberOfNodes(edges[i]), edges[i])
 
@@ -135,8 +142,8 @@ func TestKruskal(t *testing.T) {
 		if len(mst) == 0 {
 			t.Error("Kruskal failed to find minimum spanning tree")
 		}
-		if len(mst) != 5 {
-			t.Errorf("Expected 5 edges, got %d", len(mst))
+		if len(mst) != expectedEdges[i] {
+			t.Errorf("Expected %d edges, got %d", expectedEdges[i], len(mst))
 		}
 	}
 }

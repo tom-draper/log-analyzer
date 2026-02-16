@@ -29,7 +29,7 @@ func Kruskal(v int, graph Graph) Graph {
 
 	i := 0
 	e := 0
-	for e < v-1 {
+	for e < v-1 && i < len(graph) {
 		u, v, weight := graph[i].node1, graph[i].node2, graph[i].weight
 		i += 1
 		x := findParent(parent, u.id)
