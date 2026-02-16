@@ -109,26 +109,25 @@
     );
   }
 
-  $: hex && updatePlotColour();
-
-  function updatePlotColour() {
-    if (plotDiv) {
-      plotData[0].colorscale[0][1] = hex;
-      plotData[0].colorscale[1][1] = hex;
-      Plotly.redraw(plotDiv);
+  $effect(() => {
+    const color = hex;
+    if (plotDiv && plotData) {
+      Plotly.restyle(plotDiv, {
+        colorscale: [[[0, color], [0.4, color], [1, "#101010"]]],
+      });
     }
-  }
+  });
 
   let plotDiv: HTMLDivElement;
-  let plotData;
+  let plotData: any;
+  let { data, token, hex }: { data: Data; token: string; hex: string } = $props();
   onMount(async () => {
     buildPlot();
   });
-  export let data: Data, token: string, hex: string;
 </script>
 
 <div class="container" class:hidden={!isIPAddressToken(data, token)}>
-  <div id="plotDiv" bind:this={plotDiv} />
+  <div id="plotDiv" bind:this={plotDiv}></div>
 </div>
 
 <style scoped>

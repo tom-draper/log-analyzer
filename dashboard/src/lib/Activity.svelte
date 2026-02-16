@@ -95,25 +95,27 @@
     );
   }
 
-  $: hex && updatePlotColour();
+  $effect(() => { updatePlotColour(); });
 
   function updatePlotColour() {
     if (plotDiv) {
-      Plotly.restyle(plotDiv, {
-        "marker.color": hex,
-      });
+      try {
+        Plotly.restyle(plotDiv, {
+          "marker.color": hex,
+        });
+      } catch (e) {}
     }
   }
 
   let plotDiv: HTMLDivElement;
+  let { data, token, hex }: { data: Data; token: string; hex: string } = $props();
   onMount(async () => {
     buildPlot();
   });
-  export let data: Data, token: string, hex: string;
 </script>
 
 <div class="container">
-  <div id="plotDiv" bind:this={plotDiv} />
+  <div id="plotDiv" bind:this={plotDiv}></div>
 </div>
 
 <style scoped>

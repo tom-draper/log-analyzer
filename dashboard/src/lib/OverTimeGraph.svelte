@@ -142,7 +142,7 @@
               : `opacity: ${
                   (valueCounts[value.value][i] / valueMax[value.value]) * 100
                 }%`}
-          />
+          ></div>
         {/each}
       </div>
     {/each}

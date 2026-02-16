@@ -1,25 +1,20 @@
 <script lang="ts">
   import ColorPicker, { ChromeVariant } from "svelte-awesome-color-picker";
 
-  let prev: number | null = null;
+  let { multiTypeTokens, failedLines, lineCount, hex = $bindable() }: {
+    multiTypeTokens: DataTypes;
+    failedLines: FailedLines;
+    lineCount: number;
+    hex: string;
+  } = $props();
 
-  function updateColorScheme() {
-    const now = new Date().getTime();
-    // Avoid updating too frequently if dragging colour
-    if (prev !== null && now - prev < 100) {
-      return;
-    }
-    prev = now;
+  $effect(() => {
     document.documentElement.style.setProperty("--highlight", hex);
-  }
+  });
 
   function scrollToBottom() {
     window.scrollTo(0, document.body.scrollHeight);
   }
-  export let multiTypeTokens: DataTypes,
-    failedLines: FailedLines,
-    lineCount: number,
-    hex: string;
 </script>
 
 <div class="header">
@@ -27,23 +22,20 @@
     <!-- <img src="./logo.png" style="width: 10em;"/> -->
     <div class="logo-container">
       <div class="logo">Log Analyzer</div>
-      <!-- <img alt="" src="./icon.png" /> -->
+      <div class="color-picker">
+        <ColorPicker
+          bind:hex
+          components={ChromeVariant}
+          sliderDirection="horizontal"
+          label=""
+        />
+      </div>
     </div>
     <div class="line-count">{lineCount.toLocaleString()} lines</div>
   </div>
   <div class="notifications">
-    <div class="color-picker">
-      <ColorPicker
-        bind:hex
-        components={ChromeVariant}
-        sliderDirection="horizontal"
-        label=""
-        on:input={updateColorScheme}
-      />
-    </div>
-
     {#if Object.keys(multiTypeTokens).length >= 1}
-      <button on:click={scrollToBottom} class="warning"
+      <button onclick={scrollToBottom} class="warning"
         >{Object.keys(multiTypeTokens).length}
         {Object.keys(multiTypeTokens).length == 1
           ? "warning"
@@ -51,7 +43,7 @@
       >
     {/if}
     {#if Object.keys(failedLines).length >= 1}
-      <button on:click={scrollToBottom} class="error"
+      <button onclick={scrollToBottom} class="error"
         >{Object.keys(failedLines).length}
         {Object.keys(failedLines).length == 1 ? "error" : "errors"}</button
       >
@@ -66,10 +58,11 @@
   .logo-container {
     display: flex;
     align-items: center;
+    gap: 6px;
   }
   .color-picker {
-    margin-top: -20px;
-    margin-right: 10px;
+    --input-size: 14px;
+    margin-bottom: 7px;
   }
   .logo {
     font-family: "Poppins";

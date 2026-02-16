@@ -59,7 +59,7 @@
     );
   }
 
-  $: hex && updatePlotColour();
+  $effect(() => { updatePlotColour(); });
 
   function updatePlotColour() {
     if (plotDiv) {
@@ -73,8 +73,9 @@
     }
   }
 
-  let isNumeric = false;
+  let isNumeric = $state(false);
   let plotDiv: HTMLDivElement;
+  let { data, token, hex }: { data: Data; token: string; hex: string } = $props();
   onMount(async () => {
     const values = numericValueCounts(data);
     if (Object.keys(values).length === 0) {
@@ -85,11 +86,10 @@
     // Resize window to snap graph to window width
     window.dispatchEvent(new Event("resize"));
   });
-  export let data: Data, token: string, hex: string;
 </script>
 
 <div class="container" class:hidden={!isNumeric}>
-  <div id="plotDiv" bind:this={plotDiv} />
+  <div id="plotDiv" bind:this={plotDiv}></div>
 </div>
 
 <style scoped>

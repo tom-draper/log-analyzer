@@ -75,9 +75,8 @@ button:focus-visible {
 }
 
 .wrapper {
-  top: 50px !important;
-  left: -240px !important;
   font-family: 'Geist Variable', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif !important;
+  --cp-text-color: #111;
 }
 
 .wrapper > .text-input > button {

@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
   import githubIcon from '../assets/github.png'
-  import iconImg from '../assets/icon.png'
+  export let hex: string;
 </script>
 
 <div class="footer">
@@ -12,7 +12,7 @@
   </a>
   <div class="logo-container">
     <div>Log Analyzer</div>
-    <img class="icon" src={iconImg} alt="" />
+    <div class="dot" style="background: {hex}"></div>
   </div>
 </div>
 
@@ -27,12 +27,16 @@
   .logo-container {
     display: flex;
     align-items: center;
+    gap: 6px;
     font-family: "Poppins";
-    /* margin: 0.5em 0; */
   }
-  .icon {
-    width: 1.2em;
-    margin-left: 0.5em;
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    align-self: flex-end;
+    margin-bottom: 3px;
   }
   .github-icon:hover {
     filter: contrast(0.3);

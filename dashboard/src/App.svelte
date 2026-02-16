@@ -209,7 +209,7 @@
       {/each}
       <TypeWarnings {data} multiTypes={multiTypeTokens} />
       <Failed {failedLines} />
-      <Footer />
+      <Footer {hex} />
     </div>
   {/if}
 </main>
