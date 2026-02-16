@@ -1,0 +1,8 @@
+{
+  "tokens": ["<timestamp>", "thread", "message"],
+  "patterns": [
+    "<timestamp> :: thread - message",
+    "<timestamp> :: message",
+    "message"
+  ]
+}

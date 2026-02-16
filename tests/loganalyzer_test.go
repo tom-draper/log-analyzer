@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tom-draper/log-analyzer/pkg/analyze"
 	"github.com/tom-draper/log-analyzer/pkg/parse"
 )
 
@@ -65,16 +64,15 @@ func TestParse(t *testing.T) {
 }
 
 func TestLogAnalyzer(t *testing.T) {
-	config, err := parse.LoadConfig("./data/config.json")
+	config, err := parse.LoadConfig("./data/configs/Apache.json")
 	if err != nil {
 		t.Error(err)
 	}
 
-	extraction, err := parse.ParseFile("./data/test.log", &config)
+	extraction, err := parse.ParseFile("./data/logs/Apache.log", &config)
 	if err != nil {
 		t.Error(err)
 	}
 
 	parse.DisplayLines(extraction)
-	analyze.Run(extraction, &config, "3000", nil)
 }

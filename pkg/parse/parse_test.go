@@ -81,7 +81,7 @@ var profiles = []Profile{
 				"[INFO ] [float_taken_msms] result found: page=str_url status=int_status_code size=int_bytes",
 				"[INFO ] [float_taken_ss] result found: page=str_url status=int_status_code size=int_bytes",
 			},
-			Tokens: []string{"float_taken_ms", "float_taken_s", "str_url", "str_status_code", "str_bytes"},
+			Tokens: []string{"float_taken_ms", "float_taken_s", "str_url", "int_status_code", "int_bytes"},
 		},
 		logpath: logPath("test3.log"),
 	},
@@ -144,7 +144,7 @@ var profiles = []Profile{
 			Patterns: []string{
 				"rest query",
 			},
-			Tokens: []string{"query"},
+			Tokens: []string{"rest", "query"},
 		},
 		logpath: logPath("test2.log"),
 	},

@@ -69,6 +69,26 @@ func escapeRegexCharacters(regEx string) string {
 	return regEx
 }
 
+// patternMatchesLine reports whether line matches pattern after expanding
+// wildcard tokens (*) into .*  Used for zero-token patterns where rank
+// calculation cannot be used.
+func patternMatchesLine(line string, pattern string) bool {
+	regEx := escapeRegexCharacters(pattern)
+	regEx = strings.ReplaceAll(regEx, "*", ".*")
+	var compRegEx *regexp.Regexp
+	if cached, ok := regexCache.Load(regEx); ok {
+		compRegEx = cached.(*regexp.Regexp)
+	} else {
+		var err error
+		compRegEx, err = regexp.Compile(regEx)
+		if err != nil {
+			return false
+		}
+		regexCache.Store(regEx, compRegEx)
+	}
+	return compRegEx.MatchString(line)
+}
+
 // tryPattern attempts to extract the corresponding token values described by
 // the given pattern from the log text line. Any extracted values have their
 // data types inferred and then converted.
@@ -208,12 +228,21 @@ func parseLineSingle(line string, config *Config) (map[string]Param, string) {
 		params: make(map[string]Param),
 	}
 	for _, pattern := range config.Patterns {
+		patternTokenCounts := tokenCounts(pattern, config.Tokens)
 		// If pattern containing no tokens is a plain text match for line
 		// Ensure usage of this pattern is recorded even if rank may not be best
-		patternTokenCounts := tokenCounts(pattern, config.Tokens)
 		if line == pattern && patternTokenCounts == 0 {
 			patternUsed = pattern
 			break
+		}
+		// For zero-token patterns the rank formula always returns 0, so fall
+		// back to a direct regex match.
+		if patternTokenCounts == 0 {
+			if patternMatchesLine(line, pattern) && best.rank == 0 {
+				best.rank = 0.5
+				patternUsed = pattern
+			}
+			continue
 		}
 		params := tryPattern(line, pattern, config.Tokens)
 		rank := calcExtractionRank(params, patternTokenCounts)
@@ -296,9 +325,17 @@ func parseSingleLine(line string, pattern string, config *Config) PatternRank {
 		params: make(map[string]Param),
 	}
 
-	// If pattern containing no tokens is a plain text match for line
-	// Ensure usage of this pattern is recorded
 	patternTokenCounts := tokenCounts(pattern, config.Tokens)
+
+	// For zero-token patterns the rank formula always returns 0, so use a
+	// direct regex match instead.  A small positive rank signals "matched".
+	if patternTokenCounts == 0 {
+		if patternMatchesLine(line, pattern) {
+			lineRank.rank = 0.5
+		}
+		return lineRank
+	}
+
 	params := tryPattern(line, pattern, config.Tokens)
 	rank := calcExtractionRank(params, patternTokenCounts)
 	if rank > lineRank.rank {
@@ -395,24 +432,27 @@ func Parse(logtext string, config *Config) ([]Extraction, error) {
 // ParseLines attempts to extract tokens parameters from each line using the
 // most appropriate pattern in the given config.
 func ParseLines(lines []string, config *Config) ([]Extraction, error) {
-	extraction := make([]Extraction, len(lines))
+	extraction := make([]Extraction, 0, len(lines))
 	var skipLines int
 	for i, line := range lines {
 		if skipLines > 0 {
 			skipLines--
 			continue
 		}
+		if line == "" {
+			continue
+		}
 		params, patternUsed := parseLine(lines, i, config)
 		if patternUsed == "" {
 			log.Printf("no pattern matched line %d: \"%s\"\n", i+1, line)
 		}
-		extraction[i] = Extraction{
+		extraction = append(extraction, Extraction{
 			Params:     params,
 			Pattern:    patternUsed,
 			LineNumber: i,
 			Line:       line,
-		}
-		// If patten used was multi-line, skip the next lines
+		})
+		// If pattern used was multi-line, skip the next lines
 		skipLines = patternLineCount(patternUsed) - 1
 	}
 	return extraction, nil
