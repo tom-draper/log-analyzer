@@ -1,11 +1,15 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"os"
-	"path/filepath"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -18,21 +22,11 @@ type Data struct {
 	Config     *parse.Config      `json:"config"`
 }
 
-func Start(data *Data) {
+func Start(data *Data, port string, dashboardFS fs.FS) {
+	sub, _ := fs.Sub(dashboardFS, "dashboard/dist")
+	fileServer := http.FileServer(http.FS(sub))
+
 	r := chi.NewRouter()
-	// Serve dashboard index.html
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		workDir, _ := os.Getwd()
-		filePath := filepath.Join(workDir, "dashboard", "dist", "index.html")
-		http.ServeFile(w, r, filePath)
-	})
-	// Return any asset used by index.html
-	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
-		filename := chi.URLParam(r, "*")
-		workDir, _ := os.Getwd()
-		filePath := filepath.Join(workDir, "dashboard", "dist", filename)
-		http.ServeFile(w, r, filePath)
-	})
 	// Return lines data when requested by dashboard on load
 	r.Get("/data", func(w http.ResponseWriter, r *http.Request) {
 		jsonString, err := json.Marshal(data)
@@ -41,9 +35,25 @@ func Start(data *Data) {
 		}
 		w.Write(jsonString)
 	})
+	// Serve embedded dashboard static files
+	r.Handle("/*", fileServer)
 
-	fmt.Println("Dashboard running at http://localhost:3000/")
-	http.ListenAndServe("127.0.0.1:3000", r)
+	srv := &http.Server{Addr: "127.0.0.1:" + port, Handler: r}
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-stop
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		srv.Shutdown(ctx)
+	}()
+
+	fmt.Printf("Dashboard running at http://localhost:%s/\n", port)
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		fmt.Fprintf(os.Stderr, "server error: %s\n", err)
+		os.Exit(1)
+	}
 }
 
 var ErrNotFound = &ErrResponse{HTTPStatusCode: 404, StatusText: "Resource not found."}

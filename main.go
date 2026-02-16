@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"os"
 
@@ -8,16 +9,22 @@ import (
 	"github.com/tom-draper/log-analyzer/pkg/parse"
 )
 
+//go:embed dashboard/dist
+var dashboardFS embed.FS
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("no log file paths provided\nprovide log file path(s) as command-line arguments\n\nexample:\n./main ./logs/postgres-main.log ./logs/postgres-1.log")
 		return
 	}
 
-	logPaths, configPath, test, printLines := getCommandLineArgs()
+	logPaths, configPath, port, test, printLines := getCommandLineArgs()
 	// Default to ./config.json
 	if configPath == "" {
 		configPath = "./config/config.json"
+	}
+	if port == "" {
+		port = "3000"
 	}
 
 	// Retrieve log line patterns from config file
@@ -62,7 +69,7 @@ func main() {
 	if printLines {
 		parse.DisplayLines(extraction)
 	}
-	analyze.Run(extraction, &config)
+	analyze.Run(extraction, &config, port, dashboardFS)
 }
 
 func tokensExtracted(extraction []parse.Extraction) bool {
@@ -74,7 +81,7 @@ func tokensExtracted(extraction []parse.Extraction) bool {
 	return false
 }
 
-func getCommandLineArgs() (logPaths []string, configPath string, test bool, print bool) {
+func getCommandLineArgs() (logPaths []string, configPath string, port string, test bool, print bool) {
 	// Get log file paths from command-line arguments
 	logPaths = make([]string, 0)
 	for i := 1; i < len(os.Args); i++ {
@@ -89,10 +96,16 @@ func getCommandLineArgs() (logPaths []string, configPath string, test bool, prin
 			// Skip as path will be recorded next iteration
 			continue
 		} else if i > 1 && (os.Args[i-1] == "-c" || os.Args[i-1] == "--config") {
-			configPath = os.Args[i]
+			configPath = arg
+			continue
+		} else if arg == "-P" || arg == "--port" {
+			// Skip as port will be recorded next iteration
+			continue
+		} else if i > 1 && (os.Args[i-1] == "-P" || os.Args[i-1] == "--port") {
+			port = arg
 			continue
 		}
 		logPaths = append(logPaths, arg)
 	}
-	return logPaths, configPath, test, print
+	return logPaths, configPath, port, test, print
 }

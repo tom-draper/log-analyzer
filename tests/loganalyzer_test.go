@@ -76,5 +76,5 @@ func TestLogAnalyzer(t *testing.T) {
 	}
 
 	parse.DisplayLines(extraction)
-	analyze.Run(extraction, &config)
+	analyze.Run(extraction, &config, "3000", os.DirFS(".."))
 }
