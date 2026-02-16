@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
@@ -22,12 +21,8 @@ type Data struct {
 	Config     *parse.Config      `json:"config"`
 }
 
-func Start(data *Data, port string, dashboardFS fs.FS) {
-	sub, _ := fs.Sub(dashboardFS, "dashboard/dist")
-	fileServer := http.FileServer(http.FS(sub))
-
+func Start(data *Data, port string, indexHTML []byte) {
 	r := chi.NewRouter()
-	// Return lines data when requested by dashboard on load
 	r.Get("/data", func(w http.ResponseWriter, r *http.Request) {
 		jsonString, err := json.Marshal(data)
 		if err != nil {
@@ -35,10 +30,12 @@ func Start(data *Data, port string, dashboardFS fs.FS) {
 		}
 		w.Write(jsonString)
 	})
-	// Serve embedded dashboard static files
-	r.Handle("/*", fileServer)
+	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write(indexHTML)
+	})
 
-	srv := &http.Server{Addr: "127.0.0.1:" + port, Handler: r}
+	srv := &http.Server{Addr: "0.0.0.0:" + port, Handler: r}
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)

@@ -1,0 +1,17 @@
+.git
+.github
+.vscode
+dashboard/node_modules
+dashboard/src
+dashboard/public
+dashboard/package.json
+dashboard/package-lock.json
+dashboard/pnpm-lock.yaml
+dashboard/svelte.config.js
+dashboard/tsconfig*.json
+dashboard/vite.config.ts
+dashboard/index.html
+dashboard/README.md
+tests
+log-analyzer
+*.md

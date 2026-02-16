@@ -1,7 +1,7 @@
 package main
 
 import (
-	"embed"
+	_ "embed"
 	"fmt"
 	"os"
 
@@ -9,8 +9,8 @@ import (
 	"github.com/tom-draper/log-analyzer/pkg/parse"
 )
 
-//go:embed dashboard/dist
-var dashboardFS embed.FS
+//go:embed dashboard/dist/index.html
+var indexHTML []byte
 
 func main() {
 	if len(os.Args) < 2 {
@@ -69,7 +69,7 @@ func main() {
 	if printLines {
 		parse.DisplayLines(extraction)
 	}
-	analyze.Run(extraction, &config, port, dashboardFS)
+	analyze.Run(extraction, &config, port, indexHTML)
 }
 
 func tokensExtracted(extraction []parse.Extraction) bool {

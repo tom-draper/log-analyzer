@@ -1,12 +1,16 @@
 package location
 
 import (
+	_ "embed"
 	"errors"
 	"net"
 	"sync"
 
 	"github.com/oschwald/geoip2-golang"
 )
+
+//go:embed GeoLite2-Country.mmdb
+var geoDB []byte
 
 var (
 	dbOnce   sync.Once
@@ -19,7 +23,7 @@ func GetCountryCode(ipAddress net.IP) (string, error) {
 		return "", errors.New("invalid IP address")
 	}
 	dbOnce.Do(func() {
-		dbReader, dbErr = geoip2.Open("internal/location/GeoLite2-Country.mmdb")
+		dbReader, dbErr = geoip2.FromBytes(geoDB)
 	})
 	if dbErr != nil {
 		return "", dbErr

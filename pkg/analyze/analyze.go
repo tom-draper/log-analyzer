@@ -3,7 +3,6 @@ package analyze
 import (
 	"internal/location"
 	"internal/server"
-	"io/fs"
 	"net"
 
 	"github.com/tom-draper/log-analyzer/pkg/parse"
@@ -38,7 +37,7 @@ func NewData(extraction []parse.Extraction, config *parse.Config) *server.Data {
 	return &data
 }
 
-func Run(extraction []parse.Extraction, config *parse.Config, port string, dashboardFS fs.FS) {
+func Run(extraction []parse.Extraction, config *parse.Config, port string, indexHTML []byte) {
 	data := NewData(extraction, config)
-	server.Start(data, port, dashboardFS)
+	server.Start(data, port, indexHTML)
 }

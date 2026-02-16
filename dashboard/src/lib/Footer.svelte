@@ -1,13 +1,18 @@
+<script>
+  import githubIcon from '../assets/github.png'
+  import iconImg from '../assets/icon.png'
+</script>
+
 <div class="footer">
   <a
     class="github-logo-container"
     href="https://github.com/tom-draper/log-analyzer"
   >
-    <img class="github-icon" src="./github.png" alt="" />
+    <img class="github-icon" src={githubIcon} alt="" />
   </a>
   <div class="logo-container">
     <div>Log Analyzer</div>
-    <img class="icon" src="./icon.png" alt="" />
+    <img class="icon" src={iconImg} alt="" />
   </div>
 </div>
 

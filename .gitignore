@@ -2,3 +2,4 @@
 /config/config *.json
 /test-*.json
 .vscode
+log-analyzer
