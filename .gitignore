@@ -3,3 +3,4 @@
 /test-*.json
 .vscode
 log-analyzer
+/vendor
