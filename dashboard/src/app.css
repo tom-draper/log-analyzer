@@ -19,14 +19,7 @@
   background-color: #101010;
   --text: #e8e8e8;
   --background: #101010;
-  --highlight: #e2b269;
-  --highlight: #f5d8ac;
-  --highlight: rgb(226, 174, 31);
-  --highlight: #f0eb95;
-  --highlight: #f4d6a8;
-  --highlight: #ffdfaf;
-  /* --highlight: #2b77b1; */
-  /* --highlight: #fce2bb; */
+  --highlight: #55ff5c;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

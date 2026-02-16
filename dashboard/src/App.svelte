@@ -162,7 +162,7 @@
   let multiTypeTokens: DataTypes;
   let tokenCounts: TokenCount[];
   let timestampToken: string | null;
-  let hex: string = "#ffdfaf";
+  let hex: string = "#55ff5c";
   const production = import.meta.env.MODE === "production";
   onMount(async () => {
     if (production) {
