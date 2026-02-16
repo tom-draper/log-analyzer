@@ -59,9 +59,9 @@ func extractGroups(edges []Edge) []Group {
 	}
 
 	seen := make(map[int]string)
-	extractNodeGroup(best.node, edges, seen, best.totalWeight)
+	group := extractNodeGroup(best.node, edges, seen, best.totalWeight)
 
-	return []Group{}
+	return []Group{group}
 }
 
 func extractNodeGroup(node Node, graph Graph, seen map[int]string, weight int) Group {
@@ -172,8 +172,6 @@ func FindGroupsFromLines(lines []string) []Group {
 
 	// Find minimum spanning tree
 	mst := Kruskal(len(nodes), edges)
-
-	fmt.Println(mst.String())
 
 	groups := extractGroups(mst)
 

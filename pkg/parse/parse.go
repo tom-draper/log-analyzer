@@ -31,11 +31,22 @@ type Param struct {
 	Type  string `json:"type"`
 }
 
+var (
+	multiSpaceRegEx = regexp.MustCompile(`[ ]{2,}`)
+	regexCache      sync.Map // map[string]*regexp.Regexp
+)
+
 // getParams extracts all possible group values contained within the regular
 // expression from the text and stores the extracted values in a returned
 // (groupName => value) map.
 func getParams(text string, regEx string) map[string]string {
-	compRegEx := regexp.MustCompile(regEx)
+	var compRegEx *regexp.Regexp
+	if cached, ok := regexCache.Load(regEx); ok {
+		compRegEx = cached.(*regexp.Regexp)
+	} else {
+		compRegEx = regexp.MustCompile(regEx)
+		regexCache.Store(regEx, compRegEx)
+	}
 	match := compRegEx.FindStringSubmatch(text)
 
 	paramsMap := make(map[string]string)
@@ -196,7 +207,6 @@ func parseLineSingle(line string, config *Config) (map[string]Param, string) {
 		rank:   0.0,
 		params: make(map[string]Param),
 	}
-	multiSpaceRegEx := regexp.MustCompile(`[ ]{2,}`)
 	for _, pattern := range config.Patterns {
 		// If pattern containing no tokens is a plain text match for line
 		// Ensure usage of this pattern is recorded even if rank may not be best
@@ -281,7 +291,6 @@ func parseLine(lines []string, index int, config *Config) (map[string]Param, str
 }
 
 func parseSingleLine(line string, pattern string, config *Config) PatternRank {
-	multiSpaceRegEx := regexp.MustCompile(`[ ]{2,}`)
 	lineRank := PatternRank{
 		rank:   0.0,
 		params: make(map[string]Param),
