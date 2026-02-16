@@ -7,7 +7,7 @@ test:
 	go test ./...
 
 dashboard:
-	cd dashboard && npm run build
+	cd dashboard && pnpm run build
 
 clean:
 	rm -f log-analyzer
