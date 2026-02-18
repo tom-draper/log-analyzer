@@ -1,16 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  function typeString(types: { [type: string]: number }) {
-    let string = "";
-    for (const [type, count] of Object.entries(types)) {
-      string += type + ": " + count.toLocaleString() + ", ";
-    }
-    // Remove final comma and space
-    string = string.slice(0, -2);
-    return string;
-  }
-
   type Examples = { [token: string]: Example };
   type Example = { [type: string]: { line: string; pattern: string } };
 
@@ -21,16 +11,17 @@
     const examples: Example = {};
     for (const type in types) {
       if (type in examples) {
-        continue
+        continue;
       }
       for (const e of data.extraction) {
-        if (!(token in e.params) || (e.params[token].type != type)) {
+        if (!(token in e.params) || e.params[token].type != type) {
           continue;
         }
         examples[e.params[token].type] = {
           line: e.line,
           pattern: e.pattern,
         };
+        break;
       }
     }
 
@@ -56,15 +47,24 @@
 <div class="card" class:hidden={Object.keys(multiTypes).length === 0}>
   {#each Object.entries(multiTypes) as [token, dataTypes]}
     <div class="line-container">
-      <div class="lineNumber">
-        <b>{token}</b> has {Object.keys(dataTypes).length} data types - {typeString(
-          dataTypes
-        )}
+      <div class="token-header">
+        <b>{token}</b> has {Object.keys(dataTypes).length} data types
+        <span class="type-counts">
+          {#each Object.entries(dataTypes) as [type, count], i}
+            <span class="type-pill"
+              >{type} <span class="pill-count">× {count.toLocaleString()}</span
+              ></span
+            >{#if i < Object.keys(dataTypes).length - 1}{" "}{/if}
+          {/each}
+        </span>
       </div>
       {#if examples !== undefined}
         {#each Object.entries(examples[token]) as [type, example]}
           <div class="examples">
-            <div class="token"><b>{type}</b></div>
+            <div class="type-label">
+              <b>{type}</b>
+              <span class="type-count">× {dataTypes[type].toLocaleString()}</span>
+            </div>
             <div class="example-line">{example.line}</div>
             <div class="example-pattern">Pattern: {example.pattern}</div>
           </div>
@@ -89,15 +89,37 @@
     font-size: 0.9em;
     padding: 20px 20px;
   }
-  .examples,
-  .lineNumber {
+  .token-header {
     padding: 5px 15px;
+    margin-bottom: 10px;
+  }
+  .type-counts {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .type-pill {
+    background: #ffffff18;
+    border-radius: 4px;
+    padding: 1px 8px;
+    font-size: 0.9em;
+  }
+  .pill-count {
+    color: #b8b44a;
   }
   .examples {
+    padding: 5px 15px;
     margin-left: 20px;
   }
-  .lineNumber {
-    margin-bottom: 10px;
+  .type-label {
+    margin-bottom: 4px;
+  }
+  .type-count {
+    color: #b8b44a;
+    font-size: 0.9em;
+    margin-left: 4px;
   }
   .example-line {
     overflow-wrap: break-word;

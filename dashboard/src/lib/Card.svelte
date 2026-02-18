@@ -4,6 +4,7 @@
   import Statistics from "./Statistics.svelte";
   import Distribution from "./Distribution.svelte";
   import Activity from "./Activity.svelte";
+  import TimeBreakdown from "./TimeBreakdown.svelte";
   import LocationMap from "./LocationMap.svelte";
   import ValueFreqGraphDependent from "./ValueFreqGraphDependent.svelte";
 
@@ -24,12 +25,16 @@
         {token}
       {/if}
     </div>
-    <div class="line-count">{lineCount.toLocaleString()} lines</div>
+    <div class="line-count">
+      {lineCount.toLocaleString()} lines
+      <span class="coverage">({((lineCount / data.extraction.length) * 100).toFixed(1)}%)</span>
+    </div>
   </div>
   {#if dependentToken}
     <ValueFreqGraphDependent {data} {token} {dependentToken} />
   {:else if token === timestampToken}
     <Activity {data} {token} {hex} />
+    <TimeBreakdown {data} {token} {hex} />
   {:else}
     <Statistics {data} {token} />
     <Distribution {data} {token} {hex} />
@@ -48,6 +53,11 @@
   .line-count {
     margin-left: auto;
     color: #888;
+  }
+  .coverage {
+    color: #555;
+    font-size: 0.9em;
+    margin-left: 4px;
   }
   .title,
   .line-count {

@@ -1,9 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Moment from "moment";
-  import { extendMoment } from "moment-range";
-
-  const moment = extendMoment(Moment);
+  import { timestampRange, makeTimeSlots, nearestSlotIndex } from "./timeSlots";
 
   type SortableValueCount = {
     value: string;
@@ -20,39 +18,20 @@
       return {};
     }
 
-    const timeSlotTimestamps = timeSlots.map((timeSlot) => {
-      return new Date(timeSlot).getTime();
-    });
+    const slotMs = timeSlots.map((s) => new Date(s).getTime());
 
     const days: ValueCounts = {};
-    for (let i = 0; i < data.extraction.length; i++) {
-      const params = data.extraction[i].params;
-      // if (token in params && timestampToken in params) continue;
-      if (!(token in params)) {
-        continue;
-      }
+    for (const extraction of data.extraction) {
+      if (!(token in extraction.params)) continue;
 
-      const timestamp = new Date(params[timestampToken].value).getTime();
+      const timestamp = new Date(
+        extraction.params[timestampToken].value as string
+      ).getTime();
+      const slotIndex = nearestSlotIndex(timestamp, slotMs);
 
-      // Find timeslot index
-      const best = {
-        index: -1,
-        diff: Number.MAX_VALUE,
-      };
-      for (let j = 0; j < timeSlotTimestamps.length; j++) {
-        const diff = Math.abs(timeSlotTimestamps[j] - timestamp);
-        if (diff < best.diff) {
-          best.index = j;
-          best.diff = diff;
-        } else {
-          break;
-        }
-      }
-
-      const value = params[token].value;
+      const value = extraction.params[token].value;
       days[value] ||= Array(timeSlots.length).fill(0);
-
-      days[value][best.index] += 1;
+      days[value][slotIndex]++;
     }
 
     return days;
@@ -72,7 +51,7 @@
     return sortedValues;
   }
 
-  function valueCountMax(days: any) {
+  function valueCountMax(days: ValueCounts) {
     const valueMax: ValueCount = {};
     for (const value in days) {
       valueMax[value] = Math.max(...days[value]);
@@ -81,42 +60,15 @@
     return valueMax;
   }
 
-  function timestampRange(data: Data, timestampToken: string | null) {
-    if (timestampToken === null) {
-      return [null, null] as const;
-    }
-
-    let maxDate = new Date(-8640000000000000);
-    let minDate = new Date(8640000000000000);
-
-    for (let i = 0; i < data.extraction.length; i++) {
-      const params = data.extraction[i].params;
-      if (!(timestampToken in params)) {
-        continue;
-      }
-      const timestamp = new Date(params[timestampToken].value);
-      if (timestamp > maxDate) {
-        maxDate = timestamp;
-      }
-      if (timestamp < minDate) {
-        minDate = timestamp;
-      }
-    }
-
-    return [minDate, maxDate] as const;
-  }
-
   let sortedValueCounts: SortableValueCount[];
   let valueCounts: ValueCounts;
   let valueMax: ValueCount;
   let timeSlots: Moment.Moment[];
   onMount(() => {
-    const [minDate, maxDate] = timestampRange(data, timestampToken);
-    if (minDate === null || maxDate === null) {
-      return;
-    }
-    const dateRange = moment.range(minDate, maxDate);
-    timeSlots = Array.from(dateRange.by("minutes", { step: 50 }));
+    const range = timestampRange(data, timestampToken);
+    if (!range) return;
+    const [min, max] = range;
+    timeSlots = makeTimeSlots(min, max, 50);
 
     valueCounts = valueByTimeSlot(data, token, timestampToken, timeSlots);
     sortedValueCounts = sortedValueByTimeSlot(valueCounts);
@@ -136,7 +88,7 @@
             class="day"
             title={`${slot.toLocaleString()}\n${
               valueCounts[value.value][i]
-            } occurances`}
+            } occurrences`}
             style={valueCounts[value.value][i] == 0
               ? `background: #101010`
               : `opacity: ${
@@ -169,7 +121,6 @@
     flex: 1;
     margin: 0 1px;
     border-radius: 2px;
-    /* background: #0070f3; */
     background: var(--highlight);
   }
   .value-name {
@@ -182,7 +133,6 @@
   .time-range {
     display: flex;
     font-size: 0.75em;
-    color: #a1a1a1;
     color: rgb(68, 68, 68);
   }
   .time {

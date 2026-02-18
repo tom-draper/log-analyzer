@@ -1,12 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  function asc(arr: number[]) {
-    return arr.sort((a, b) => a - b);
-  }
-
   function quantile(arr: number[], q: number) {
-    const sorted = asc(arr);
+    const sorted = arr.slice().sort((a, b) => a - b);
     const pos = (sorted.length - 1) * q;
     const base = Math.floor(pos);
     const rest = pos - base;
@@ -34,9 +30,11 @@
   }
 
   type Statistics = {
-    median: number;
+    min: number;
     lq: number;
+    median: number;
     uq: number;
+    max: number;
     p95: number;
     p99: number;
   };
@@ -44,12 +42,14 @@
   let statistics: Statistics;
   onMount(() => {
     const values = numericValues(data, token);
-    values.sort();
     if (values.length == 0) return;
+    values.sort((a, b) => a - b);
     statistics = {
-      median: values[Math.floor(values.length / 2)],
+      min: values[0],
       lq: quantile(values, 0.25),
+      median: quantile(values, 0.5),
       uq: quantile(values, 0.75),
+      max: values[values.length - 1],
       p95: quantile(values, 0.95),
       p99: quantile(values, 0.99),
     };
@@ -59,6 +59,10 @@
 
 {#if statistics}
   <div class="container">
+    <div class="statistic">
+      <div class="value">{statistics.min.toLocaleString()}</div>
+      <div class="label">Min</div>
+    </div>
     <div class="statistic">
       <div class="value">{statistics.lq.toLocaleString()}</div>
       <div class="label">LQ</div>
@@ -70,6 +74,10 @@
     <div class="statistic">
       <div class="value">{statistics.uq.toLocaleString()}</div>
       <div class="label">UQ</div>
+    </div>
+    <div class="statistic">
+      <div class="value">{statistics.max.toLocaleString()}</div>
+      <div class="label">Max</div>
     </div>
     <div class="statistic">
       <div class="value">{statistics.p95.toLocaleString()}</div>
@@ -90,16 +98,18 @@
     margin: 3em 0 2em;
     padding: 2rem;
     display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 0;
   }
   .statistic {
     flex: 1;
+    min-width: 80px;
     font-size: 1.6em;
     display: grid;
     place-items: center;
   }
   .value {
     font-weight: 600;
-    /* font-family: Poppins; */
   }
   .label {
     font-size: 0.62em;

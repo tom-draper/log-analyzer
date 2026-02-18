@@ -20,7 +20,7 @@
       othersTotal += sortedFreq[i].count;
     }
 
-    // Cap at 10 values
+    // Cap at numBars values
     sortedFreq = sortedFreq.slice(0, numBars);
     if (othersTotal > 0) {
       sortedFreq.push({ token: "Others", count: othersTotal, width: 0 });
@@ -71,8 +71,11 @@
 {#if bars.length > 0}
   <div class="freq-graph">
     {#each bars as bar}
-      <div class="token-frequency" title={bar.count.toLocaleString()}>
-        <div class="bar" style="width: {bar.width}%">{bar.token}</div>
+      <div class="token-frequency">
+        <div class="bar-wrap">
+          <div class="bar" style="width: {bar.width}%">{bar.token}</div>
+        </div>
+        <div class="count">{bar.count.toLocaleString()}</div>
       </div>
     {/each}
   </div>
@@ -80,7 +83,13 @@
 
 <style scoped>
   .token-frequency {
+    display: flex;
+    align-items: center;
     margin: 2px 0;
+  }
+  .bar-wrap {
+    flex: 1;
+    min-width: 0;
   }
   .freq-graph {
     overflow: auto;
@@ -89,7 +98,6 @@
     background: #0070f3;
     background: var(--highlight);
     color: #444;
-    
     border-radius: 4px;
     margin: 5px 0;
     padding: 1px 10px;
@@ -98,7 +106,10 @@
     text-wrap: nowrap;
     box-sizing: border-box;
   }
-  .token-frequency {
-    position: relative;
+  .count {
+    font-size: 0.8em;
+    color: #666;
+    padding-left: 10px;
+    white-space: nowrap;
   }
 </style>

@@ -61,7 +61,7 @@
     gap: 6px;
   }
   .color-picker {
-    --input-size: 14px;
+    --input-size: 12px;
     margin-bottom: 7px;
   }
   .logo {

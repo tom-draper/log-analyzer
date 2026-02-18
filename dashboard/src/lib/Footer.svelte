@@ -36,7 +36,7 @@
     border-radius: 50%;
     flex-shrink: 0;
     align-self: flex-end;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
   }
   .github-icon:hover {
     filter: contrast(0.3);
