@@ -34,8 +34,8 @@ In `config/config.json`, define some simple patterns featured in your log files 
 Run the log analyzer, providing the path to your log file.
 
 ```bash
-> make build
-> ./log-analyzer ./tests/data/logs/demo.log
+go build -o log-analyzer .
+./log-analyzer ./tests/data/logs/demo.log
 ```
 
 The tokens are extracted from the log file and their data types inferred. Any timestamps are parsed without needing to specify a format.
@@ -201,7 +201,7 @@ Some tokens with a numeric value may be equivalent to other tokens after perform
 You can specify a path to the config file containing your patterns following the `-c` or `--config` flag. The config path defaults to `config/config.json`.
 
 ```bash
-> ./log-analyzer -c ./tests/data/configs/config.json ./tests/data/logs/demo.log
+./log-analyzer -c ./tests/data/configs/config.json ./tests/data/logs/demo.log
 ```
 
 ### Port
@@ -209,7 +209,7 @@ You can specify a path to the config file containing your patterns following the
 The dashboard defaults to port `3000`. You can specify a different port with the `-P` or `--port` flag.
 
 ```bash
-> ./log-analyzer -P 8080 ./tests/data/logs/demo.log
+./log-analyzer -P 8080 ./tests/data/logs/demo.log
 ```
 
 ### Config Test
@@ -217,7 +217,16 @@ The dashboard defaults to port `3000`. You can specify a different port with the
 Once you have your patterns together, you can perform a test run by including the `-t` or `--test` flag and the extracted result of each line will be written to json file in the current directory.
 
 ```bash
-> ./log-analyzer ./tests/data/logs/demo.log --test
+./log-analyzer ./tests/data/logs/demo.log --test
+```
+
+## Docker
+
+Build and run using Docker. Mount your log directory and map the port to access the dashboard from your host.
+
+```bash
+docker build -t log-analyzer .
+docker run -v /path/to/logs:/logs -p 3000:3000 log-analyzer /logs/app.log
 ```
 
 ## Additional Tools
@@ -275,15 +284,6 @@ func main() {
 
     parse.DisplayLines(extraction)
 }
-```
-
-## Docker
-
-Build and run using Docker. Mount your log directory and map the port to access the dashboard from your host.
-
-```bash
-> docker build -t log-analyzer .
-> docker run -v /path/to/logs:/logs -p 3000:3000 log-analyzer /logs/app.log
 ```
 
 ## Contributions
