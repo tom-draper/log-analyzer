@@ -91,6 +91,15 @@ Dashboard running at http://localhost:3000/
 
 ![Dashboard](https://github.com/tom-draper/log-analyzer/assets/41476809/6fd6cf34-f5f5-4148-9d40-e86288751c6b)
 
+## Docker
+
+If preferred, you can build and run using Docker. Mount your log directory and map the port to access the dashboard from your host.
+
+```bash
+docker build -t log-analyzer .
+docker run -v /path/to/logs:/logs -p 3000:3000 log-analyzer /logs/app.log
+```
+
 ## Advanced Config
 
 ### Data Types
@@ -218,15 +227,6 @@ Once you have your patterns together, you can perform a test run by including th
 
 ```bash
 ./log-analyzer ./tests/data/logs/demo.log --test
-```
-
-## Docker
-
-Build and run using Docker. Mount your log directory and map the port to access the dashboard from your host.
-
-```bash
-docker build -t log-analyzer .
-docker run -v /path/to/logs:/logs -p 3000:3000 log-analyzer /logs/app.log
 ```
 
 ## Additional Tools
