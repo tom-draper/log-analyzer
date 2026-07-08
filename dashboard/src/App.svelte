@@ -25,9 +25,8 @@
 
     tokens.sort((a, b) => {
       // Force timestamp token to top of list
-      if (a.token === timestampToken) {
-        return Number.MIN_SAFE_INTEGER;
-      }
+      if (a.token === timestampToken) return -1;
+      if (b.token === timestampToken) return 1;
       return b.count - a.count;
     });
 
@@ -62,9 +61,8 @@
 
     tokens.sort((a, b) => {
       // Force timestamp token to top of list
-      if (a.token === timestampToken) {
-        return Number.MIN_SAFE_INTEGER;
-      }
+      if (a.token === timestampToken) return -1;
+      if (b.token === timestampToken) return 1;
       return b.count - a.count;
     });
 
@@ -110,14 +108,21 @@
     for (let i = 0; i < data.extraction.length; i++) {
       const params = data.extraction[i].params;
       for (let [token, conversion] of Object.entries(data.config.conversions)) {
-        if (!(token in params) || typeof params[token] !== "number") {
+        if (!(token in params)) {
           continue;
         }
-        const value = params[token];
-        if (typeof value !== "number") {
+        const param = params[token];
+        if (typeof param.value !== "number") {
           continue;
         }
-        params[conversion.token].value = conversion.multiplier * value;
+        const converted = conversion.multiplier * param.value;
+        // Group the converted value under the target token, creating it if the
+        // line doesn't already have it.
+        if (conversion.token in params) {
+          params[conversion.token].value = converted;
+        } else {
+          params[conversion.token] = { value: converted, type: param.type };
+        }
         delete params[token];
       }
     }
@@ -173,7 +178,6 @@
       data = demo;
     }
     performConversions(data);
-    console.log(data);
 
     timestampToken = identifyTimestampToken(data);
 
