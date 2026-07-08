@@ -2,24 +2,34 @@ package parse
 
 import (
 	"fmt"
+	"io"
+	"os"
 )
 
 func DisplayLines(extraction []Extraction) {
-	fmt.Printf("%d lines\n", len(extraction))
+	fprintLines(os.Stdout, extraction)
+}
+
+func DisplayTestLines(extraction []Extraction) {
+	fprintTestLines(os.Stdout, extraction)
+}
+
+func fprintLines(w io.Writer, extraction []Extraction) {
+	fmt.Fprintf(w, "%d lines\n", len(extraction))
 	for i, e := range extraction {
-		fmt.Printf("line %d\n", i+1)
+		fmt.Fprintf(w, "line %d\n", i+1)
 		for k, v := range e.Params {
-			fmt.Printf("	%s(%s): %v\n", k, v.Type, v.Value)
+			fmt.Fprintf(w, "	%s(%s): %v\n", k, v.Type, v.Value)
 		}
 	}
 }
 
-func DisplayTestLines(extraction []Extraction) {
-	fmt.Printf("%d lines\n", len(extraction))
+func fprintTestLines(w io.Writer, extraction []Extraction) {
+	fmt.Fprintf(w, "%d lines\n", len(extraction))
 	for _, e := range extraction {
-		fmt.Printf("line %d: %s\n", e.LineNumber+1, e.Line)
+		fmt.Fprintf(w, "line %d: %s\n", e.LineNumber+1, e.Line)
 		for k, v := range e.Params {
-			fmt.Printf("	%s(%s): %v\n", k, v.Type, v.Value)
+			fmt.Fprintf(w, "	%s(%s): %v\n", k, v.Type, v.Value)
 		}
 	}
 }

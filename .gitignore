@@ -1,5 +1,5 @@
 /test.log
-/config/config *.json
+/config/config*.json
 /test-*.json
 .vscode
 log-analyzer
