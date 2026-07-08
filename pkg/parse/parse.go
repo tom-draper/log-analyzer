@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"regexp"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -98,7 +99,10 @@ func tryPattern(line string, pattern string, tokens []string) map[string]Param {
 	// Convert wildcard asterisk into underscore _ so we only have to deal
 	// with one wildcard char
 	regEx = strings.ReplaceAll(regEx, "*", "_")
-	tokens = append(tokens, "_")
+	// Work on a copy of the tokens slice; the append and in-place sort below
+	// would otherwise mutate the shared config.Tokens, which is unsafe when
+	// lines are parsed concurrently.
+	tokens = append(append([]string{}, tokens...), "_")
 	// Sort tokens to try largest first and avoid matching substrings
 	sort.Slice(tokens, func(i, j int) bool {
 		return len(tokens[i]) > len(tokens[j])
@@ -216,57 +220,6 @@ func calcExtractionRank(params map[string]Param, patternTokenCounts int) float64
 type PatternRank struct {
 	rank   float64
 	params map[string]Param
-}
-
-// parseLine extracts token parameters from each line using the most appropriate
-// pattern in the given config.
-func parseLineSingle(line string, config *Config) (map[string]Param, string) {
-	// Attempt to parse the line against each pattern in config, only taking the best
-	var patternUsed string
-	best := PatternRank{
-		rank:   0.0,
-		params: make(map[string]Param),
-	}
-	for _, pattern := range config.Patterns {
-		patternTokenCounts := tokenCounts(pattern, config.Tokens)
-		// If pattern containing no tokens is a plain text match for line
-		// Ensure usage of this pattern is recorded even if rank may not be best
-		if line == pattern && patternTokenCounts == 0 {
-			patternUsed = pattern
-			break
-		}
-		// For zero-token patterns the rank formula always returns 0, so fall
-		// back to a direct regex match.
-		if patternTokenCounts == 0 {
-			if patternMatchesLine(line, pattern) && best.rank == 0 {
-				best.rank = 0.5
-				patternUsed = pattern
-			}
-			continue
-		}
-		params := tryPattern(line, pattern, config.Tokens)
-		rank := calcExtractionRank(params, patternTokenCounts)
-		if rank > best.rank {
-			best.rank = rank
-			best.params = params
-			patternUsed = pattern
-		}
-
-		// Try pattern again after eliminating multi-spaces and tab characters
-		if multiSpaceRegEx.MatchString(line) {
-			singleSpaceLine := multiSpaceRegEx.ReplaceAllString(strings.ReplaceAll(line, "\t", " "), " ")
-			singleSpacePattern := multiSpaceRegEx.ReplaceAllString(strings.ReplaceAll(pattern, "\t", " "), " ")
-			params = tryPattern(singleSpaceLine, singleSpacePattern, config.Tokens)
-			rank := calcExtractionRank(params, patternTokenCounts)
-			if rank > best.rank {
-				best.rank = rank
-				best.params = params
-				patternUsed = pattern
-			}
-		}
-	}
-
-	return best.params, patternUsed
 }
 
 // parseLine extracts token parameters from each line using the most appropriate
@@ -393,36 +346,6 @@ func splitLines(text string) []string {
 	return strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n")
 }
 
-// ParseFast is identical to Parse but run concurrently.
-func ParseFast(logtext string, config *Config) ([]Extraction, error) {
-	lines := splitLines(logtext)
-	return ParseLinesFast(lines, config)
-}
-
-// ParseLinesFast is identical to ParseLines but run concurrently.
-func ParseLinesFast(lines []string, config *Config) ([]Extraction, error) {
-	extraction := make([]Extraction, len(lines))
-	var wg sync.WaitGroup
-	for i, line := range lines {
-		wg.Add(1)
-		go func(line string, extraction []Extraction, config *Config, lineIdx int, wg *sync.WaitGroup) {
-			defer wg.Done()
-			params, patternUsed := parseLineSingle(line, config)
-			if patternUsed == "" {
-				log.Printf("no pattern matched line %d: \"%s\"\n", lineIdx+1, line)
-			}
-			extraction[lineIdx] = Extraction{
-				Params:     params,
-				Pattern:    patternUsed,
-				LineNumber: lineIdx,
-				Line:       line,
-			}
-		}(line, extraction, config, i, &wg)
-	}
-	wg.Wait()
-	return extraction, nil
-}
-
 // Parse separates the log text into lines and attempts to extract tokens
 // parameters from each line using the most appropriate pattern in the given config.
 func Parse(logtext string, config *Config) ([]Extraction, error) {
@@ -430,11 +353,34 @@ func Parse(logtext string, config *Config) ([]Extraction, error) {
 	return ParseLines(lines, config)
 }
 
-// ParseLines attempts to extract tokens parameters from each line using the
-// most appropriate pattern in the given config.
+// hasMultiLinePatterns reports whether any pattern in the config spans more than
+// one line. Multi-line patterns require the sequential parser so that lines
+// consumed by a match are skipped correctly.
+func hasMultiLinePatterns(config *Config) bool {
+	for _, pattern := range config.Patterns {
+		if strings.Contains(pattern, "\n") {
+			return true
+		}
+	}
+	return false
+}
+
+// ParseLines attempts to extract token parameters from each line using the most
+// appropriate pattern in the given config. When the config contains no
+// multi-line patterns the lines are parsed concurrently; otherwise a sequential
+// pass is used so lines consumed by a multi-line match are skipped correctly.
+// Both paths produce identical, in-order results.
 func ParseLines(lines []string, config *Config) ([]Extraction, error) {
+	if hasMultiLinePatterns(config) {
+		return parseLinesSequential(lines, config)
+	}
+	return parseLinesConcurrent(lines, config)
+}
+
+func parseLinesSequential(lines []string, config *Config) ([]Extraction, error) {
 	extraction := make([]Extraction, 0, len(lines))
 	var skipLines int
+	var unmatched int
 	for i, line := range lines {
 		if skipLines > 0 {
 			skipLines--
@@ -445,7 +391,7 @@ func ParseLines(lines []string, config *Config) ([]Extraction, error) {
 		}
 		params, patternUsed := parseLine(lines, i, config)
 		if patternUsed == "" {
-			log.Printf("no pattern matched line %d: \"%s\"\n", i+1, line)
+			unmatched++
 		}
 		extraction = append(extraction, Extraction{
 			Params:     params,
@@ -456,7 +402,68 @@ func ParseLines(lines []string, config *Config) ([]Extraction, error) {
 		// If pattern used was multi-line, skip the next lines
 		skipLines = patternLineCount(patternUsed) - 1
 	}
+	logUnmatched(unmatched, len(extraction))
 	return extraction, nil
+}
+
+func parseLinesConcurrent(lines []string, config *Config) ([]Extraction, error) {
+	extraction := make([]Extraction, len(lines))
+	keep := make([]bool, len(lines))
+
+	workers := runtime.NumCPU()
+	if workers < 1 {
+		workers = 1
+	}
+	jobs := make(chan int, workers)
+	var wg sync.WaitGroup
+	for w := 0; w < workers; w++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for i := range jobs {
+				line := lines[i]
+				if line == "" {
+					continue
+				}
+				params, patternUsed := parseLine(lines, i, config)
+				extraction[i] = Extraction{
+					Params:     params,
+					Pattern:    patternUsed,
+					LineNumber: i,
+					Line:       line,
+				}
+				keep[i] = true
+			}
+		}()
+	}
+	for i := range lines {
+		jobs <- i
+	}
+	close(jobs)
+	wg.Wait()
+
+	// Compact into an in-order slice, dropping skipped (empty) lines.
+	result := make([]Extraction, 0, len(lines))
+	var unmatched int
+	for i := range extraction {
+		if !keep[i] {
+			continue
+		}
+		if extraction[i].Pattern == "" {
+			unmatched++
+		}
+		result = append(result, extraction[i])
+	}
+	logUnmatched(unmatched, len(result))
+	return result, nil
+}
+
+// logUnmatched prints a single summary line rather than one message per
+// unmatched line, which would otherwise flood the terminal on large log files.
+func logUnmatched(unmatched, total int) {
+	if unmatched > 0 {
+		log.Printf("%d of %d lines did not match any pattern in the config", unmatched, total)
+	}
 }
 
 // ParseFile reads the log text from the given file path, separates the text
