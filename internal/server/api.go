@@ -27,7 +27,9 @@ func Start(data *Data, port string, indexHTML []byte) {
 		jsonString, err := json.Marshal(data)
 		if err != nil {
 			render.Render(w, r, ErrInternalServerError(err))
+			return
 		}
+		w.Header().Set("Content-Type", "application/json")
 		w.Write(jsonString)
 	})
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {

@@ -12,64 +12,108 @@ import (
 //go:embed dashboard/dist/index.html
 var indexHTML []byte
 
+const version = "1.0.0"
+
+const usage = `Log Analyzer - turn unstructured log files into a dashboard.
+
+Usage:
+  log-analyzer [options] <log-file> [log-file...]
+
+Options:
+  -c, --config <path>   Path to the config file (default: ./config/config.json)
+  -P, --port <port>     Port for the dashboard (default: 3000)
+  -t, --test            Test config against the log file(s); write extraction to JSON
+  -p, --print           Print extracted tokens for each line to the terminal
+  -h, --help            Show this help message
+  -v, --version         Show version information
+
+Example:
+  log-analyzer ./logs/app.log
+  log-analyzer -c ./config/config.json -P 8080 ./logs/app.log
+`
+
+type options struct {
+	logPaths   []string
+	configPath string
+	port       string
+	test       bool
+	print      bool
+	help       bool
+	version    bool
+}
+
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("no log file paths provided\nprovide log file path(s) as command-line arguments\n\nexample:\n./main ./logs/postgres-main.log ./logs/postgres-1.log")
+	opts, err := parseArgs(os.Args[1:])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		fmt.Fprintln(os.Stderr, "\nrun `log-analyzer --help` for usage")
+		os.Exit(2)
+	}
+
+	if opts.help {
+		fmt.Print(usage)
+		return
+	}
+	if opts.version {
+		fmt.Printf("log-analyzer %s\n", version)
 		return
 	}
 
-	logPaths, configPath, port, test, printLines := getCommandLineArgs()
-	// Default to ./config.json
-	if configPath == "" {
-		configPath = "./config/config.json"
+	if len(opts.logPaths) == 0 {
+		fmt.Fprintln(os.Stderr, "error: no log file path provided")
+		fmt.Fprintln(os.Stderr, "\nrun `log-analyzer --help` for usage")
+		os.Exit(2)
 	}
-	if port == "" {
-		port = "3000"
+
+	// Defaults
+	if opts.configPath == "" {
+		opts.configPath = "./config/config.json"
+	}
+	if opts.port == "" {
+		opts.port = "3000"
 	}
 
 	// Retrieve log line patterns from config file
-	config, err := parse.LoadConfig(configPath)
+	config, err := parse.LoadConfig(opts.configPath)
 	if err != nil {
-		fmt.Printf("failed to load patterns from %s\n", configPath)
-		return
+		fmt.Fprintf(os.Stderr, "error: failed to load config from %s: %s\n", opts.configPath, err)
+		os.Exit(1)
 	}
 
 	// If testing config against log file(s), run test
-	if test {
-		if len(logPaths) == 1 {
-			parse.ParseFileTest(logPaths[0], &config)
+	if opts.test {
+		if len(opts.logPaths) == 1 {
+			parse.ParseFileTest(opts.logPaths[0], &config)
 		} else {
-			parse.ParseFilesTest(logPaths, &config)
+			parse.ParseFilesTest(opts.logPaths, &config)
 		}
 		return
 	}
 
 	// Extract tokens from log files
 	var extraction []parse.Extraction
-	if len(logPaths) == 1 {
-		extraction, err = parse.ParseFile(logPaths[0], &config)
-		if err != nil {
-			fmt.Printf("unable to parse log file: %s\n", fmt.Sprint(err))
-		}
+	if len(opts.logPaths) == 1 {
+		extraction, err = parse.ParseFile(opts.logPaths[0], &config)
 	} else {
-		extraction, err = parse.ParseFiles(logPaths, &config)
-		if err != nil {
-			fmt.Printf("unable to parse log files: %s\n", fmt.Sprint(err))
-		}
+		extraction, err = parse.ParseFiles(opts.logPaths, &config)
+	}
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: unable to parse log file(s): %s\n", err)
+		os.Exit(1)
 	}
 
 	if len(extraction) == 0 {
-		fmt.Println("no lines extracted\nensure log file path is correct")
-		return
+		fmt.Fprintln(os.Stderr, "error: no lines extracted; ensure the log file path is correct")
+		os.Exit(1)
 	} else if !tokensExtracted(extraction) {
-		fmt.Println("no tokens extracted\nensure patterns in `config/config.json` are correct and all tokens are named")
-		return
+		fmt.Fprintf(os.Stderr, "error: no tokens extracted; ensure the patterns in %s are correct and all tokens are named\n", opts.configPath)
+		os.Exit(1)
 	}
 
-	if printLines {
+	if opts.print {
 		parse.DisplayLines(extraction)
 	}
-	analyze.Run(extraction, &config, port, indexHTML)
+	analyze.Run(extraction, &config, opts.port, indexHTML)
 }
 
 func tokensExtracted(extraction []parse.Extraction) bool {
@@ -81,31 +125,39 @@ func tokensExtracted(extraction []parse.Extraction) bool {
 	return false
 }
 
-func getCommandLineArgs() (logPaths []string, configPath string, port string, test bool, print bool) {
-	// Get log file paths from command-line arguments
-	logPaths = make([]string, 0)
-	for i := 1; i < len(os.Args); i++ {
-		arg := os.Args[i]
-		if arg == "-t" || arg == "--test" {
-			test = true
-			continue
-		} else if arg == "-p" || arg == "--print" || arg == "-d" || arg == "--display" {
-			print = true
-			continue
-		} else if arg == "-c" || arg == "--config" {
-			// Skip as path will be recorded next iteration
-			continue
-		} else if i > 1 && (os.Args[i-1] == "-c" || os.Args[i-1] == "--config") {
-			configPath = arg
-			continue
-		} else if arg == "-P" || arg == "--port" {
-			// Skip as port will be recorded next iteration
-			continue
-		} else if i > 1 && (os.Args[i-1] == "-P" || os.Args[i-1] == "--port") {
-			port = arg
-			continue
+// parseArgs parses command-line arguments, allowing flags and log file paths to
+// be intermixed in any order.
+func parseArgs(args []string) (options, error) {
+	var opts options
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+		switch arg {
+		case "-h", "--help":
+			opts.help = true
+		case "-v", "--version":
+			opts.version = true
+		case "-t", "--test":
+			opts.test = true
+		case "-p", "--print", "-d", "--display":
+			opts.print = true
+		case "-c", "--config":
+			if i+1 >= len(args) {
+				return opts, fmt.Errorf("%s flag requires a path argument", arg)
+			}
+			i++
+			opts.configPath = args[i]
+		case "-P", "--port":
+			if i+1 >= len(args) {
+				return opts, fmt.Errorf("%s flag requires a port argument", arg)
+			}
+			i++
+			opts.port = args[i]
+		default:
+			if len(arg) > 0 && arg[0] == '-' {
+				return opts, fmt.Errorf("unknown flag: %s", arg)
+			}
+			opts.logPaths = append(opts.logPaths, arg)
 		}
-		logPaths = append(logPaths, arg)
 	}
-	return logPaths, configPath, port, test, print
+	return opts, nil
 }

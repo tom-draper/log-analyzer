@@ -419,6 +419,7 @@ func ParseLinesFast(lines []string, config *Config) ([]Extraction, error) {
 			}
 		}(line, extraction, config, i, &wg)
 	}
+	wg.Wait()
 	return extraction, nil
 }
 

@@ -210,7 +210,7 @@ Some tokens with a numeric value may be equivalent to other tokens after perform
 You can specify a path to the config file containing your patterns following the `-c` or `--config` flag. The config path defaults to `config/config.json`.
 
 ```bash
-./log-analyzer -c ./tests/data/configs/config.json ./tests/data/logs/demo.log
+./log-analyzer -c ./tests/data/configs/Apache.json ./tests/data/logs/Apache.log
 ```
 
 ### Port
@@ -219,6 +219,14 @@ The dashboard defaults to port `3000`. You can specify a different port with the
 
 ```bash
 ./log-analyzer -P 8080 ./tests/data/logs/demo.log
+```
+
+### Print Extracted Tokens
+
+To print the tokens extracted from each line to the terminal, include the `-p` or `--print` flag. This is useful for quickly checking your patterns are extracting the values you expect.
+
+```bash
+./log-analyzer -p ./tests/data/logs/demo.log
 ```
 
 ### Config Test

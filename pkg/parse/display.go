@@ -2,7 +2,6 @@ package parse
 
 import (
 	"fmt"
-	"reflect"
 )
 
 func DisplayLines(extraction []Extraction) {
@@ -10,7 +9,7 @@ func DisplayLines(extraction []Extraction) {
 	for i, e := range extraction {
 		fmt.Printf("line %d\n", i+1)
 		for k, v := range e.Params {
-			fmt.Printf("	%s(%s): %v\n", k, reflect.TypeOf(v).String(), v)
+			fmt.Printf("	%s(%s): %v\n", k, v.Type, v.Value)
 		}
 	}
 }
@@ -20,7 +19,7 @@ func DisplayTestLines(extraction []Extraction) {
 	for _, e := range extraction {
 		fmt.Printf("line %d: %s\n", e.LineNumber+1, e.Line)
 		for k, v := range e.Params {
-			fmt.Printf("	%s(%s): %v\n", k, reflect.TypeOf(v).String(), v)
+			fmt.Printf("	%s(%s): %v\n", k, v.Type, v.Value)
 		}
 	}
 }
