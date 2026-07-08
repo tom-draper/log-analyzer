@@ -1,7 +1,9 @@
 import Moment from "moment";
 import { extendMoment } from "moment-range";
 
-const moment = extendMoment(Moment);
+// moment-range's types expect its own bundled moment build; cast to bridge the
+// two identical-at-runtime moment typings.
+const moment = extendMoment(Moment as any);
 
 export function timestampRange(
   data: Data,

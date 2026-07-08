@@ -75,7 +75,6 @@
       plotDiv,
       plotData,
       {
-        title: false,
         hovermode: "closest",
         plot_bgcolor: "transparent",
         paper_bgcolor: "transparent",
@@ -114,7 +113,7 @@
     if (plotDiv && plotData) {
       Plotly.restyle(plotDiv, {
         colorscale: [[[0, color], [0.4, color], [1, "#101010"]]],
-      });
+      } as any);
     }
   });
 

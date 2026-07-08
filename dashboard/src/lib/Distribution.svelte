@@ -40,7 +40,6 @@
         },
       ],
       {
-        title: false,
         hovermode: "closest",
         plot_bgcolor: "transparent",
         paper_bgcolor: "transparent",

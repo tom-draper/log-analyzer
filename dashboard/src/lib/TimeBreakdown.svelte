@@ -79,9 +79,9 @@
   let monthCounts: number[];
   let dayCounts: number[];
   let hourCounts: number[];
-  let monthDiv: HTMLDivElement = $state();
-  let dayDiv: HTMLDivElement = $state();
-  let hourDiv: HTMLDivElement = $state();
+  let monthDiv = $state<HTMLDivElement>();
+  let dayDiv = $state<HTMLDivElement>();
+  let hourDiv = $state<HTMLDivElement>();
 
   onMount(async () => {
     const timestamps = collectTimestamps();

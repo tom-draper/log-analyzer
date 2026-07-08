@@ -18,7 +18,7 @@
       return {};
     }
 
-    const slotMs = timeSlots.map((s) => new Date(s).getTime());
+    const slotMs = timeSlots.map((s) => s.valueOf());
 
     const days: ValueCounts = {};
     for (const extraction of data.extraction) {

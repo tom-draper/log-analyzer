@@ -9,7 +9,7 @@
     const [min, max] = range;
 
     const timeSlots = makeTimeSlots(min, max, 20);
-    const slotMs = timeSlots.map((s) => new Date(s).getTime());
+    const slotMs = timeSlots.map((s) => s.valueOf());
 
     const y: number[] = Array(timeSlots.length).fill(0);
     for (const extraction of data.extraction) {
@@ -18,7 +18,7 @@
       y[nearestSlotIndex(ts, slotMs)]++;
     }
 
-    const x = timeSlots.map((s) => new Date(s));
+    const x = timeSlots.map((s) => s.toDate());
 
     Plotly.newPlot(
       plotDiv,
@@ -33,7 +33,6 @@
         },
       ],
       {
-        title: false,
         hovermode: "closest",
         plot_bgcolor: "transparent",
         paper_bgcolor: "transparent",
