@@ -158,14 +158,14 @@ func FindGroupsFromLines(lines []string) []Group {
 		}
 	}
 
-	// Build edges weighted by Levenshtein distance between strings
-	edges := make([]Edge, 0)
-	for i, node1 := range nodes {
-		for j, node2 := range nodes {
-			if node1.id == node2.id {
-				continue
-			}
-			distance := metrics.NewLevenshtein().Distance(node1.value, node2.value)
+	// Build edges weighted by Levenshtein distance between strings. The
+	// distance is symmetric and all consumers treat edges as undirected, so
+	// only the unique pairs (j > i) are needed.
+	lev := metrics.NewLevenshtein()
+	edges := make([]Edge, 0, len(nodes)*(len(nodes)-1)/2)
+	for i := range nodes {
+		for j := i + 1; j < len(nodes); j++ {
+			distance := lev.Distance(nodes[i].value, nodes[j].value)
 			edges = append(edges, Edge{distance, &nodes[i], &nodes[j]})
 		}
 	}

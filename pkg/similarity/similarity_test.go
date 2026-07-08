@@ -1,7 +1,6 @@
 package similarity
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -89,8 +88,27 @@ var demoLines = [][]string{
 }
 
 func TestFindGroups(t *testing.T) {
-	for _, lines := range demoLines {
+	for tc, lines := range demoLines {
+		valid := make(map[string]struct{}, len(lines))
+		for _, line := range lines {
+			valid[line] = struct{}{}
+		}
+
 		groups := FindGroupsFromLines(lines)
-		fmt.Println(groups)
+		if len(groups) == 0 {
+			t.Errorf("case %d: expected at least one group, got none", tc)
+		}
+
+		for g, group := range groups {
+			if len(group.Members) == 0 {
+				t.Errorf("case %d group %d: group has no members", tc, g)
+			}
+			// Every grouped member must be one of the original input lines.
+			for _, member := range group.Members {
+				if _, ok := valid[member]; !ok {
+					t.Errorf("case %d group %d: member %q is not an input line", tc, g, member)
+				}
+			}
+		}
 	}
 }
