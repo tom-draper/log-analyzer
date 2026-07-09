@@ -104,13 +104,22 @@ func main() {
 		return
 	}
 
-	// Follow mode streams records as new lines arrive; it does not build the
-	// dashboard or a one-shot export.
+	// Follow mode tails the input as new lines arrive. With an export format,
+	// output path or print flag it streams records to the terminal/file;
+	// otherwise it serves a live-updating dashboard.
 	if opts.follow {
-		if err := runFollow(opts, &config); err != nil {
-			fmt.Fprintf(os.Stderr, "error: %s\n", err)
-			os.Exit(1)
+		if opts.format != "" || opts.output != "" || opts.print {
+			if err := runFollow(opts, &config); err != nil {
+				fmt.Fprintf(os.Stderr, "error: %s\n", err)
+				os.Exit(1)
+			}
+			return
 		}
+		if len(opts.logPaths) != 1 {
+			fmt.Fprintln(os.Stderr, "error: --follow requires exactly one input (a file path, or - for stdin)")
+			os.Exit(2)
+		}
+		analyze.RunFollow(opts.logPaths[0], &config, opts.port, indexHTML)
 		return
 	}
 

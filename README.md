@@ -259,7 +259,16 @@ cat ./tests/data/logs/demo.log | ./log-analyzer - --format csv
 
 ### Follow Mode
 
-Add the `--follow` flag to tail a growing log file (or a stdin stream) and emit each extracted record as new lines are appended. Streaming output supports `--format ndjson` or plain print output. This is useful for live monitoring, and composes with tools like `tail`.
+Add the `--follow` flag to tail a growing log file (or a stdin stream) as new lines are appended.
+
+On its own, `--follow` serves a **live-updating dashboard**: the charts refresh automatically as new lines arrive (updates are pushed to the browser over server-sent events).
+
+```bash
+# Live dashboard that updates as the log grows
+./log-analyzer --follow ./logs/app.log
+```
+
+Combined with an export format, output path or `--print`, follow instead **streams records** to the terminal or a file as they arrive. Streaming supports `--format ndjson` or plain print output.
 
 ```bash
 # Tail a file and stream extracted records as newline-delimited JSON

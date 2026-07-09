@@ -169,14 +169,9 @@
   let timestampToken: string | null;
   let hex: string = "#55ff5c";
   const production = import.meta.env.MODE === "production";
-  onMount(async () => {
-    if (production) {
-      const response = await fetch("/data");
-      data = await response.json();
-    } else {
-      //@ts-ignore
-      data = demo;
-    }
+
+  function applyData(d: Data) {
+    data = d;
     performConversions(data);
 
     timestampToken = identifyTimestampToken(data);
@@ -186,9 +181,28 @@
     const dataTypes = getDataTypeBreakdown(data);
     multiTypeTokens = getMultiTypeTokens(dataTypes);
 
-    tokenCounts = sortedTokenCounts(data);
-    const tokenDependencyCounts = sortedTokenDependencyCounts(data);
-    tokenCounts.push(...tokenDependencyCounts);
+    const counts = sortedTokenCounts(data);
+    counts.push(...sortedTokenDependencyCounts(data));
+    tokenCounts = counts;
+  }
+
+  async function loadData() {
+    const response = await fetch("/data");
+    applyData(await response.json());
+  }
+
+  onMount(async () => {
+    if (production) {
+      await loadData();
+      // Subscribe to live updates when the server is following a log source.
+      const events = new EventSource("/events");
+      events.addEventListener("update", () => {
+        loadData();
+      });
+    } else {
+      //@ts-ignore
+      applyData(demo);
+    }
   });
 </script>
 

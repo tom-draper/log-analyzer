@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -21,16 +20,43 @@ type Data struct {
 	Config     *parse.Config      `json:"config"`
 }
 
-func Start(data *Data, port string, indexHTML []byte) {
+func Start(store *Store, port string, indexHTML []byte) {
 	r := chi.NewRouter()
 	r.Get("/data", func(w http.ResponseWriter, r *http.Request) {
-		jsonString, err := json.Marshal(data)
+		jsonString, err := store.snapshotJSON()
 		if err != nil {
 			render.Render(w, r, ErrInternalServerError(err))
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(jsonString)
+	})
+	r.Get("/events", func(w http.ResponseWriter, r *http.Request) {
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			http.Error(w, "streaming unsupported", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+
+		ch := store.subscribe()
+		defer store.unsubscribe(ch)
+
+		// Establish the stream immediately.
+		fmt.Fprint(w, ": connected\n\n")
+		flusher.Flush()
+
+		for {
+			select {
+			case <-r.Context().Done():
+				return
+			case <-ch:
+				fmt.Fprint(w, "event: update\ndata: 1\n\n")
+				flusher.Flush()
+			}
+		}
 	})
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
