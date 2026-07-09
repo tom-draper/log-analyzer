@@ -284,26 +284,28 @@ Note that follow mode considers single-line patterns only, since streaming canno
 
 ### Pattern Identification
 
-With larger, more complex log files, identifying the patterns to extract may be challenging. The `suggest` command groups similar lines together so you can see the distinct log formats present and write a config pattern for each.
+With larger, more complex log files, identifying the patterns to extract may be challenging. The `suggest` command groups similar lines together, derives a starting pattern for each format by marking the fields that vary as tokens, and prints a ready-to-use config.
 
 ```bash
 ./log-analyzer suggest ./logs/app.log
 ```
 
 ```text
-Found 2 distinct log format(s):
+Found 1 distinct log format(s):
 
 Group 1 (842 lines)
-  [11/Dec/2023:11:01:34] 74.6.8.121 "GET /api/data HTTP/1.1" 200 182
+  example: [2023-10-25T16:24:31] 10.0.0.1 "GET /home HTTP/1.1" 200 512
+  pattern: [field1] field2 "field3" field4 field5
 
-Group 2 (13 lines)
-  [11/Dec/2023:11:01:32] 122.161.56.36 [error] request failed: error reading the headers
+Suggested config (rename the field tokens to something meaningful):
 
-Add a pattern to your config for each group, replacing the variable parts
-(timestamps, IPs, ids, ...) with tokens.
+{
+  "tokens": ["field1", "field2", "field3", "field4", "field5"],
+  "patterns": ["[field1] field2 \"field3\" field4 field5"]
+}
 ```
 
-The grouping is approximate (large variable fields such as user agents can cause a single format to be split across a few groups), but it gives a quick overview of the formats to target. Very large files are sampled to keep the comparison fast.
+Copy the suggested config into your config file and rename the `field` tokens to something meaningful. The grouping is approximate (large variable fields such as user agents can cause a single format to be split across a few groups), and a starting pattern is only generated for groups with at least two lines. Very large files are sampled to keep the comparison fast.
 
 The same grouping is also available programmatically via the similarity package.
 

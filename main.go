@@ -278,12 +278,123 @@ func printSuggestions(w io.Writer, groups []similarity.Group, total, sampled int
 		fmt.Fprintf(w, "Sampled %d of %d lines.\n", sampled, total)
 	}
 	fmt.Fprintf(w, "Found %d distinct log format(s):\n\n", len(groups))
+
+	counter := 0
+	var patterns, tokens []string
 	for i, g := range groups {
 		fmt.Fprintf(w, "Group %d (%d line%s)\n", i+1, len(g.Members), plural(len(g.Members)))
-		fmt.Fprintf(w, "  %s\n\n", representative(g.Members))
+		fmt.Fprintf(w, "  example: %s\n", representative(g.Members))
+		// A pattern can only be derived when there are at least two lines to
+		// compare (so the varying fields can be identified).
+		if len(g.Members) >= 2 {
+			if pattern, toks, ok := generatePattern(g.Members, &counter); ok {
+				fmt.Fprintf(w, "  pattern: %s\n", pattern)
+				patterns = append(patterns, pattern)
+				tokens = append(tokens, toks...)
+			}
+		}
+		fmt.Fprintln(w)
 	}
-	fmt.Fprint(w, "Add a pattern to your config for each group, replacing the variable parts\n"+
-		"(timestamps, IPs, ids, ...) with tokens.\n")
+
+	if len(patterns) > 0 {
+		fmt.Fprint(w, "Suggested config (rename the field tokens to something meaningful):\n\n")
+		encoder := json.NewEncoder(w)
+		encoder.SetIndent("", "  ")
+		encoder.Encode(parse.Config{Patterns: patterns, Tokens: tokens})
+	} else {
+		fmt.Fprint(w, "Add a pattern to your config for each group, replacing the variable parts\n"+
+			"(timestamps, IPs, ids, ...) with tokens.\n")
+	}
+}
+
+// segment is one unit of a log line: a bracketed group "[...]", a quoted group
+// "\"...\"", or a bare whitespace-delimited run. Treating bracketed and quoted
+// groups as single units keeps variable-length fields (such as quoted requests
+// or user agents) aligned across lines.
+type segment struct {
+	text string
+	kind byte // '[', '"', or 'b' for bare
+}
+
+func tokenizeLine(line string) []segment {
+	var segs []segment
+	for i := 0; i < len(line); {
+		if line[i] == ' ' || line[i] == '\t' {
+			i++
+			continue
+		}
+		switch line[i] {
+		case '[':
+			if j := strings.IndexByte(line[i:], ']'); j != -1 {
+				segs = append(segs, segment{line[i : i+j+1], '['})
+				i += j + 1
+				continue
+			}
+		case '"':
+			if j := strings.IndexByte(line[i+1:], '"'); j != -1 {
+				segs = append(segs, segment{line[i : i+1+j+1], '"'})
+				i += 1 + j + 1
+				continue
+			}
+		}
+		// Bare run until the next whitespace.
+		end := i
+		for end < len(line) && line[end] != ' ' && line[end] != '\t' {
+			end++
+		}
+		segs = append(segs, segment{line[i:end], 'b'})
+		i = end
+	}
+	return segs
+}
+
+// generatePattern derives a config pattern from a group of similar lines by
+// aligning them field-by-field: fields that are identical across every line
+// become literals, and fields that vary become tokens (field1, field2, ...,
+// numbered via counter so names stay unique across groups). Bracket and quote
+// delimiters are kept as literals around the token. It reports ok=false when
+// the lines do not share the same field structure.
+func generatePattern(lines []string, counter *int) (string, []string, bool) {
+	tokenized := make([][]segment, len(lines))
+	for i, line := range lines {
+		tokenized[i] = tokenizeLine(line)
+	}
+
+	fields := len(tokenized[0])
+	for _, segs := range tokenized {
+		if len(segs) != fields {
+			return "", nil, false
+		}
+	}
+
+	var parts, tokens []string
+	for pos := 0; pos < fields; pos++ {
+		constant := true
+		first := tokenized[0][pos].text
+		for _, segs := range tokenized {
+			if segs[pos].text != first {
+				constant = false
+				break
+			}
+		}
+		if constant {
+			parts = append(parts, first)
+			continue
+		}
+
+		*counter++
+		name := fmt.Sprintf("field%d", *counter)
+		tokens = append(tokens, name)
+		switch tokenized[0][pos].kind {
+		case '[':
+			parts = append(parts, "["+name+"]")
+		case '"':
+			parts = append(parts, "\""+name+"\"")
+		default:
+			parts = append(parts, name)
+		}
+	}
+	return strings.Join(parts, " "), tokens, true
 }
 
 // representative returns the shortest member, which is usually closest to the

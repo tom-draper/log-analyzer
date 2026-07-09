@@ -153,6 +153,80 @@ func TestPrintSuggestions(t *testing.T) {
 	}
 }
 
+func TestTokenizeLine(t *testing.T) {
+	segs := tokenizeLine(`[11/Dec:01] 1.2.3.4 "GET /a HTTP/1.1" 200`)
+	if len(segs) != 4 {
+		t.Fatalf("expected 4 segments, got %d: %+v", len(segs), segs)
+	}
+	if segs[0].kind != '[' || segs[0].text != "[11/Dec:01]" {
+		t.Errorf("segment 0 = %+v, want bracketed timestamp", segs[0])
+	}
+	if segs[2].kind != '"' || segs[2].text != `"GET /a HTTP/1.1"` {
+		t.Errorf("segment 2 = %+v, want quoted request as one unit", segs[2])
+	}
+}
+
+func TestGeneratePattern(t *testing.T) {
+	lines := []string{
+		`[11/Dec/2023:11:01:28] 220.203.23.174 "GET /a HTTP/1.1" 200 182`,
+		`[11/Dec/2023:11:01:29] 89.238.65.53 "POST /b HTTP/1.1" 201 145`,
+	}
+	counter := 0
+	pattern, tokens, ok := generatePattern(lines, &counter)
+	if !ok {
+		t.Fatal("expected generation to succeed for aligned lines")
+	}
+	// timestamp, ip, request, status, bytes all vary -> 5 tokens.
+	if len(tokens) != 5 {
+		t.Errorf("expected 5 tokens, got %d: %v (pattern %q)", len(tokens), tokens, pattern)
+	}
+	if !strings.Contains(pattern, "[field1]") {
+		t.Errorf("expected bracket kept as literal around token: %q", pattern)
+	}
+	if !strings.Contains(pattern, `"field3"`) {
+		t.Errorf("expected quotes kept as literal around token: %q", pattern)
+	}
+}
+
+func TestGeneratePatternMisaligned(t *testing.T) {
+	counter := 0
+	if _, _, ok := generatePattern([]string{"a b c", "a b"}, &counter); ok {
+		t.Error("expected generation to fail for lines with different field counts")
+	}
+}
+
+// TestGeneratedPatternParses is the important round-trip: a generated pattern,
+// fed back through the real parser, must actually match its source lines and
+// extract every token.
+func TestGeneratedPatternParses(t *testing.T) {
+	lines := []string{
+		`[t1] 1.1.1.1 "GET /a HTTP/1.1" 200 10`,
+		`[t2] 2.2.2.2 "POST /b HTTP/1.1" 404 20`,
+	}
+	counter := 0
+	pattern, tokens, ok := generatePattern(lines, &counter)
+	if !ok {
+		t.Fatal("expected generation to succeed")
+	}
+
+	config := parse.Config{Patterns: []string{pattern}, Tokens: tokens}
+	extraction, err := parse.ParseLines(lines, &config)
+	if err != nil {
+		t.Fatalf("parse error: %v", err)
+	}
+	if len(extraction) != len(lines) {
+		t.Fatalf("expected %d extractions, got %d", len(lines), len(extraction))
+	}
+	for i, e := range extraction {
+		if e.Pattern == "" {
+			t.Errorf("line %d did not match the generated pattern %q", i, pattern)
+		}
+		if len(e.Params) != len(tokens) {
+			t.Errorf("line %d extracted %d params, want %d: %+v", i, len(e.Params), len(tokens), e.Params)
+		}
+	}
+}
+
 func TestTokensExtracted(t *testing.T) {
 	none := []parse.Extraction{
 		{Params: map[string]parse.Param{}},
