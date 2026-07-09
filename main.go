@@ -352,8 +352,10 @@ func tokenizeLine(line string) []segment {
 // aligning them field-by-field: fields that are identical across every line
 // become literals, and fields that vary become tokens (field1, field2, ...,
 // numbered via counter so names stay unique across groups). Bracket and quote
-// delimiters are kept as literals around the token. It reports ok=false when
-// the lines do not share the same field structure.
+// delimiters are kept as literals around their content, and their content is
+// recursively sub-split into tokens too (so a quoted request becomes
+// "method endpoint version" rather than a single token). It reports ok=false
+// when the lines do not share the same field structure.
 func generatePattern(lines []string, counter *int) (string, []string, bool) {
 	tokenized := make([][]segment, len(lines))
 	for i, line := range lines {
@@ -369,32 +371,87 @@ func generatePattern(lines []string, counter *int) (string, []string, bool) {
 
 	var parts, tokens []string
 	for pos := 0; pos < fields; pos++ {
-		constant := true
-		first := tokenized[0][pos].text
-		for _, segs := range tokenized {
-			if segs[pos].text != first {
-				constant = false
-				break
-			}
+		texts := make([]string, len(tokenized))
+		for i, segs := range tokenized {
+			texts[i] = segs[pos].text
 		}
-		if constant {
-			parts = append(parts, first)
+		if allEqual(texts) {
+			parts = append(parts, texts[0])
 			continue
 		}
-
-		*counter++
-		name := fmt.Sprintf("field%d", *counter)
-		tokens = append(tokens, name)
-		switch tokenized[0][pos].kind {
-		case '[':
-			parts = append(parts, "["+name+"]")
-		case '"':
-			parts = append(parts, "\""+name+"\"")
-		default:
-			parts = append(parts, name)
-		}
+		part, toks := patternForSegment(texts, tokenized[0][pos].kind, counter)
+		parts = append(parts, part)
+		tokens = append(tokens, toks...)
 	}
 	return strings.Join(parts, " "), tokens, true
+}
+
+// patternForSegment produces the pattern fragment for a single varying field.
+// Bracketed and quoted fields keep their delimiters and have their inner
+// whitespace-separated content aligned into sub-tokens when every line splits
+// into the same number of parts; otherwise the whole field becomes one token.
+func patternForSegment(texts []string, kind byte, counter *int) (string, []string) {
+	if kind == '[' || kind == '"' {
+		open, close := "[", "]"
+		if kind == '"' {
+			open, close = "\"", "\""
+		}
+		rows := make([][]string, len(texts))
+		for i, t := range texts {
+			rows[i] = strings.Fields(t[1 : len(t)-1]) // strip delimiters
+		}
+		if len(rows[0]) >= 1 && sameRowLength(rows) {
+			inner, toks := alignFields(rows, counter)
+			return open + inner + close, toks
+		}
+		name := nextToken(counter)
+		return open + name + close, []string{name}
+	}
+	name := nextToken(counter)
+	return name, []string{name}
+}
+
+// alignFields aligns equal-length rows of tokens, emitting a literal where every
+// row agrees and a token where they differ.
+func alignFields(rows [][]string, counter *int) (string, []string) {
+	var parts, tokens []string
+	for pos := 0; pos < len(rows[0]); pos++ {
+		column := make([]string, len(rows))
+		for i, r := range rows {
+			column[i] = r[pos]
+		}
+		if allEqual(column) {
+			parts = append(parts, column[0])
+			continue
+		}
+		name := nextToken(counter)
+		parts = append(parts, name)
+		tokens = append(tokens, name)
+	}
+	return strings.Join(parts, " "), tokens
+}
+
+func nextToken(counter *int) string {
+	*counter++
+	return fmt.Sprintf("field%d", *counter)
+}
+
+func allEqual(values []string) bool {
+	for _, v := range values {
+		if v != values[0] {
+			return false
+		}
+	}
+	return true
+}
+
+func sameRowLength(rows [][]string) bool {
+	for _, r := range rows {
+		if len(r) != len(rows[0]) {
+			return false
+		}
+	}
+	return true
 }
 
 // representative returns the shortest member, which is usually closest to the

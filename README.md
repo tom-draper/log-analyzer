@@ -295,17 +295,17 @@ Found 1 distinct log format(s):
 
 Group 1 (842 lines)
   example: [2023-10-25T16:24:31] 10.0.0.1 "GET /home HTTP/1.1" 200 512
-  pattern: [field1] field2 "field3" field4 field5
+  pattern: [field1] field2 "field3 field4 HTTP/1.1" field5 field6
 
 Suggested config (rename the field tokens to something meaningful):
 
 {
-  "tokens": ["field1", "field2", "field3", "field4", "field5"],
-  "patterns": ["[field1] field2 \"field3\" field4 field5"]
+  "tokens": ["field1", "field2", "field3", "field4", "field5", "field6"],
+  "patterns": ["[field1] field2 \"field3 field4 HTTP/1.1\" field5 field6"]
 }
 ```
 
-Copy the suggested config into your config file and rename the `field` tokens to something meaningful. The grouping is approximate (large variable fields such as user agents can cause a single format to be split across a few groups), and a starting pattern is only generated for groups with at least two lines. Very large files are sampled to keep the comparison fast.
+Copy the suggested config into your config file and rename the `field` tokens to something meaningful. Bracketed and quoted groups are broken down into sub-tokens where their contents vary (so the quoted request above becomes separate method, endpoint and version fields), while parts that are constant across the group are kept as literals. The grouping is approximate (large variable fields such as user agents can cause a single format to be split across a few groups), and a starting pattern is only generated for groups with at least two lines. Very large files are sampled to keep the comparison fast.
 
 The same grouping is also available programmatically via the similarity package.
 

@@ -176,15 +176,20 @@ func TestGeneratePattern(t *testing.T) {
 	if !ok {
 		t.Fatal("expected generation to succeed for aligned lines")
 	}
-	// timestamp, ip, request, status, bytes all vary -> 5 tokens.
-	if len(tokens) != 5 {
-		t.Errorf("expected 5 tokens, got %d: %v (pattern %q)", len(tokens), tokens, pattern)
+	// timestamp, ip, and (method, endpoint) inside the quoted request, plus
+	// status and bytes vary -> 6 tokens; the HTTP version stays literal.
+	if len(tokens) != 6 {
+		t.Errorf("expected 6 tokens, got %d: %v (pattern %q)", len(tokens), tokens, pattern)
 	}
 	if !strings.Contains(pattern, "[field1]") {
 		t.Errorf("expected bracket kept as literal around token: %q", pattern)
 	}
-	if !strings.Contains(pattern, `"field3"`) {
-		t.Errorf("expected quotes kept as literal around token: %q", pattern)
+	if !strings.Contains(pattern, "HTTP/1.1") {
+		t.Errorf("expected constant HTTP version kept literal inside the quotes: %q", pattern)
+	}
+	// The quoted request is sub-split rather than a single token.
+	if strings.Contains(pattern, `"field3"`) {
+		t.Errorf("expected quoted request to be sub-split, not a single token: %q", pattern)
 	}
 }
 
