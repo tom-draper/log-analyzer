@@ -2,10 +2,17 @@ package similarity
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/adrg/strutil/metrics"
 )
+
+// cutRatio is the normalized edit-distance (distance / longest string) above
+// which two lines are considered too dissimilar to belong to the same group.
+// Cutting the minimum spanning tree at this threshold performs single-linkage
+// clustering: the remaining connected components are the groups.
+const cutRatio = 0.6
 
 type Group struct {
 	Members []string
@@ -40,50 +47,69 @@ func (e Edge) String() string {
 	return fmt.Sprintf("[%d]%s [%d]%s = %d", e.node1.id, e.node1.value, e.node2.id, e.node2.value, e.weight)
 }
 
-func extractGroups(edges []Edge) []Group {
-	best := struct {
-		node        Node
-		totalWeight int
-	}{}
-	for _, edge := range edges {
-		node1Connections := GetNodeConnections(*edge.node1, edges)
-		if node1Connections > best.totalWeight {
-			best.totalWeight = node1Connections
-			best.node = *edge.node1
+// extractGroups partitions the nodes into groups of similar lines by keeping
+// the minimum-spanning-tree edges that join sufficiently similar lines and
+// treating the resulting connected components as groups. Nodes that are not
+// joined to any other (because every incident edge was cut) form their own
+// singleton group. Groups are returned largest first.
+func extractGroups(nodes []Node, mst Graph) []Group {
+	idToIndex := make(map[int]int, len(nodes))
+	for index, node := range nodes {
+		idToIndex[node.id] = index
+	}
+
+	parent := make([]int, len(nodes))
+	for i := range parent {
+		parent[i] = i
+	}
+	var find func(int) int
+	find = func(i int) int {
+		for parent[i] != i {
+			parent[i] = parent[parent[i]] // path halving
+			i = parent[i]
 		}
-		node2Connections := GetNodeConnections(*edge.node2, edges)
-		if node2Connections > best.totalWeight {
-			best.totalWeight = node2Connections
-			best.node = *edge.node2
+		return i
+	}
+	union := func(a, b int) {
+		if ra, rb := find(a), find(b); ra != rb {
+			parent[ra] = rb
 		}
 	}
 
-	seen := make(map[int]string)
-	group := extractNodeGroup(best.node, edges, seen, best.totalWeight)
+	for _, edge := range mst {
+		if normalizedDistance(edge) <= cutRatio {
+			union(idToIndex[edge.node1.id], idToIndex[edge.node2.id])
+		}
+	}
 
-	return []Group{group}
+	membersByRoot := make(map[int][]string)
+	for index, node := range nodes {
+		root := find(index)
+		membersByRoot[root] = append(membersByRoot[root], node.value)
+	}
+
+	groups := make([]Group, 0, len(membersByRoot))
+	for _, members := range membersByRoot {
+		groups = append(groups, Group{Members: members})
+	}
+	sort.Slice(groups, func(i, j int) bool {
+		return len(groups[i].Members) > len(groups[j].Members)
+	})
+	return groups
 }
 
-func extractNodeGroup(node Node, graph Graph, seen map[int]string, weight int) Group {
-	edges := GetNodeEdges(node, graph)
-	for _, edge := range edges {
-		// If node has not been visited yet and the edge will take us to a more similar string
-		if _, ok := seen[edge.node1.id]; !ok && edge.weight < weight {
-			seen[edge.node1.id] = edge.node1.value
-			extractNodeGroup(*edge.node2, graph, seen, edge.weight)
-		}
-		if _, ok := seen[edge.node2.id]; !ok && edge.weight < weight {
-			seen[edge.node2.id] = edge.node2.value
-			extractNodeGroup(*edge.node1, graph, seen, edge.weight)
-		}
+// normalizedDistance returns an edge's edit distance scaled by the length of
+// the longer of its two strings, giving a 0..1 dissimilarity that is comparable
+// across lines of different lengths.
+func normalizedDistance(edge Edge) float64 {
+	longest := len(edge.node1.value)
+	if len(edge.node2.value) > longest {
+		longest = len(edge.node2.value)
 	}
-
-	//convert seen to group
-	group := Group{}
-	for id := range seen {
-		group.Members = append(group.Members, seen[id])
+	if longest == 0 {
+		return 0
 	}
-	return group
+	return float64(edge.weight) / float64(longest)
 }
 
 func GetNode(id int, graph Graph) (Node, error) {
@@ -173,7 +199,7 @@ func FindGroupsFromLines(lines []string) []Group {
 	// Find minimum spanning tree
 	mst := Kruskal(len(nodes), edges)
 
-	groups := extractGroups(mst)
+	groups := extractGroups(nodes, mst)
 
 	return groups
 }

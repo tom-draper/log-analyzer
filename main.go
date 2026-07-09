@@ -1,14 +1,17 @@
 package main
 
 import (
+	"bufio"
 	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/tom-draper/log-analyzer/pkg/analyze"
 	"github.com/tom-draper/log-analyzer/pkg/parse"
+	"github.com/tom-draper/log-analyzer/pkg/similarity"
 )
 
 //go:embed dashboard/dist/index.html
@@ -20,6 +23,10 @@ const usage = `Log Analyzer - turn unstructured log files into a dashboard.
 
 Usage:
   log-analyzer [options] <log-file> [log-file...]
+  log-analyzer suggest <log-file>
+
+Commands:
+  suggest               Group similar log lines to help you write config patterns
 
 Options:
   -c, --config <path>   Path to the config file (default: ./config/config.json)
@@ -57,6 +64,15 @@ type options struct {
 }
 
 func main() {
+	// Subcommands.
+	if len(os.Args) > 1 && os.Args[1] == "suggest" {
+		if err := runSuggest(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "error:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	opts, err := parseArgs(os.Args[1:])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
@@ -182,6 +198,111 @@ func runExport(opts options, extraction []parse.Extraction) error {
 		fmt.Fprintf(os.Stderr, "wrote %d records to %s\n", len(extraction), opts.output)
 	}
 	return nil
+}
+
+// maxSuggestSample caps how many lines are compared when suggesting patterns;
+// similarity grouping is O(n^2) in lines, so a representative sample keeps it fast.
+const maxSuggestSample = 100
+
+// runSuggest groups similar lines from a log file (or stdin) so the user can see
+// the distinct log formats present and write a config pattern for each.
+func runSuggest(args []string) error {
+	var path string
+	for _, a := range args {
+		if a == "-" || (len(a) > 0 && a[0] != '-') {
+			path = a
+			break
+		}
+	}
+	if path == "" {
+		return fmt.Errorf("usage: log-analyzer suggest <log-file>")
+	}
+
+	lines, err := readNonEmptyLines(path)
+	if err != nil {
+		return err
+	}
+	if len(lines) == 0 {
+		return fmt.Errorf("no lines read from %s", path)
+	}
+
+	sample := sampleLines(lines, maxSuggestSample)
+	groups := similarity.FindGroupsFromLines(sample)
+	printSuggestions(os.Stdout, groups, len(lines), len(sample))
+	return nil
+}
+
+func readNonEmptyLines(path string) ([]string, error) {
+	var r io.Reader = os.Stdin
+	if path != "-" {
+		file, err := os.Open(path)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+		r = file
+	}
+
+	br := bufio.NewReader(r)
+	var lines []string
+	for {
+		line, err := br.ReadString('\n')
+		if trimmed := strings.TrimRight(line, "\r\n"); trimmed != "" {
+			lines = append(lines, trimmed)
+		}
+		if err != nil {
+			if err == io.EOF {
+				return lines, nil
+			}
+			return lines, err
+		}
+	}
+}
+
+// sampleLines returns at most limit lines, evenly spaced across the input so the
+// sample reflects formats found throughout the file rather than just the start.
+func sampleLines(lines []string, limit int) []string {
+	if len(lines) <= limit {
+		return lines
+	}
+	sample := make([]string, 0, limit)
+	step := float64(len(lines)) / float64(limit)
+	for i := 0; i < limit; i++ {
+		sample = append(sample, lines[int(float64(i)*step)])
+	}
+	return sample
+}
+
+func printSuggestions(w io.Writer, groups []similarity.Group, total, sampled int) {
+	if sampled < total {
+		fmt.Fprintf(w, "Sampled %d of %d lines.\n", sampled, total)
+	}
+	fmt.Fprintf(w, "Found %d distinct log format(s):\n\n", len(groups))
+	for i, g := range groups {
+		fmt.Fprintf(w, "Group %d (%d line%s)\n", i+1, len(g.Members), plural(len(g.Members)))
+		fmt.Fprintf(w, "  %s\n\n", representative(g.Members))
+	}
+	fmt.Fprint(w, "Add a pattern to your config for each group, replacing the variable parts\n"+
+		"(timestamps, IPs, ids, ...) with tokens.\n")
+}
+
+// representative returns the shortest member, which is usually closest to the
+// group's underlying template.
+func representative(members []string) string {
+	rep := members[0]
+	for _, m := range members[1:] {
+		if len(m) < len(rep) {
+			rep = m
+		}
+	}
+	return rep
+}
+
+func plural(n int) string {
+	if n == 1 {
+		return ""
+	}
+	return "s"
 }
 
 func tokensExtracted(extraction []parse.Extraction) bool {

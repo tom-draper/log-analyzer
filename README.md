@@ -284,7 +284,28 @@ Note that follow mode considers single-line patterns only, since streaming canno
 
 ### Pattern Identification
 
-With larger, more complex log files, identifying the patterns to extract may be challenging. To help create these patterns, the similarity tool can be used to group the lines of a log file by similarity.
+With larger, more complex log files, identifying the patterns to extract may be challenging. The `suggest` command groups similar lines together so you can see the distinct log formats present and write a config pattern for each.
+
+```bash
+./log-analyzer suggest ./logs/app.log
+```
+
+```text
+Found 2 distinct log format(s):
+
+Group 1 (842 lines)
+  [11/Dec/2023:11:01:34] 74.6.8.121 "GET /api/data HTTP/1.1" 200 182
+
+Group 2 (13 lines)
+  [11/Dec/2023:11:01:32] 122.161.56.36 [error] request failed: error reading the headers
+
+Add a pattern to your config for each group, replacing the variable parts
+(timestamps, IPs, ids, ...) with tokens.
+```
+
+The grouping is approximate (large variable fields such as user agents can cause a single format to be split across a few groups), but it gives a quick overview of the formats to target. Very large files are sampled to keep the comparison fast.
+
+The same grouping is also available programmatically via the similarity package.
 
 ```text
 go get github.com/tom-draper/log-analyzer/pkg/similarity

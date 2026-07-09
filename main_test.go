@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/tom-draper/log-analyzer/pkg/parse"
+	"github.com/tom-draper/log-analyzer/pkg/similarity"
 )
 
 func TestParseArgs(t *testing.T) {
@@ -99,6 +102,54 @@ func TestParseArgsErrors(t *testing.T) {
 				t.Errorf("parseArgs(%v) expected error, got nil", tt.args)
 			}
 		})
+	}
+}
+
+func TestSampleLines(t *testing.T) {
+	lines := make([]string, 100)
+	for i := range lines {
+		lines[i] = string(rune('a' + i%26))
+	}
+
+	// Under the limit: returns everything unchanged.
+	if got := sampleLines(lines[:5], 10); len(got) != 5 {
+		t.Errorf("expected 5 lines, got %d", len(got))
+	}
+
+	// Over the limit: returns exactly limit lines, starting at the first.
+	got := sampleLines(lines, 10)
+	if len(got) != 10 {
+		t.Fatalf("expected 10 sampled lines, got %d", len(got))
+	}
+	if got[0] != lines[0] {
+		t.Errorf("expected sample to start at first line, got %q", got[0])
+	}
+}
+
+func TestRepresentative(t *testing.T) {
+	members := []string{"a longer line", "short", "medium one"}
+	if got := representative(members); got != "short" {
+		t.Errorf("expected shortest member, got %q", got)
+	}
+}
+
+func TestPrintSuggestions(t *testing.T) {
+	groups := []similarity.Group{
+		{Members: []string{"aaa", "aab", "aac"}},
+		{Members: []string{"zzz"}},
+	}
+	var buf bytes.Buffer
+	printSuggestions(&buf, groups, 500, 200)
+	out := buf.String()
+
+	if !strings.Contains(out, "Sampled 200 of 500 lines.") {
+		t.Errorf("expected sampling note, got: %q", out)
+	}
+	if !strings.Contains(out, "Found 2 distinct log format(s):") {
+		t.Errorf("expected group count, got: %q", out)
+	}
+	if !strings.Contains(out, "Group 1 (3 lines)") || !strings.Contains(out, "Group 2 (1 line)") {
+		t.Errorf("expected per-group counts with correct pluralisation, got: %q", out)
 	}
 }
 
