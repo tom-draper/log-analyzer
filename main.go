@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/tom-draper/log-analyzer/pkg/analyze"
@@ -22,6 +23,8 @@ Usage:
 Options:
   -c, --config <path>   Path to the config file (default: ./config/config.json)
   -P, --port <port>     Port for the dashboard (default: 3000)
+  -o, --output <path>   Write extracted data to a file instead of the dashboard
+  -f, --format <fmt>    Export format: json, ndjson or csv (implies headless)
   -t, --test            Test config against the log file(s); write extraction to JSON
   -p, --print           Print extracted tokens for each line to the terminal
   -h, --help            Show this help message
@@ -30,12 +33,16 @@ Options:
 Example:
   log-analyzer ./logs/app.log
   log-analyzer -c ./config/config.json -P 8080 ./logs/app.log
+  log-analyzer --format csv ./logs/app.log > app.csv
+  log-analyzer -o data.ndjson ./logs/app.log
 `
 
 type options struct {
 	logPaths   []string
 	configPath string
 	port       string
+	output     string
+	format     string
 	test       bool
 	print      bool
 	help       bool
@@ -113,7 +120,47 @@ func main() {
 	if opts.print {
 		parse.DisplayLines(extraction)
 	}
+
+	// Headless export mode: write structured data instead of serving the dashboard.
+	if opts.format != "" || opts.output != "" {
+		if err := runExport(opts, extraction); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	analyze.Run(extraction, &config, opts.port, indexHTML)
+}
+
+// runExport writes the extracted data to the configured output (a file, or
+// stdout when no output path is given) in the requested or inferred format.
+func runExport(opts options, extraction []parse.Extraction) error {
+	format := opts.format
+	if format == "" {
+		format = parse.FormatFromPath(opts.output)
+	}
+	if format == "" {
+		return fmt.Errorf("could not determine export format; pass --format json|ndjson|csv")
+	}
+
+	out := io.Writer(os.Stdout)
+	if opts.output != "" {
+		file, err := os.Create(opts.output)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", opts.output, err)
+		}
+		defer file.Close()
+		out = file
+	}
+
+	if err := parse.Export(out, format, extraction); err != nil {
+		return err
+	}
+	if opts.output != "" {
+		fmt.Fprintf(os.Stderr, "wrote %d records to %s\n", len(extraction), opts.output)
+	}
+	return nil
 }
 
 func tokensExtracted(extraction []parse.Extraction) bool {
@@ -152,6 +199,18 @@ func parseArgs(args []string) (options, error) {
 			}
 			i++
 			opts.port = args[i]
+		case "-o", "--output":
+			if i+1 >= len(args) {
+				return opts, fmt.Errorf("%s flag requires a path argument", arg)
+			}
+			i++
+			opts.output = args[i]
+		case "-f", "--format":
+			if i+1 >= len(args) {
+				return opts, fmt.Errorf("%s flag requires a format argument", arg)
+			}
+			i++
+			opts.format = args[i]
 		default:
 			if len(arg) > 0 && arg[0] == '-' {
 				return opts, fmt.Errorf("unknown flag: %s", arg)
