@@ -1,11 +1,13 @@
 package parse
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -466,19 +468,49 @@ func logUnmatched(unmatched, total int) {
 	}
 }
 
-// ParseFile reads the log text from the given file path, separates the text
-// into lines and attempts to extract tokens parameters from each line using the
-// most appropriate pattern in the given config.
+// readLines streams lines from r without loading the entire input into memory
+// as a single contiguous string. Trailing "\n" and "\r\n" are stripped and
+// blank lines are preserved so that line numbers stay accurate. Lines of
+// arbitrary length are supported.
+func readLines(r io.Reader) ([]string, error) {
+	br := bufio.NewReader(r)
+	lines := make([]string, 0)
+	for {
+		line, err := br.ReadString('\n')
+		if len(line) > 0 {
+			lines = append(lines, strings.TrimRight(line, "\r\n"))
+		}
+		if err != nil {
+			if err == io.EOF {
+				return lines, nil
+			}
+			return lines, err
+		}
+	}
+}
+
+// ParseReader streams log lines from r and extracts token parameters from each
+// line using the most appropriate pattern in the given config. Reading from a
+// stream avoids holding a second full-size copy of the log in memory, so it
+// scales to large files and also supports stdin.
+func ParseReader(r io.Reader, config *Config) ([]Extraction, error) {
+	lines, err := readLines(r)
+	if err != nil {
+		return nil, err
+	}
+	return ParseLines(lines, config)
+}
+
+// ParseFile streams the log text from the given file path and attempts to
+// extract token parameters from each line using the most appropriate pattern in
+// the given config.
 func ParseFile(path string, config *Config) ([]Extraction, error) {
-	body, err := os.ReadFile(path)
+	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	extraction, err := Parse(string(body), config)
-	if err != nil {
-		return nil, err
-	}
-	return extraction, err
+	defer file.Close()
+	return ParseReader(file, config)
 }
 
 // ParseFile reads the log text from each of the given file paths, separates the
