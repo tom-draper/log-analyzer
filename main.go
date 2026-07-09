@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -25,16 +26,21 @@ Options:
   -P, --port <port>     Port for the dashboard (default: 3000)
   -o, --output <path>   Write extracted data to a file instead of the dashboard
   -f, --format <fmt>    Export format: json, ndjson or csv (implies headless)
+      --follow          Stream records as new lines are appended (ndjson or print)
   -t, --test            Test config against the log file(s); write extraction to JSON
   -p, --print           Print extracted tokens for each line to the terminal
   -h, --help            Show this help message
   -v, --version         Show version information
+
+Use - as the log path to read from stdin.
 
 Example:
   log-analyzer ./logs/app.log
   log-analyzer -c ./config/config.json -P 8080 ./logs/app.log
   log-analyzer --format csv ./logs/app.log > app.csv
   log-analyzer -o data.ndjson ./logs/app.log
+  log-analyzer --follow --format ndjson ./logs/app.log
+  tail -f ./logs/app.log | log-analyzer --follow -
 `
 
 type options struct {
@@ -43,6 +49,7 @@ type options struct {
 	port       string
 	output     string
 	format     string
+	follow     bool
 	test       bool
 	print      bool
 	help       bool
@@ -97,13 +104,18 @@ func main() {
 		return
 	}
 
-	// Extract tokens from log files
-	var extraction []parse.Extraction
-	if len(opts.logPaths) == 1 {
-		extraction, err = parse.ParseFile(opts.logPaths[0], &config)
-	} else {
-		extraction, err = parse.ParseFiles(opts.logPaths, &config)
+	// Follow mode streams records as new lines arrive; it does not build the
+	// dashboard or a one-shot export.
+	if opts.follow {
+		if err := runFollow(opts, &config); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n", err)
+			os.Exit(1)
+		}
+		return
 	}
+
+	// Extract tokens from the log file(s), or stdin when the path is "-".
+	extraction, err := parseLogs(opts.logPaths, &config)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: unable to parse log file(s): %s\n", err)
 		os.Exit(1)
@@ -172,6 +184,83 @@ func tokensExtracted(extraction []parse.Extraction) bool {
 	return false
 }
 
+// parseLogs parses the given log paths, reading from stdin when the single path
+// is "-".
+func parseLogs(paths []string, config *parse.Config) ([]parse.Extraction, error) {
+	if len(paths) == 1 {
+		if paths[0] == "-" {
+			return parse.ParseReader(os.Stdin, config)
+		}
+		return parse.ParseFile(paths[0], config)
+	}
+	return parse.ParseFiles(paths, config)
+}
+
+// runFollow tails a single input (a file, or stdin when the path is "-") and
+// emits each extracted record as new lines arrive.
+func runFollow(opts options, config *parse.Config) error {
+	if len(opts.logPaths) != 1 {
+		return fmt.Errorf("--follow requires exactly one input (a file path, or - for stdin)")
+	}
+
+	emit, closeFn, err := streamEmitter(opts)
+	if err != nil {
+		return err
+	}
+	defer closeFn()
+
+	path := opts.logPaths[0]
+	if path == "-" {
+		// A pipe delivers lines as they are written and ends at EOF, so
+		// following is implicit and we stop when the pipe closes.
+		return parse.ParseStream(os.Stdin, config, false, emit)
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	fmt.Fprintf(os.Stderr, "following %s (Ctrl-C to stop)\n", path)
+	return parse.ParseStream(file, config, true, emit)
+}
+
+// streamEmitter builds a per-record emitter for follow mode based on the chosen
+// format and output. Streaming supports ndjson and human-readable print output.
+func streamEmitter(opts options) (func(parse.Extraction) error, func(), error) {
+	format := opts.format
+	if format == "" && opts.output != "" {
+		format = parse.FormatFromPath(opts.output)
+	}
+
+	out := io.Writer(os.Stdout)
+	closeFn := func() {}
+	if opts.output != "" {
+		file, err := os.Create(opts.output)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create output file %s: %w", opts.output, err)
+		}
+		out = file
+		closeFn = func() { file.Close() }
+	}
+
+	switch format {
+	case "", "print":
+		return func(e parse.Extraction) error {
+			parse.FprintExtraction(out, e)
+			return nil
+		}, closeFn, nil
+	case "ndjson":
+		encoder := json.NewEncoder(out)
+		return func(e parse.Extraction) error {
+			return encoder.Encode(e)
+		}, closeFn, nil
+	default:
+		closeFn()
+		return nil, nil, fmt.Errorf("--follow supports --format ndjson or plain print output, not %q", format)
+	}
+}
+
 // parseArgs parses command-line arguments, allowing flags and log file paths to
 // be intermixed in any order.
 func parseArgs(args []string) (options, error) {
@@ -183,6 +272,8 @@ func parseArgs(args []string) (options, error) {
 			opts.help = true
 		case "-v", "--version":
 			opts.version = true
+		case "--follow":
+			opts.follow = true
 		case "-t", "--test":
 			opts.test = true
 		case "-p", "--print", "-d", "--display":
@@ -212,7 +303,8 @@ func parseArgs(args []string) (options, error) {
 			i++
 			opts.format = args[i]
 		default:
-			if len(arg) > 0 && arg[0] == '-' {
+			// "-" is the conventional stdin marker, not a flag.
+			if arg != "-" && len(arg) > 0 && arg[0] == '-' {
 				return opts, fmt.Errorf("unknown flag: %s", arg)
 			}
 			opts.logPaths = append(opts.logPaths, arg)

@@ -501,6 +501,61 @@ func ParseReader(r io.Reader, config *Config) ([]Extraction, error) {
 	return ParseLines(lines, config)
 }
 
+// ParseStream reads lines from r one at a time and calls emit with the
+// extraction for each non-blank line as soon as the line is available. Only
+// single-line patterns are considered, since streaming cannot look ahead for
+// multi-line patterns.
+//
+// When follow is true, reaching the end of the input means "wait for more data"
+// rather than "done", so a growing file can be tailed; the call then returns
+// only on error or an emit failure. When follow is false it returns at EOF,
+// which also lets it stream naturally from a pipe (each line is emitted as soon
+// as it is written, and the pipe closing ends the stream).
+func ParseStream(r io.Reader, config *Config, follow bool, emit func(Extraction) error) error {
+	br := bufio.NewReader(r)
+	lineNum := 0
+	var partial strings.Builder
+
+	emitLine := func() error {
+		line := strings.TrimRight(partial.String(), "\r\n")
+		partial.Reset()
+		if line != "" {
+			params, pattern := parseLine([]string{line}, 0, config)
+			if err := emit(Extraction{Params: params, Pattern: pattern, LineNumber: lineNum, Line: line}); err != nil {
+				return err
+			}
+		}
+		lineNum++
+		return nil
+	}
+
+	for {
+		chunk, err := br.ReadString('\n')
+		if err == nil {
+			partial.WriteString(chunk)
+			if e := emitLine(); e != nil {
+				return e
+			}
+			continue
+		}
+		if err == io.EOF {
+			// Keep any unterminated trailing text for the next read.
+			partial.WriteString(chunk)
+			if follow {
+				time.Sleep(250 * time.Millisecond)
+				continue
+			}
+			if partial.Len() > 0 {
+				if e := emitLine(); e != nil {
+					return e
+				}
+			}
+			return nil
+		}
+		return err
+	}
+}
+
 // ParseFile streams the log text from the given file path and attempts to
 // extract token parameters from each line using the most appropriate pattern in
 // the given config.

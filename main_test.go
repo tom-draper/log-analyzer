@@ -44,6 +44,21 @@ func TestParseArgs(t *testing.T) {
 			want: options{logPaths: []string{"app.log"}, print: true},
 		},
 		{
+			name: "stdin dash is a path, not a flag",
+			args: []string{"-"},
+			want: options{logPaths: []string{"-"}},
+		},
+		{
+			name: "follow with stdin and format",
+			args: []string{"--follow", "-", "-f", "ndjson"},
+			want: options{logPaths: []string{"-"}, follow: true, format: "ndjson"},
+		},
+		{
+			name: "output and format flags",
+			args: []string{"-o", "out.csv", "app.log"},
+			want: options{logPaths: []string{"app.log"}, output: "out.csv"},
+		},
+		{
 			name: "help",
 			args: []string{"--help"},
 			want: options{help: true},

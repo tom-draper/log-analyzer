@@ -39,6 +39,40 @@ func TestReadLines(t *testing.T) {
 	}
 }
 
+func TestParseStream(t *testing.T) {
+	config := Config{
+		Patterns: []string{"[timestamp] ip rest"},
+		Tokens:   []string{"timestamp", "ip", "rest"},
+	}
+	// Blank middle line is skipped; last line has no trailing newline.
+	input := "[11/Dec/2023:11:01:28] 1.2.3.4 GET /a\n\n[11/Dec/2023:11:01:29] 5.6.7.8 POST /b"
+
+	var got []Extraction
+	err := ParseStream(strings.NewReader(input), &config, false, func(e Extraction) error {
+		got = append(got, e)
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("ParseStream error: %v", err)
+	}
+
+	if len(got) != 2 {
+		t.Fatalf("expected 2 records, got %d: %+v", len(got), got)
+	}
+	// Line numbers account for the skipped blank line at index 1.
+	if got[0].LineNumber != 0 || got[1].LineNumber != 2 {
+		t.Errorf("unexpected line numbers: %d, %d", got[0].LineNumber, got[1].LineNumber)
+	}
+	for i, e := range got {
+		if e.Pattern == "" {
+			t.Errorf("record %d did not match a pattern: %q", i, e.Line)
+		}
+		if _, ok := e.Params["ip"]; !ok {
+			t.Errorf("record %d missing ip param: %+v", i, e.Params)
+		}
+	}
+}
+
 func TestParseReaderMatchesParse(t *testing.T) {
 	config := Config{
 		Patterns: []string{"[timestamp] ip rest"},

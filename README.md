@@ -237,6 +237,40 @@ Once you have your patterns together, you can perform a test run by including th
 ./log-analyzer ./tests/data/logs/demo.log --test
 ```
 
+### Structured Export
+
+Instead of launching the dashboard, you can export the extracted data as structured records for use in other tools. Use `-f` or `--format` to choose `json`, `ndjson` or `csv`, and optionally `-o` or `--output` to write to a file (the format is inferred from the file extension when `--format` is omitted).
+
+```bash
+# Print a CSV table to stdout (one column per token)
+./log-analyzer --format csv ./tests/data/logs/demo.log > demo.csv
+
+# Write newline-delimited JSON to a file
+./log-analyzer -o demo.ndjson ./tests/data/logs/demo.log
+```
+
+### Reading from stdin
+
+Use `-` as the log path to read from stdin, which lets you pipe logs directly into the analyzer.
+
+```bash
+cat ./tests/data/logs/demo.log | ./log-analyzer - --format csv
+```
+
+### Follow Mode
+
+Add the `--follow` flag to tail a growing log file (or a stdin stream) and emit each extracted record as new lines are appended. Streaming output supports `--format ndjson` or plain print output. This is useful for live monitoring, and composes with tools like `tail`.
+
+```bash
+# Tail a file and stream extracted records as newline-delimited JSON
+./log-analyzer --follow --format ndjson ./logs/app.log
+
+# Pipe a live stream in and extract on the fly
+tail -f ./logs/app.log | ./log-analyzer --follow -
+```
+
+Note that follow mode considers single-line patterns only, since streaming cannot look ahead for multi-line patterns.
+
 ## Additional Tools
 
 ### Pattern Identification
