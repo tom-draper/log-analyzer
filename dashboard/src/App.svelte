@@ -7,6 +7,7 @@
   import TypeWarnings from "./lib/TypeWarnings.svelte";
   import Footer from "./lib/Footer.svelte";
   import RequestFunnel from "./lib/RequestFunnel.svelte";
+  import EventExplorer from "./lib/EventExplorer.svelte";
 
   type TokenCount = { token: string; dependentToken?: string; count: number };
 
@@ -232,6 +233,7 @@
         bind:hex
       />
       <RequestFunnel {data} />
+      <EventExplorer {data} />
       {#each tokenCounts as token (`${token.token}:${token.dependentToken ?? ""}:${dataVersion}`)}
         <Card
           {data}
