@@ -1,25 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
 @font-face {
     font-family: 'Geist Variable';
     src: url('assets/fonts/Geist/GeistVF.ttf');
 }
 
 :root {
-  font-family: 'Geist Variable', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 300;
+  font-family: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.45;
+  font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  color: #ededed;
   color: #e8e8e8;
-  background-color: #000000;
-  background-color: #101010;
+  background-color: #0a0a0a;
   --text: #e8e8e8;
-  --background: #101010;
-  --highlight: #55ff5c;
+  --background: #0a0a0a;
+  --card: #111111;
+  --border: #27272a;
+  --muted: #a1a1aa;
+  --radius: 0.625rem;
+  --highlight: #3b82f6;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -30,12 +28,12 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #60a5fa;
   text-decoration: inherit;
 }
 
 a:hover {
-  color: #535bf2;
+  color: #93c5fd;
 }
 
 body {
@@ -50,19 +48,20 @@ h1 {
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--border);
+  padding: 0.45em 0.75em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #181818;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background-color 0.15s, border-color 0.15s;
 }
 
 button:hover {
-  border-color: #646cff;
+  border-color: #525252;
+  background: #232323;
 }
 
 button:focus,
@@ -74,20 +73,6 @@ button:focus-visible {
   display: none !important;
 }
 
-.wrapper {
-  font-family: 'Geist Variable', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif !important;
-  --cp-text-color: #111;
-}
-
-.wrapper > .text-input > button {
-  font-size: 0.5em;
-  font-family: 'Geist Variable' !important;
-}
-
-.wrapper > .text-input > .input-container > input {
-  /* font-size: 0.5em; */
-  font-family: 'Geist Variable' !important;
-}
 
 /* @media (prefers-color-scheme: light) {
   :root {

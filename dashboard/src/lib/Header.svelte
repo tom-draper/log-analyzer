@@ -1,16 +1,9 @@
 <script lang="ts">
-  import ColorPicker, { ChromeVariant } from "svelte-awesome-color-picker";
-
-  let { multiTypeTokens, failedLines, lineCount, hex = $bindable() }: {
+  let { multiTypeTokens, failedLines, lineCount }: {
     multiTypeTokens: DataTypes;
     failedLines: FailedLines;
     lineCount: number;
-    hex: string;
   } = $props();
-
-  $effect(() => {
-    document.documentElement.style.setProperty("--highlight", hex);
-  });
 
   function scrollToBottom() {
     window.scrollTo(0, document.body.scrollHeight);
@@ -19,18 +12,7 @@
 
 <div class="header">
   <div class="title">
-    <!-- <img src="./logo.png" style="width: 10em;"/> -->
-    <div class="logo-container">
-      <div class="logo">Log Analyzer</div>
-      <div class="color-picker">
-        <ColorPicker
-          bind:hex
-          components={ChromeVariant}
-          sliderDirection="horizontal"
-          label=""
-        />
-      </div>
-    </div>
+    <div class="logo">Log Analyzer</div>
     <div class="line-count">{lineCount.toLocaleString()} lines</div>
   </div>
   <div class="notifications">
@@ -53,30 +35,21 @@
 
 <style scoped>
   .title {
-    margin: 0 0 20px;
-  }
-  .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .color-picker {
-    --input-size: 12px;
-    margin-bottom: 7px;
+    margin: 0;
   }
   .logo {
-    font-family: "Poppins";
+    font-size: 1.5rem;
     font-weight: 600;
+    letter-spacing: -0.04em;
   }
   .line-count {
-    font-size: 1.4rem;
-    color: #888;
-    margin-top: 0.5em;
+    font-size: .875rem;
+    color: #a1a1aa;
+    margin-top: .2rem;
   }
   .header {
-    font-size: 2em;
-    font-weight: 500;
     display: flex;
+    align-items: flex-start;
   }
 
   .notifications {
@@ -84,22 +57,22 @@
     display: flex;
   }
   button {
-    padding: 5px 10px;
-    border-radius: 3px;
+    padding: .35rem .55rem;
+    border-radius: 6px;
     height: min-content;
     font-size: 0.9rem;
     outline: none;
   }
 
   .error {
-    background: #271515;
-    color: #dd7178;
-    border: 1px solid #dd71787d;
+    background: #2a1518;
+    color: #fda4af;
+    border: 1px solid #7f1d1d;
   }
   .warning {
-    background: #5e4c1589;
-    color: #ddd871;
-    border: 1px solid #ddd8717d;
+    background: #292319;
+    color: #fcd34d;
+    border: 1px solid #713f12;
   }
   .error,
   .warning {

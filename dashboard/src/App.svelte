@@ -231,7 +231,6 @@
         {failedLines}
         {multiTypeTokens}
         lineCount={data.extraction.length}
-        bind:hex
       />
       <RequestFunnel {data} />
       <PatternCoverage {data} />
@@ -248,14 +247,16 @@
       {/each}
       <TypeWarnings {data} multiTypes={multiTypeTokens} />
       <Failed {failedLines} />
-      <Footer {hex} />
+      <Footer />
     </div>
   {/if}
 </main>
 
 <style>
   .content {
-    margin: 4em 4em 2em 4em;
+    max-width: 1280px;
+    margin: 2.5rem auto 1rem;
+    padding: 0 1.5rem;
   }
 
   .error {
@@ -265,7 +266,8 @@
 
   @media screen and (max-width: 800px) {
     .content {
-      margin: 3em 2em 2em;
+      margin: 1.5rem auto 1rem;
+      padding: 0 1rem;
     }
   }
 </style>

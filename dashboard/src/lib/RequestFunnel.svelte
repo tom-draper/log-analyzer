@@ -67,7 +67,7 @@
 {/if}
 
 <style scoped>
-  .funnel { border: 1px solid rgb(42, 42, 42); border-radius: 5px; margin: 0 0 2rem; padding: 1.5rem 2rem; }
+  .funnel { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); margin: 0 0 1.5rem; padding: 1.25rem 1.5rem; }
   .heading { display: flex; align-items: baseline; gap: .6rem; margin-bottom: 1rem; }
   h2 { font-size: 1rem; margin: 0; } .heading span, small { color: #888; font-size: .8rem; }
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }
