@@ -51,6 +51,22 @@
     return sortedValues;
   }
 
+  function limitSeries(valueByTimeSlot: ValueCounts, limit = 10) {
+    const sorted = sortedValueByTimeSlot(valueByTimeSlot);
+    if (sorted.length <= limit) return valueByTimeSlot;
+
+    const result: ValueCounts = {};
+    for (const { value } of sorted.slice(0, limit - 1)) {
+      result[value] = valueByTimeSlot[value];
+    }
+    const other = Array(valueByTimeSlot[sorted[0].value].length).fill(0);
+    for (const { value } of sorted.slice(limit - 1)) {
+      valueByTimeSlot[value].forEach((count, index) => other[index] += count);
+    }
+    result.Other = other;
+    return result;
+  }
+
   function valueCountMax(days: ValueCounts) {
     const valueMax: ValueCount = {};
     for (const value in days) {
@@ -70,7 +86,7 @@
     const [min, max] = range;
     timeSlots = makeTimeSlots(min, max, 50);
 
-    valueCounts = valueByTimeSlot(data, token, timestampToken, timeSlots);
+    valueCounts = limitSeries(valueByTimeSlot(data, token, timestampToken, timeSlots));
     sortedValueCounts = sortedValueByTimeSlot(valueCounts);
     valueMax = valueCountMax(valueCounts);
   });
