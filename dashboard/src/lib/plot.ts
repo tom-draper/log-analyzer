@@ -17,7 +17,8 @@ export function chartLayout(options: { height?: number; title?: string } = {}): 
     dragmode: false,
     height: options.height ?? 240,
     font: { family: "Geist Variable, ui-sans-serif, system-ui", color: "#a1a1aa", size: 11 },
-    yaxis: { gridcolor: "#27272a", zerolinecolor: "#27272a", fixedrange: true },
-    xaxis: { gridcolor: "#27272a", fixedrange: true },
+    hoverlabel: { bgcolor: "#18181b", bordercolor: "#3f3f46", font: { family: "Geist Variable, ui-sans-serif, system-ui", color: "#f4f4f5", size: 12 } },
+    yaxis: { gridcolor: "#202023", zerolinecolor: "#27272a", tickfont: { color: "#a1a1aa" }, fixedrange: true },
+    xaxis: { gridcolor: "#202023", tickfont: { color: "#a1a1aa" }, fixedrange: true },
   };
 }

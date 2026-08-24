@@ -68,12 +68,12 @@
   .error {
     background: #2a1518;
     color: #fda4af;
-    border: 1px solid #7f1d1d;
+    border: 1px solid #9f1239;
   }
   .warning {
     background: #292319;
-    color: #fcd34d;
-    border: 1px solid #713f12;
+    color: #fbbf24;
+    border: 1px solid #854d0e;
   }
   .error,
   .warning {

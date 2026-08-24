@@ -18,6 +18,9 @@
   --muted: #a1a1aa;
   --radius: 0.625rem;
   --highlight: #3b82f6;
+  --warning: #f59e0b;
+  --danger: #f43f5e;
+  --success: #22c55e;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -93,8 +96,8 @@ button:focus-visible {
   line-height: 1.1;
 }
 
-.badge.warning { background: #292319; border-color: #713f12; color: #fcd34d; }
-.badge.danger { background: #2a1518; border-color: #7f1d1d; color: #fda4af; }
+.badge.warning { background: #2a2113; border-color: #854d0e; color: #fbbf24; }
+.badge.danger { background: #2b151b; border-color: #9f1239; color: #fda4af; }
 .empty-state { color: var(--muted); font-size: .875rem; margin: 1rem 0; }
 
 
