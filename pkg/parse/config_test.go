@@ -2,6 +2,7 @@ package parse
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -21,5 +22,34 @@ func TestLoadConfig(t *testing.T) {
 
 	if !reflect.DeepEqual(got, expected) {
 		t.Errorf("config got %+v did not match expected %+v", got, expected)
+	}
+}
+
+func TestValidateConfig(t *testing.T) {
+	valid := Config{Tokens: []string{"timestamp", "status"}, Patterns: []string{"timestamp status"}}
+	tests := []struct {
+		name   string
+		config Config
+		want   string
+	}{
+		{name: "no patterns", config: Config{}, want: "at least one pattern"},
+		{name: "duplicate token", config: Config{Tokens: []string{"value", "value"}, Patterns: valid.Patterns}, want: "declared more than once"},
+		{name: "reserved wildcard", config: Config{Tokens: []string{"*"}, Patterns: valid.Patterns}, want: "reserved"},
+		{name: "unknown dependency", config: Config{Tokens: valid.Tokens, Patterns: valid.Patterns, Dependencies: map[string][]string{"missing": {"status"}}}, want: "not declared"},
+		{name: "self dependency", config: Config{Tokens: valid.Tokens, Patterns: valid.Patterns, Dependencies: map[string][]string{"status": {"status"}}}, want: "cannot depend"},
+		{name: "unknown conversion target", config: Config{Tokens: valid.Tokens, Patterns: valid.Patterns, Conversions: map[string]Conversion{"status": {Token: "missing", Multiplier: 1}}}, want: "target token"},
+		{name: "zero conversion multiplier", config: Config{Tokens: valid.Tokens, Patterns: valid.Patterns, Conversions: map[string]Conversion{"status": {Token: "timestamp", Multiplier: 0}}}, want: "finite non-zero"},
+	}
+
+	if err := ValidateConfig(valid); err != nil {
+		t.Fatalf("valid config returned error: %v", err)
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ValidateConfig(tt.config)
+			if err == nil || !strings.Contains(err.Error(), tt.want) {
+				t.Errorf("ValidateConfig() error = %v, want containing %q", err, tt.want)
+			}
+		})
 	}
 }
