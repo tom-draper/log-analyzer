@@ -3,44 +3,33 @@
   import Plotly from "plotly.js-dist-min";
   import { chartLayout, plotConfig } from "./plot";
 
-  function numericValueCounts(data: Data) {
-    const values: ValueCount = {};
-    for (let i = 0; i < data.extraction.length; i++) {
-      if (!(token in data.extraction[i].params)) {
-        continue;
-      }
-      const value = data.extraction[i].params[token];
-      if (typeof value.value !== "number") {
-        continue;
-      }
-      values[value.value] ||= 0;
-      values[value.value] += 1;
+  function numericValues(data: Data) {
+    const values: number[] = [];
+    for (const extraction of data.extraction) {
+      const value = extraction.params[token]?.value;
+      if (typeof value === "number" && Number.isFinite(value)) values.push(value);
     }
-
     return values;
   }
 
-  function buildPlot(values: ValueCount) {
-    const sortedValues = Object.keys(values).sort();
-    const y = Array(sortedValues.length).fill(0);
-    for (const value of sortedValues) {
-      y[sortedValues.indexOf(value)] = values[value];
-    }
+  function buildPlot(values: number[]) {
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const binCount = Math.max(5, Math.min(40, Math.ceil(Math.sqrt(values.length))));
+    const size = max === min ? 1 : (max - min) / binCount;
 
     Plotly.newPlot(
       plotDiv,
       [
         {
-          x: sortedValues,
-          y: y,
-          type: "bar",
-          marker: {
-            // color: "#0070f3",
-            color: hex,
-          },
+          x: values,
+          type: "histogram",
+          xbins: { start: min, end: max, size },
+          marker: { color: hex },
+          hovertemplate: "%{x}<br>%{y} records<extra></extra>",
         },
       ],
-      chartLayout({ title: "Distribution" }),
+      { ...chartLayout({ title: "Distribution" }), bargap: 0.08, xaxis: { ...chartLayout().xaxis, title: { text: token } } },
       plotConfig
     );
   }
@@ -63,8 +52,8 @@
   let plotDiv: HTMLDivElement;
   let { data, token, hex }: { data: Data; token: string; hex: string } = $props();
   onMount(() => {
-    const values = numericValueCounts(data);
-    if (Object.keys(values).length === 0) {
+    const values = numericValues(data);
+    if (values.length === 0) {
       return;
     }
     isNumeric = true;
