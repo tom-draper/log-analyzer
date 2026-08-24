@@ -9,6 +9,7 @@
   import LatencyOverTime from "./LatencyOverTime.svelte";
   import ValueFreqGraphDependent from "./ValueFreqGraphDependent.svelte";
   import TopValuesTable from "./TopValuesTable.svelte";
+  import DependencyHeatmap from "./DependencyHeatmap.svelte";
 
   export let data: Data,
     token: string,
@@ -36,6 +37,7 @@
   </div>
   {#if dependentToken}
     <ValueFreqGraphDependent {data} {token} {dependentToken} />
+    <DependencyHeatmap {data} {token} {dependentToken} />
   {:else if token === timestampToken}
     <Activity {data} {token} {hex} />
     <TimeBreakdown {data} {token} {hex} />
