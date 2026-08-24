@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,7 +21,7 @@ type Data struct {
 	Config     *parse.Config      `json:"config"`
 }
 
-func Start(store *Store, port string, indexHTML []byte) {
+func Start(store *Store, host, port string, indexHTML []byte) {
 	r := chi.NewRouter()
 	r.Get("/data", func(w http.ResponseWriter, r *http.Request) {
 		jsonString, err := store.snapshotJSON()
@@ -63,7 +64,7 @@ func Start(store *Store, port string, indexHTML []byte) {
 		w.Write(indexHTML)
 	})
 
-	srv := &http.Server{Addr: "0.0.0.0:" + port, Handler: r}
+	srv := &http.Server{Addr: net.JoinHostPort(host, port), Handler: r}
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
@@ -74,7 +75,7 @@ func Start(store *Store, port string, indexHTML []byte) {
 		srv.Shutdown(ctx)
 	}()
 
-	fmt.Printf("Dashboard running at http://localhost:%s/\n", port)
+	fmt.Printf("Dashboard running at http://%s/\n", net.JoinHostPort(host, port))
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		fmt.Fprintf(os.Stderr, "server error: %s\n", err)
 		os.Exit(1)

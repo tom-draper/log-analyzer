@@ -32,6 +32,11 @@ func TestParseArgs(t *testing.T) {
 			want: options{logPaths: []string{"app.log"}, configPath: "cfg.json", port: "8080"},
 		},
 		{
+			name: "host short flag",
+			args: []string{"-H", "0.0.0.0", "app.log"},
+			want: options{logPaths: []string{"app.log"}, host: "0.0.0.0"},
+		},
+		{
 			name: "config and port short flags",
 			args: []string{"-c", "cfg.json", "-P", "8080", "app.log"},
 			want: options{logPaths: []string{"app.log"}, configPath: "cfg.json", port: "8080"},
@@ -98,6 +103,7 @@ func TestParseArgsErrors(t *testing.T) {
 	}{
 		{name: "config flag without value", args: []string{"--config"}},
 		{name: "port flag without value", args: []string{"app.log", "-P"}},
+		{name: "host flag without value", args: []string{"app.log", "--host"}},
 		{name: "unknown flag", args: []string{"--bogus", "app.log"}},
 		{name: "negative follow record limit", args: []string{"--follow-max-records", "-1", "app.log"}},
 	}

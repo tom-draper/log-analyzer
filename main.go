@@ -34,6 +34,7 @@ Commands:
 Options:
   -c, --config <path>   Path to the config file (default: ./config/config.json)
   -P, --port <port>     Port for the dashboard (default: 3000)
+  -H, --host <host>     Interface for the dashboard (default: 127.0.0.1)
   -o, --output <path>   Write extracted data to a file instead of the dashboard
   -f, --format <fmt>    Export format: json, ndjson or csv (implies headless)
       --follow          Stream records as new lines are appended (ndjson or print)
@@ -59,6 +60,7 @@ type options struct {
 	logPaths            []string
 	configPath          string
 	port                string
+	host                string
 	output              string
 	format              string
 	follow              bool
@@ -109,6 +111,9 @@ func main() {
 	if opts.port == "" {
 		opts.port = "3000"
 	}
+	if opts.host == "" {
+		opts.host = "127.0.0.1"
+	}
 	if !opts.followMaxRecordsSet {
 		opts.followMaxRecords = defaultFollowMaxRecords
 	}
@@ -154,7 +159,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, "error: --follow requires exactly one input (a file path, or - for stdin)")
 			os.Exit(2)
 		}
-		analyze.RunFollow(opts.logPaths[0], &config, opts.port, opts.followMaxRecords, indexHTML)
+		analyze.RunFollow(opts.logPaths[0], &config, opts.host, opts.port, opts.followMaxRecords, indexHTML)
 		return
 	}
 
@@ -186,7 +191,7 @@ func main() {
 		return
 	}
 
-	analyze.Run(extraction, &config, opts.port, indexHTML)
+	analyze.Run(extraction, &config, opts.host, opts.port, indexHTML)
 }
 
 // runExport writes the extracted data to the configured output (a file, or
@@ -618,6 +623,12 @@ func parseArgs(args []string) (options, error) {
 			}
 			i++
 			opts.port = args[i]
+		case "-H", "--host":
+			if i+1 >= len(args) {
+				return opts, fmt.Errorf("%s flag requires a host argument", arg)
+			}
+			i++
+			opts.host = args[i]
 		case "-o", "--output":
 			if i+1 >= len(args) {
 				return opts, fmt.Errorf("%s flag requires a path argument", arg)

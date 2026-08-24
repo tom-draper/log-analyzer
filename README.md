@@ -97,7 +97,7 @@ If preferred, you can build and run using Docker. Mount your log directory and m
 
 ```bash
 docker build -t log-analyzer .
-docker run -v /path/to/logs:/logs -p 3000:3000 log-analyzer /logs/app.log
+docker run -v /path/to/logs:/logs -p 3000:3000 log-analyzer --host 0.0.0.0 /logs/app.log
 ```
 
 ## Advanced Config
@@ -219,6 +219,15 @@ The dashboard defaults to port `3000`. You can specify a different port with the
 
 ```bash
 ./log-analyzer -P 8080 ./tests/data/logs/demo.log
+```
+
+### Host
+
+For safety, the dashboard only listens on `127.0.0.1` by default. Pass a host
+explicitly when it must be reachable from another machine or a container.
+
+```bash
+./log-analyzer --host 0.0.0.0 ./tests/data/logs/demo.log
 ```
 
 ### Print Extracted Tokens

@@ -41,16 +41,16 @@ func NewData(extraction []parse.Extraction, config *parse.Config) *server.Data {
 	return &server.Data{Extraction: extraction, Locations: locations, Config: config}
 }
 
-func Run(extraction []parse.Extraction, config *parse.Config, port string, indexHTML []byte) {
+func Run(extraction []parse.Extraction, config *parse.Config, host, port string, indexHTML []byte) {
 	data := NewData(extraction, config)
 	store := server.NewStore(data)
-	server.Start(store, port, indexHTML)
+	server.Start(store, host, port, indexHTML)
 }
 
 // RunFollow serves the dashboard and tails the given source (a file path, or
 // "-" for stdin), streaming newly extracted records into the dashboard so it
 // updates live.
-func RunFollow(path string, config *parse.Config, port string, maxRecords int, indexHTML []byte) {
+func RunFollow(path string, config *parse.Config, host, port string, maxRecords int, indexHTML []byte) {
 	data := &server.Data{
 		Extraction: []parse.Extraction{},
 		Locations:  map[string]string{},
@@ -60,7 +60,7 @@ func RunFollow(path string, config *parse.Config, port string, maxRecords int, i
 
 	go tail(path, config, maxRecords, store)
 
-	server.Start(store, port, indexHTML)
+	server.Start(store, host, port, indexHTML)
 }
 
 // tail streams records from the source into the store. Incoming records are
