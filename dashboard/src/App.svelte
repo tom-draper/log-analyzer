@@ -172,7 +172,7 @@
   let timestampToken: string | null;
   let dataVersion = 0;
   let loadError: string | null = null;
-  let hex: string = "#55ff5c";
+  let hex: string = "#3b82f6";
   const production = import.meta.env.MODE === "production";
 
   function applyData(d: Data) {

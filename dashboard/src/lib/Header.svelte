@@ -36,6 +36,7 @@
 <style scoped>
   .title {
     margin: 0;
+    padding-bottom: .75rem;
   }
   .logo {
     font-size: 1.5rem;
