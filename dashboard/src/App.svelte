@@ -8,6 +8,7 @@
   import Footer from "./lib/Footer.svelte";
   import RequestFunnel from "./lib/RequestFunnel.svelte";
   import EventExplorer from "./lib/EventExplorer.svelte";
+  import PatternCoverage from "./lib/PatternCoverage.svelte";
 
   type TokenCount = { token: string; dependentToken?: string; count: number };
 
@@ -233,6 +234,7 @@
         bind:hex
       />
       <RequestFunnel {data} />
+      <PatternCoverage {data} />
       <EventExplorer {data} />
       {#each tokenCounts as token (`${token.token}:${token.dependentToken ?? ""}:${dataVersion}`)}
         <Card
