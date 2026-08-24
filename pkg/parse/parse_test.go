@@ -257,3 +257,27 @@ func TestParseFile(t *testing.T) {
 		}
 	}
 }
+
+func TestParseLineTreatsPatternPunctuationAsLiteral(t *testing.T) {
+	config := Config{
+		Patterns: []string{"INFO path=/api/v1+beta?filter={value} file=C:\\logs\\app.log"},
+		Tokens:   []string{"value"},
+	}
+
+	params, pattern := parseLine([]string{"INFO path=/api/v1+beta?filter={active} file=C:\\logs\\app.log"}, 0, &config)
+	if pattern == "" {
+		t.Fatal("expected literal punctuation pattern to match")
+	}
+	if got := params["value"].Value; got != "active" {
+		t.Errorf("value = %v, want active", got)
+	}
+}
+
+func TestParseLineRequiresFullLineMatch(t *testing.T) {
+	config := Config{Patterns: []string{"INFO value"}, Tokens: []string{"value"}}
+
+	_, pattern := parseLine([]string{"prefix INFO expected suffix"}, 0, &config)
+	if pattern != "" {
+		t.Errorf("pattern = %q, want no match", pattern)
+	}
+}

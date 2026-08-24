@@ -3,7 +3,6 @@ package parse
 import (
 	"bufio"
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,6 +17,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/araddon/dateparse"
 )
@@ -36,106 +36,89 @@ type Param struct {
 
 var (
 	multiSpaceRegEx = regexp.MustCompile(`[ ]{2,}`)
-	regexCache      sync.Map // map[string]*regexp.Regexp
+	patternRegexCache sync.Map // map[string]compiledPattern
 )
 
-// getParams extracts all possible group values contained within the regular
-// expression from the text and stores the extracted values in a returned
-// (groupName => value) map.
-func getParams(text string, regEx string) map[string]string {
-	var compRegEx *regexp.Regexp
-	if cached, ok := regexCache.Load(regEx); ok {
-		compRegEx = cached.(*regexp.Regexp)
-	} else {
-		compRegEx = regexp.MustCompile(regEx)
-		regexCache.Store(regEx, compRegEx)
-	}
-	match := compRegEx.FindStringSubmatch(text)
-
-	paramsMap := make(map[string]string)
-	for i, name := range compRegEx.SubexpNames() {
-		if i > 0 && i <= len(match) {
-			paramsMap[name] = strings.TrimSpace(match[i])
-		}
-	}
-	return paramsMap
+type compiledPattern struct {
+	regex  *regexp.Regexp
+	tokens []string
 }
 
-// Replace all characters that have a special meaning within a regular
-// expression with an escaped version of the character.
-func escapeRegexCharacters(regEx string) string {
-	regEx = strings.ReplaceAll(regEx, "(", "\\(")
-	regEx = strings.ReplaceAll(regEx, ")", "\\)")
-	regEx = strings.ReplaceAll(regEx, "]", "\\]")
-	regEx = strings.ReplaceAll(regEx, "[", "\\[")
-	regEx = strings.ReplaceAll(regEx, "“", "\"")
-	return regEx
+// compilePattern converts a user pattern into an anchored regular expression.
+// Pattern text is always treated as literal; only configured tokens and * have
+// special meaning. This prevents log punctuation from altering the expression
+// or making the parser panic.
+func compilePattern(pattern string, tokens []string) compiledPattern {
+	sortedTokens := append([]string(nil), tokens...)
+	sort.Slice(sortedTokens, func(i, j int) bool {
+		return len(sortedTokens[i]) > len(sortedTokens[j])
+	})
+	cacheKey := pattern + "\x00" + strings.Join(sortedTokens, "\x00")
+	if cached, ok := patternRegexCache.Load(cacheKey); ok {
+		return cached.(compiledPattern)
+	}
+
+	var expression strings.Builder
+	expression.WriteString("^")
+	capturedTokens := make([]string, 0)
+	for i := 0; i < len(pattern); {
+		if pattern[i] == '*' {
+			expression.WriteString(".*")
+			i++
+			continue
+		}
+
+		var token string
+		for _, candidate := range sortedTokens {
+			if candidate != "" && strings.HasPrefix(pattern[i:], candidate) {
+				token = candidate
+				break
+			}
+		}
+		if token != "" {
+			expression.WriteString("(.*)")
+			capturedTokens = append(capturedTokens, token)
+			i += len(token)
+			continue
+		}
+
+		// Quote one rune at a time to retain byte indexes for token matching.
+		r, size := utf8.DecodeRuneInString(pattern[i:])
+		expression.WriteString(regexp.QuoteMeta(string(r)))
+		i += size
+	}
+	expression.WriteString("$")
+
+	compiled := compiledPattern{tokens: capturedTokens}
+	compiled.regex = regexp.MustCompile(expression.String())
+	actual, loaded := patternRegexCache.LoadOrStore(cacheKey, compiled)
+	if loaded {
+		return actual.(compiledPattern)
+	}
+	return compiled
 }
 
 // patternMatchesLine reports whether line matches pattern after expanding
 // wildcard tokens (*) into .*  Used for zero-token patterns where rank
 // calculation cannot be used.
 func patternMatchesLine(line string, pattern string) bool {
-	regEx := escapeRegexCharacters(pattern)
-	regEx = strings.ReplaceAll(regEx, "*", ".*")
-	var compRegEx *regexp.Regexp
-	if cached, ok := regexCache.Load(regEx); ok {
-		compRegEx = cached.(*regexp.Regexp)
-	} else {
-		var err error
-		compRegEx, err = regexp.Compile(regEx)
-		if err != nil {
-			return false
-		}
-		regexCache.Store(regEx, compRegEx)
-	}
-	return compRegEx.MatchString(line)
+	return compilePattern(pattern, nil).regex.MatchString(line)
 }
 
 // tryPattern attempts to extract the corresponding token values described by
 // the given pattern from the log text line. Any extracted values have their
 // data types inferred and then converted.
 func tryPattern(line string, pattern string, tokens []string) map[string]Param {
-	var regEx string = pattern
-	regEx = escapeRegexCharacters(regEx)
-	// Convert wildcard asterisk into underscore _ so we only have to deal
-	// with one wildcard char
-	regEx = strings.ReplaceAll(regEx, "*", "_")
-	// Work on a copy of the tokens slice; the append and in-place sort below
-	// would otherwise mutate the shared config.Tokens, which is unsafe when
-	// lines are parsed concurrently.
-	tokens = append(append([]string{}, tokens...), "_")
-	// Sort tokens to try largest first and avoid matching substrings
-	sort.Slice(tokens, func(i, j int) bool {
-		return len(tokens[i]) > len(tokens[j])
-	})
-	for _, token := range tokens {
-		// Encode token value to create temporary token ID as hex as any
-		// brackets in token may break regex
-		t := escapeRegexCharacters(token)
-		if !strings.Contains(regEx, t) {
-			continue
-		}
-
-		tokenID := hex.EncodeToString([]byte(t))
-		regEx = strings.ReplaceAll(regEx, t, fmt.Sprintf("(?P<%s>.*)", tokenID))
+	compiled := compilePattern(pattern, tokens)
+	match := compiled.regex.FindStringSubmatch(line)
+	if match == nil {
+		return map[string]Param{}
 	}
-	encodedParams := getParams(line, regEx)
 
-	// Decode back to raw token value
 	params := make(map[string]string)
-	for tokenID, match := range encodedParams {
-		token, err := hex.DecodeString(tokenID)
-		if err != nil {
-			continue
-		}
-		stoken := string(token)
-		// Avoid adding to final parameters if was a wildcard token
-		if stoken == "" || stoken[0] == '_' {
-			continue
-		}
-		if _, ok := params[stoken]; !ok {
-			params[stoken] = match
+	for i, token := range compiled.tokens {
+		if _, ok := params[token]; !ok {
+			params[token] = strings.TrimSpace(match[i+1])
 		}
 	}
 
