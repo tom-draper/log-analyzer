@@ -6,6 +6,7 @@
   import Failed from "./lib/Failed.svelte";
   import TypeWarnings from "./lib/TypeWarnings.svelte";
   import Footer from "./lib/Footer.svelte";
+  import RequestFunnel from "./lib/RequestFunnel.svelte";
 
   type TokenCount = { token: string; dependentToken?: string; count: number };
 
@@ -230,6 +231,7 @@
         lineCount={data.extraction.length}
         bind:hex
       />
+      <RequestFunnel {data} />
       {#each tokenCounts as token (`${token.token}:${token.dependentToken ?? ""}:${dataVersion}`)}
         <Card
           {data}
