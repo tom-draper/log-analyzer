@@ -275,7 +275,7 @@
   }
   .summary-grid :global(.funnel),
   .summary-grid :global(.coverage) { margin: 0; }
-  @media screen and (max-width: 760px) { .summary-grid { grid-template-columns: 1fr; } }
+  @media screen and (max-width: 900px) { .summary-grid { grid-template-columns: 1fr; } }
 
   @media screen and (max-width: 800px) {
     .content {

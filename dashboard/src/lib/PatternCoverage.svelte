@@ -30,5 +30,5 @@
 
 <style scoped>
   .coverage { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); padding: 1.25rem 1.5rem; margin: 1.5rem 0; } .heading { display: flex; justify-content: space-between; align-items: center; } h2 { margin: 0; font-size: 1rem; } .heading span, small { color: var(--muted); font-size: .8rem; } strong { color: var(--highlight); font-size: 1.4rem; } strong.warning { color: #e0b34b; }
-  .bar { height: .5rem; border-radius: 1rem; background: #2b2b2b; overflow: hidden; margin: 1rem 0; } .bar span { display: block; height: 100%; background: var(--highlight); } .patterns { display: grid; gap: .45rem; } .pattern { display: flex; gap: 1rem; justify-content: space-between; font-size: .8rem; } .pattern code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #bbb; } .pattern.unmatched code { color: #dd7178; }
+  .bar { height: .5rem; border-radius: 1rem; background: #2b2b2b; overflow: hidden; margin: 1rem 0; } .bar span { display: block; height: 100%; background: var(--highlight); } .patterns { display: grid; gap: .45rem; } .pattern { display: flex; gap: 1rem; justify-content: space-between; font-size: .8rem; min-width: 0; } .pattern code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #bbb; } .pattern.unmatched code { color: #dd7178; }
 </style>
