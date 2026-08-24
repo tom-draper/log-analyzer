@@ -105,6 +105,12 @@
     if (showMonths && monthDiv) buildChart(monthDiv, MONTHS, monthCounts);
     if (showDays && dayDiv) buildChart(dayDiv, DAYS, dayCounts, 280);
     if (showHours && hourDiv) buildHourChart(hourDiv, hourCounts);
+
+    return () => {
+      for (const div of [monthDiv, dayDiv, hourDiv]) {
+        if (div) Plotly.purge(div);
+      }
+    };
   });
 
   $effect(() => {

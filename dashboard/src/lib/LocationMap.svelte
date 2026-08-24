@@ -120,8 +120,9 @@
   let plotDiv: HTMLDivElement;
   let plotData: any;
   let { data, token, hex }: { data: Data; token: string; hex: string } = $props();
-  onMount(async () => {
+  onMount(() => {
     buildPlot();
+    return () => Plotly.purge(plotDiv);
   });
 </script>
 

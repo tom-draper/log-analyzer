@@ -167,6 +167,8 @@
   let multiTypeTokens: DataTypes;
   let tokenCounts: TokenCount[];
   let timestampToken: string | null;
+  let dataVersion = 0;
+  let loadError: string | null = null;
   let hex: string = "#55ff5c";
   const production = import.meta.env.MODE === "production";
 
@@ -184,21 +186,31 @@
     const counts = sortedTokenCounts(data);
     counts.push(...sortedTokenDependencyCounts(data));
     tokenCounts = counts;
+    dataVersion += 1;
   }
 
   async function loadData() {
-    const response = await fetch("/data");
-    applyData(await response.json());
+    try {
+      const response = await fetch("/data");
+      if (!response.ok) {
+        throw new Error(`server returned ${response.status}`);
+      }
+      applyData(await response.json());
+      loadError = null;
+    } catch (error) {
+      loadError = error instanceof Error ? error.message : "unknown error";
+    }
   }
 
-  onMount(async () => {
+  onMount(() => {
     if (production) {
-      await loadData();
+      void loadData();
       // Subscribe to live updates when the server is following a log source.
       const events = new EventSource("/events");
       events.addEventListener("update", () => {
-        loadData();
+        void loadData();
       });
+      return () => events.close();
     } else {
       //@ts-ignore
       applyData(demo);
@@ -207,6 +219,9 @@
 </script>
 
 <main>
+  {#if loadError}
+    <p class="error">Unable to load dashboard data: {loadError}</p>
+  {/if}
   {#if tokenCounts !== undefined}
     <div class="content">
       <Header
@@ -215,7 +230,7 @@
         lineCount={data.extraction.length}
         bind:hex
       />
-      {#each tokenCounts as token}
+      {#each tokenCounts as token (`${token.token}:${token.dependentToken ?? ""}:${dataVersion}`)}
         <Card
           {data}
           token={token.token}
@@ -235,6 +250,11 @@
 <style>
   .content {
     margin: 4em 4em 2em 4em;
+  }
+
+  .error {
+    color: #ff8a8a;
+    margin: 2rem 4rem;
   }
 
   @media screen and (max-width: 800px) {

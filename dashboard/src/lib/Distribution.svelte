@@ -75,7 +75,7 @@
   let isNumeric = $state(false);
   let plotDiv: HTMLDivElement;
   let { data, token, hex }: { data: Data; token: string; hex: string } = $props();
-  onMount(async () => {
+  onMount(() => {
     const values = numericValueCounts(data);
     if (Object.keys(values).length === 0) {
       return;
@@ -84,6 +84,7 @@
     buildPlot(values);
     // Resize window to snap graph to window width
     window.dispatchEvent(new Event("resize"));
+    return () => Plotly.purge(plotDiv);
   });
 </script>
 
