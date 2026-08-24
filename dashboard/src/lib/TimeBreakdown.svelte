@@ -82,8 +82,9 @@
   let monthDiv = $state<HTMLDivElement>();
   let dayDiv = $state<HTMLDivElement>();
   let hourDiv = $state<HTMLDivElement>();
+  let disposed = false;
 
-  onMount(async () => {
+  async function initialiseCharts() {
     const timestamps = collectTimestamps();
 
     monthCounts = Array(12).fill(0);
@@ -102,11 +103,17 @@
 
     await tick();
 
+    if (disposed) return;
+
     if (showMonths && monthDiv) buildChart(monthDiv, MONTHS, monthCounts);
     if (showDays && dayDiv) buildChart(dayDiv, DAYS, dayCounts, 280);
     if (showHours && hourDiv) buildHourChart(hourDiv, hourCounts);
+  }
 
+  onMount(() => {
+    void initialiseCharts();
     return () => {
+      disposed = true;
       for (const div of [monthDiv, dayDiv, hourDiv]) {
         if (div) Plotly.purge(div);
       }
