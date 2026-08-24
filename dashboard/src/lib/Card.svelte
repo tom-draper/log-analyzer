@@ -8,6 +8,7 @@
   import LocationMap from "./LocationMap.svelte";
   import LatencyOverTime from "./LatencyOverTime.svelte";
   import ValueFreqGraphDependent from "./ValueFreqGraphDependent.svelte";
+  import TopValuesTable from "./TopValuesTable.svelte";
 
   export let data: Data,
     token: string,
@@ -45,6 +46,7 @@
       <LatencyOverTime {data} {token} {timestampToken} {hex} />
     {/if}
     <ValueFreqGraph {data} {token} />
+    <TopValuesTable {data} {token} />
     <OverTimeGraph {data} {token} {timestampToken} />
     <LocationMap {data} {token} {hex} />
   {/if}
