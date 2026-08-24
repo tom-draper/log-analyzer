@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import Plotly from "plotly.js-dist-min";
   import { makeTimeSlots, nearestSlotIndex, timestampRange } from "./timeSlots";
+  import { chartLayout, plotConfig } from "./plot";
 
   const quantile = (values: number[], q: number) => {
     const sorted = values.slice().sort((a, b) => a - b);
@@ -30,7 +31,7 @@
       { x, y: percentile(.5), name: "p50", mode: "lines", line: { color: "#aaa" } },
       { x, y: percentile(.95), name: "p95", mode: "lines", line: { color: hex } },
       { x, y: percentile(.99), name: "p99", mode: "lines", line: { color: "#dd7178" } },
-    ], { title: { text: "Latency percentiles over time", font: { size: 14 } }, plot_bgcolor: "transparent", paper_bgcolor: "transparent", margin: { t: 35, l: 50, b: 35, r: 10 }, height: 280, yaxis: { title: { text: token }, gridcolor: "#333" }, xaxis: { fixedrange: true } }, { responsive: true, displayModeBar: false });
+    ], { ...chartLayout({ title: "Latency percentiles over time", height: 240 }), yaxis: { ...chartLayout().yaxis, title: { text: token } } }, plotConfig);
   }
 
   let plotDiv: HTMLDivElement;

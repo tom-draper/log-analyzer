@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Plotly from "plotly.js-dist-min";
+  import { chartLayout, plotConfig } from "./plot";
 
   function isIPAddressToken(data: Data, token: string) {
     for (let i = 0; i < data.extraction.length; i++) {
@@ -75,20 +76,9 @@
       plotDiv,
       plotData,
       {
+        ...chartLayout({ height: 360, title: "Geographic distribution" }),
         hovermode: "closest",
-        plot_bgcolor: "transparent",
-        paper_bgcolor: "transparent",
         margin: { t: 50, l: 0, b: 0, r: 0 },
-        autosize: true,
-        height: 600,
-        dragmode: false,
-        yaxis: {
-          gridcolor: "gray",
-          showgrid: false,
-        },
-        xaxis: {
-          fixedrange: true,
-        },
         geo: {
           showframe: false,
           countrycolor: "rgb(255, 255, 255)",
@@ -104,7 +94,7 @@
           style: "dark",
         },
       },
-      { responsive: true, showSendToCloud: false, displayModeBar: false }
+      plotConfig
     );
   }
 

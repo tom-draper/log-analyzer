@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import Plotly from "plotly.js-dist-min";
+  import { chartLayout, plotConfig } from "./plot";
 
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -19,17 +20,8 @@
     Plotly.newPlot(
       div,
       [{ x, y, type: "bar", marker: { color: hex } }],
-      {
-        plot_bgcolor: "transparent",
-        paper_bgcolor: "transparent",
-        margin: { t: 10, l: 40, b: 50, r: 10 },
-        autosize: true,
-        dragmode: false,
-        height,
-        yaxis: { gridcolor: "gray", showgrid: false },
-        xaxis: { fixedrange: true },
-      },
-      { responsive: true, showSendToCloud: false, displayModeBar: false }
+      chartLayout({ height }),
+      plotConfig
     );
   }
 
@@ -47,9 +39,7 @@
         },
       ],
       {
-        paper_bgcolor: "transparent",
-        dragmode: false,
-        height: 280,
+        ...chartLayout({ height: 240 }),
         polar: {
           bgcolor: "transparent",
           angularaxis: {

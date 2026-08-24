@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Plotly from "plotly.js-dist-min";
+  import { chartLayout, plotConfig } from "./plot";
 
   function numericValueCounts(data: Data) {
     const values: ValueCount = {};
@@ -39,22 +40,8 @@
           },
         },
       ],
-      {
-        hovermode: "closest",
-        plot_bgcolor: "transparent",
-        paper_bgcolor: "transparent",
-        margin: { t: 0, l: 40, b: 40, r: 20 },
-        autosize: true,
-        dragmode: false,
-        yaxis: {
-          gridcolor: "gray",
-          showgrid: false,
-        },
-        xaxis: {
-          fixedrange: true,
-        },
-      },
-      { responsive: true, showSendToCloud: false, displayModeBar: false }
+      chartLayout({ title: "Distribution" }),
+      plotConfig
     );
   }
 
