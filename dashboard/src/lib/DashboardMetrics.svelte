@@ -41,5 +41,5 @@
   .metric span { color: var(--muted); font-size: .72rem; } .metric strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .92rem; }
   .metric.warning strong { color: #fbbf24; } .metric.danger strong { color: #fda4af; }
   @media (max-width: 900px) { .metrics { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 600px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .metrics { grid-template-columns: repeat(2, 1fr); gap: .5rem; } .metric { padding: .65rem .75rem; } }
 </style>

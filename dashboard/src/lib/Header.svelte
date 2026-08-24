@@ -56,6 +56,9 @@
   .notifications {
     margin-left: auto;
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .4rem;
   }
   button {
     padding: .35rem .55rem;
@@ -77,6 +80,10 @@
   }
   .error,
   .warning {
-    margin-left: 10px;
+    margin-left: 0;
+  }
+  @media (max-width: 520px) {
+    .header { display: grid; gap: .5rem; }
+    .notifications { margin-left: 0; justify-content: flex-start; }
   }
 </style>

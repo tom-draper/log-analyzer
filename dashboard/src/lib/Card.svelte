@@ -115,4 +115,9 @@
       padding: 1.25rem;
     }
   }
+  @media screen and (max-width: 520px) {
+    .header { align-items: flex-start; gap: .5rem; }
+    .line-count { margin-left: 0; }
+    .title { overflow-wrap: anywhere; }
+  }
 </style>
