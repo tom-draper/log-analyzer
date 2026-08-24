@@ -6,6 +6,7 @@
   import Activity from "./Activity.svelte";
   import TimeBreakdown from "./TimeBreakdown.svelte";
   import LocationMap from "./LocationMap.svelte";
+  import LatencyOverTime from "./LatencyOverTime.svelte";
   import ValueFreqGraphDependent from "./ValueFreqGraphDependent.svelte";
 
   export let data: Data,
@@ -14,6 +15,8 @@
     lineCount: number,
     timestampToken: string | null,
     hex: string;
+
+  $: isLatencyToken = /(?:latency|duration|elapsed|response[_-]?time)/i.test(token);
 </script>
 
 <div class="card">
@@ -38,6 +41,9 @@
   {:else}
     <Statistics {data} {token} />
     <Distribution {data} {token} {hex} />
+    {#if isLatencyToken && timestampToken}
+      <LatencyOverTime {data} {token} {timestampToken} {hex} />
+    {/if}
     <ValueFreqGraph {data} {token} />
     <OverTimeGraph {data} {token} {timestampToken} />
     <LocationMap {data} {token} {hex} />
