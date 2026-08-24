@@ -1,14 +1,14 @@
 package analyze
 
 import (
-	"internal/location"
-	"internal/server"
 	"log"
 	"net"
 	"os"
 	"sync"
 	"time"
 
+	"github.com/tom-draper/log-analyzer/internal/location"
+	"github.com/tom-draper/log-analyzer/internal/server"
 	"github.com/tom-draper/log-analyzer/pkg/parse"
 )
 

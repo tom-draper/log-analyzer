@@ -100,6 +100,10 @@ docker build -t log-analyzer .
 docker run -v /path/to/logs:/logs -p 3000:3000 log-analyzer --host 0.0.0.0 /logs/app.log
 ```
 
+## Data attribution
+
+IP-country lookup uses the bundled [GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) database created by MaxMind. Refresh `internal/location/GeoLite2-Country.mmdb` regularly from the licensed GeoLite2 distribution when publishing a new release.
+
 ## Advanced Config
 
 ### Data Types
