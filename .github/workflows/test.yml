@@ -12,6 +12,16 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: dashboard/pnpm-lock.yaml
+      - run: corepack enable
+      - run: pnpm --dir dashboard install --frozen-lockfile
+      - run: pnpm --dir dashboard run check
+      - run: pnpm --dir dashboard run build
+      - run: git diff --exit-code -- dashboard/dist
       - run: go build ./...
       - run: go vet ./...
       - run: go test ./...
