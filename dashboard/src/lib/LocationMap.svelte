@@ -3,31 +3,22 @@
   import Plotly from "plotly.js-dist-min";
   import { chartLayout, plotConfig } from "./plot";
 
-  function isIPAddressToken(data: Data, token: string) {
-    for (let i = 0; i < data.extraction.length; i++) {
-      const params = data.extraction[i].params;
-      if (
-        token in params &&
-        params[token].type === "ip" &&
-        params[token].value in data.locations
-      ) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function getLocationCount(data: Data) {
+  function locationSummary(data: Data) {
     const locationCount: { [location: string]: number } = {};
-    for (let i = 0; i < data.extraction.length; i++) {
-      const params = data.extraction[i].params;
-      if (token in params && params[token].type === "ip") {
-        const location = data.locations[params[token].value];
-        locationCount[location] ||= 0;
-        locationCount[location] += 1;
+    let total = 0;
+    let mapped = 0;
+    for (const extraction of data.extraction) {
+      const param = extraction.params[token];
+      if (param?.type === "ip") {
+        total++;
+        const location = data.locations[String(param.value)];
+        if (location) {
+          locationCount[location] = (locationCount[location] ?? 0) + 1;
+          mapped++;
+        }
       }
     }
-    return locationCount;
+    return { locationCount, total, mapped };
   }
 
   function unpackObject(obj: Object) {
@@ -41,7 +32,7 @@
   }
 
   function buildPlot() {
-    const locationCount = getLocationCount(data);
+    const { locationCount } = locationSummary(data);
     const [locations, z] = unpackObject(locationCount);
 
     plotData = [
@@ -110,14 +101,16 @@
   let plotDiv: HTMLDivElement;
   let plotData: any;
   let { data, token, hex }: { data: Data; token: string; hex: string } = $props();
+  let coverage = $derived(locationSummary(data));
   onMount(() => {
     buildPlot();
     return () => Plotly.purge(plotDiv);
   });
 </script>
 
-<div class="container" class:hidden={!isIPAddressToken(data, token)}>
+<div class="container" class:hidden={coverage.mapped === 0}>
   <div id="plotDiv" bind:this={plotDiv}></div>
+  <div class="coverage">Mapped {coverage.mapped.toLocaleString()} of {coverage.total.toLocaleString()} IP values ({coverage.total === 0 ? "0" : ((coverage.mapped / coverage.total) * 100).toFixed(1)}%)</div>
 </div>
 
 <style scoped>
@@ -128,4 +121,5 @@
   #plotDiv {
     width: 100%;
   }
+  .coverage { color: var(--muted); font-size: .75rem; margin-top: -.5rem; }
 </style>
