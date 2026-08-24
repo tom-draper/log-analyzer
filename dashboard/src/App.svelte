@@ -9,6 +9,7 @@
   import RequestFunnel from "./lib/RequestFunnel.svelte";
   import EventExplorer from "./lib/EventExplorer.svelte";
   import PatternCoverage from "./lib/PatternCoverage.svelte";
+  import DashboardMetrics from "./lib/DashboardMetrics.svelte";
 
   type TokenCount = { token: string; dependentToken?: string; count: number };
 
@@ -232,8 +233,11 @@
         {multiTypeTokens}
         lineCount={data.extraction.length}
       />
-      <RequestFunnel {data} />
-      <PatternCoverage {data} />
+      <DashboardMetrics {data} />
+      <div class="summary-grid">
+        <RequestFunnel {data} />
+        <PatternCoverage {data} />
+      </div>
       <EventExplorer {data} />
       {#each tokenCounts as token (`${token.token}:${token.dependentToken ?? ""}:${dataVersion}`)}
         <Card
@@ -263,6 +267,15 @@
     color: #ff8a8a;
     margin: 2rem 4rem;
   }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .summary-grid :global(.funnel),
+  .summary-grid :global(.coverage) { margin: 0; }
+  @media screen and (max-width: 760px) { .summary-grid { grid-template-columns: 1fr; } }
 
   @media screen and (max-width: 800px) {
     .content {
