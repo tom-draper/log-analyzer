@@ -262,6 +262,9 @@ cat ./tests/data/logs/demo.log | ./log-analyzer - --format csv
 Add the `--follow` flag to tail a growing log file (or a stdin stream) as new lines are appended.
 
 On its own, `--follow` serves a **live-updating dashboard**: the charts refresh automatically as new lines arrive (updates are pushed to the browser over server-sent events).
+To keep the dashboard responsive over long-running streams, it retains the most
+recent 10,000 records by default. Use `--follow-max-records 0` to retain all
+records, or set a smaller window for lower memory use.
 
 ```bash
 # Live dashboard that updates as the log grows

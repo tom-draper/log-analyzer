@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/tom-draper/log-analyzer/pkg/analyze"
@@ -18,6 +19,8 @@ import (
 var indexHTML []byte
 
 const version = "1.0.0"
+
+const defaultFollowMaxRecords = 10_000
 
 const usage = `Log Analyzer - turn unstructured log files into a dashboard.
 
@@ -34,6 +37,8 @@ Options:
   -o, --output <path>   Write extracted data to a file instead of the dashboard
   -f, --format <fmt>    Export format: json, ndjson or csv (implies headless)
       --follow          Stream records as new lines are appended (ndjson or print)
+      --follow-max-records <n>
+                        Keep the latest n records in a live dashboard (default: 10000; 0 keeps all)
   -t, --test            Test config against the log file(s); write extraction to JSON
   -p, --print           Print extracted tokens for each line to the terminal
   -h, --help            Show this help message
@@ -51,16 +56,18 @@ Example:
 `
 
 type options struct {
-	logPaths   []string
-	configPath string
-	port       string
-	output     string
-	format     string
-	follow     bool
-	test       bool
-	print      bool
-	help       bool
-	version    bool
+	logPaths            []string
+	configPath          string
+	port                string
+	output              string
+	format              string
+	follow              bool
+	followMaxRecords    int
+	followMaxRecordsSet bool
+	test                bool
+	print               bool
+	help                bool
+	version             bool
 }
 
 func main() {
@@ -101,6 +108,9 @@ func main() {
 	}
 	if opts.port == "" {
 		opts.port = "3000"
+	}
+	if !opts.followMaxRecordsSet {
+		opts.followMaxRecords = defaultFollowMaxRecords
 	}
 
 	// Retrieve log line patterns from config file
@@ -144,7 +154,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, "error: --follow requires exactly one input (a file path, or - for stdin)")
 			os.Exit(2)
 		}
-		analyze.RunFollow(opts.logPaths[0], &config, opts.port, indexHTML)
+		analyze.RunFollow(opts.logPaths[0], &config, opts.port, opts.followMaxRecords, indexHTML)
 		return
 	}
 
@@ -581,6 +591,17 @@ func parseArgs(args []string) (options, error) {
 			opts.version = true
 		case "--follow":
 			opts.follow = true
+		case "--follow-max-records":
+			if i+1 >= len(args) {
+				return opts, fmt.Errorf("%s flag requires a non-negative integer", arg)
+			}
+			i++
+			value, err := strconv.Atoi(args[i])
+			if err != nil || value < 0 {
+				return opts, fmt.Errorf("%s flag requires a non-negative integer", arg)
+			}
+			opts.followMaxRecords = value
+			opts.followMaxRecordsSet = true
 		case "-t", "--test":
 			opts.test = true
 		case "-p", "--print", "-d", "--display":

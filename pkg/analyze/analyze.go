@@ -50,7 +50,7 @@ func Run(extraction []parse.Extraction, config *parse.Config, port string, index
 // RunFollow serves the dashboard and tails the given source (a file path, or
 // "-" for stdin), streaming newly extracted records into the dashboard so it
 // updates live.
-func RunFollow(path string, config *parse.Config, port string, indexHTML []byte) {
+func RunFollow(path string, config *parse.Config, port string, maxRecords int, indexHTML []byte) {
 	data := &server.Data{
 		Extraction: []parse.Extraction{},
 		Locations:  map[string]string{},
@@ -58,7 +58,7 @@ func RunFollow(path string, config *parse.Config, port string, indexHTML []byte)
 	}
 	store := server.NewStore(data)
 
-	go tail(path, config, store)
+	go tail(path, config, maxRecords, store)
 
 	server.Start(store, port, indexHTML)
 }
@@ -66,7 +66,7 @@ func RunFollow(path string, config *parse.Config, port string, indexHTML []byte)
 // tail streams records from the source into the store. Incoming records are
 // buffered and flushed on a fixed interval so that a burst of new lines results
 // in at most a couple of dashboard refreshes per second rather than one per line.
-func tail(path string, config *parse.Config, store *server.Store) {
+func tail(path string, config *parse.Config, maxRecords int, store *server.Store) {
 	var reader = os.Stdin
 	follow := true
 	if path != "-" {
@@ -100,10 +100,10 @@ func tail(path string, config *parse.Config, store *server.Store) {
 		for {
 			select {
 			case <-done:
-				flush(store, &mu, &pending)
+				flush(store, &mu, &pending, maxRecords)
 				return
 			case <-ticker.C:
-				flush(store, &mu, &pending)
+				flush(store, &mu, &pending, maxRecords)
 			}
 		}
 	}()
@@ -114,7 +114,7 @@ func tail(path string, config *parse.Config, store *server.Store) {
 	close(done)
 }
 
-func flush(store *server.Store, mu *sync.Mutex, pending *[]parse.Extraction) {
+func flush(store *server.Store, mu *sync.Mutex, pending *[]parse.Extraction, maxRecords int) {
 	mu.Lock()
 	batch := *pending
 	*pending = nil
@@ -129,10 +129,37 @@ func flush(store *server.Store, mu *sync.Mutex, pending *[]parse.Extraction) {
 
 	store.Update(func(d *server.Data) {
 		d.Extraction = append(d.Extraction, batch...)
+		d.Extraction = retainRecent(d.Extraction, maxRecords)
 		for ip, loc := range batchLocations {
-			if _, ok := d.Locations[ip]; !ok {
-				d.Locations[ip] = loc
+			d.Locations[ip] = loc
+		}
+		d.Locations = retainedLocations(d.Extraction, d.Locations)
+	})
+}
+
+// retainRecent bounds the live dashboard's working set. A limit of zero keeps
+// all records, which is useful when the caller has its own resource controls.
+func retainRecent(extraction []parse.Extraction, maxRecords int) []parse.Extraction {
+	if maxRecords <= 0 || len(extraction) <= maxRecords {
+		return extraction
+	}
+	return append([]parse.Extraction(nil), extraction[len(extraction)-maxRecords:]...)
+}
+
+// retainedLocations drops country lookups for records that have aged out of
+// the dashboard window, keeping location memory proportional to the window.
+func retainedLocations(extraction []parse.Extraction, locations map[string]string) map[string]string {
+	retained := make(map[string]string)
+	for _, e := range extraction {
+		for _, p := range e.Params {
+			ip, ok := p.Value.(net.IP)
+			if !ok {
+				continue
+			}
+			if country, ok := locations[ip.String()]; ok {
+				retained[ip.String()] = country
 			}
 		}
-	})
+	}
+	return retained
 }

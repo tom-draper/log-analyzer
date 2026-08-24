@@ -57,6 +57,11 @@ func TestParseArgs(t *testing.T) {
 			want: options{logPaths: []string{"-"}, follow: true, format: "ndjson"},
 		},
 		{
+			name: "follow record limit",
+			args: []string{"--follow", "--follow-max-records", "500", "app.log"},
+			want: options{logPaths: []string{"app.log"}, follow: true, followMaxRecords: 500, followMaxRecordsSet: true},
+		},
+		{
 			name: "output and format flags",
 			args: []string{"-o", "out.csv", "app.log"},
 			want: options{logPaths: []string{"app.log"}, output: "out.csv"},
@@ -94,6 +99,7 @@ func TestParseArgsErrors(t *testing.T) {
 		{name: "config flag without value", args: []string{"--config"}},
 		{name: "port flag without value", args: []string{"app.log", "-P"}},
 		{name: "unknown flag", args: []string{"--bogus", "app.log"}},
+		{name: "negative follow record limit", args: []string{"--follow-max-records", "-1", "app.log"}},
 	}
 
 	for _, tt := range tests {
