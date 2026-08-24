@@ -99,3 +99,10 @@ func TestParseReaderMatchesParse(t *testing.T) {
 		}
 	}
 }
+
+func TestParseFileTestReturnsReadError(t *testing.T) {
+	_, err := ParseFileTest("does-not-exist.log", &Config{})
+	if err == nil {
+		t.Fatal("expected an error for a missing log file")
+	}
+}

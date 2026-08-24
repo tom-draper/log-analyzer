@@ -2,9 +2,7 @@ package parse
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -35,7 +33,7 @@ type Param struct {
 }
 
 var (
-	multiSpaceRegEx = regexp.MustCompile(`[ ]{2,}`)
+	multiSpaceRegEx   = regexp.MustCompile(`[ ]{2,}`)
 	patternRegexCache sync.Map // map[string]compiledPattern
 )
 
@@ -566,82 +564,39 @@ func ParseFiles(paths []string, config *Config) ([]Extraction, error) {
 	return extraction, nil
 }
 
-func writeConfigTest(extractions []Extraction) (int, error) {
-	//write data as buffer to json encoder
-	buffer := new(bytes.Buffer)
-	encoder := json.NewEncoder(buffer)
-	encoder.SetIndent("", "\t")
-
-	err := encoder.Encode(extractions)
+// WriteConfigTest writes extractions to a new JSON file in the current
+// directory and returns its path. CreateTemp prevents collisions between runs
+// and creates the file with owner-only permissions.
+func WriteConfigTest(extractions []Extraction) (path string, err error) {
+	file, err := os.CreateTemp(".", "test-*.json")
 	if err != nil {
-		return 0, err
+		return "", err
 	}
-	fileDir := fmt.Sprintf("test-%d.json", time.Now().Unix())
-	file, err := os.OpenFile(fileDir, os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
-		return 0, err
-	}
-	n, err := file.Write(buffer.Bytes())
-	if err != nil {
-		return 0, err
-	}
-	fmt.Println(fileDir) // Display output location
-	return n, nil
-}
-
-type ExtractionDebug struct {
-	Line       string         `json:"line"`
-	LineNumber int            `json:"lineNumber"`
-	Pattern    string         `json:"pattern"`
-	Params     map[string]any `json:"params"`
-}
-
-// ParseTest runs Parse and displays a random sample of extracted parameters
-// along with the origin lines from the log text.
-func ParseTest(logtext string, config *Config) []Extraction {
-	extractions, err := Parse(logtext, config)
-	if err != nil {
-		panic(err)
-	}
-	// Random sample...
-	writeConfigTest(extractions)
-	return extractions
-}
-
-// ParseTest runs ParseFile and displays a random sample of extracted parameters
-// along with the origin lines from the log file.
-func ParseFileTest(path string, config *Config) ([]Extraction, error) {
-	body, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	extractions := ParseTest(string(body), config)
-	if err != nil {
-		return nil, err
-	}
-
-	return extractions, nil
-}
-
-// ParseTest runs ParseFiles and displays a random sample of extracted
-// parameters along with the origin lines from the log files.
-func ParseFilesTest(paths []string, config *Config) ([]Extraction, error) {
-	extractions := make([]Extraction, 0)
-
-	var parsedAny bool
-	for _, path := range paths {
-		r, err := ParseFileTest(path, config)
-		if err != nil {
-			log.Printf("unable to read file at path %s: %s\n", path, fmt.Sprint(err))
-			continue
+	path = file.Name()
+	defer func() {
+		if closeErr := file.Close(); err == nil && closeErr != nil {
+			err = closeErr
 		}
-		parsedAny = true
-		extractions = append(extractions, r...)
-	}
+		if err != nil {
+			_ = os.Remove(path)
+		}
+	}()
 
-	if !parsedAny {
-		return nil, errors.New("unable to read log file path provided")
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "\t")
+	if err := encoder.Encode(extractions); err != nil {
+		return "", err
 	}
+	fmt.Println(path)
+	return path, nil
+}
 
-	return extractions, nil
+// ParseFileTest parses one log file for config-test mode.
+func ParseFileTest(path string, config *Config) ([]Extraction, error) {
+	return ParseFile(path, config)
+}
+
+// ParseFilesTest parses all log files for config-test mode.
+func ParseFilesTest(paths []string, config *Config) ([]Extraction, error) {
+	return ParseFiles(paths, config)
 }

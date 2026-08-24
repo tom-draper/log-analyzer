@@ -112,10 +112,19 @@ func main() {
 
 	// If testing config against log file(s), run test
 	if opts.test {
+		var extraction []parse.Extraction
 		if len(opts.logPaths) == 1 {
-			parse.ParseFileTest(opts.logPaths[0], &config)
+			extraction, err = parse.ParseFileTest(opts.logPaths[0], &config)
 		} else {
-			parse.ParseFilesTest(opts.logPaths, &config)
+			extraction, err = parse.ParseFilesTest(opts.logPaths, &config)
+		}
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: unable to test log file(s): %s\n", err)
+			os.Exit(1)
+		}
+		if _, err := parse.WriteConfigTest(extraction); err != nil {
+			fmt.Fprintf(os.Stderr, "error: unable to write config test output: %s\n", err)
+			os.Exit(1)
 		}
 		return
 	}
