@@ -19,6 +19,10 @@
     hex: string;
 
   $: isLatencyToken = /(?:latency|duration|elapsed|response[_-]?time)/i.test(token);
+  let showHeatmap = false;
+  let showBreakdown = false;
+  let showDistribution = false;
+  let showExamples = false;
 </script>
 
 <div class="card">
@@ -37,20 +41,32 @@
   </div>
   {#if dependentToken}
     <ValueFreqGraphDependent {data} {token} {dependentToken} />
-    <DependencyHeatmap {data} {token} {dependentToken} />
+    <details ontoggle={(event) => showHeatmap = event.currentTarget.open}>
+      <summary>Correlation heatmap</summary>
+      {#if showHeatmap}<DependencyHeatmap {data} {token} {dependentToken} />{/if}
+    </details>
   {:else if token === timestampToken}
     <Activity {data} {token} {hex} />
-    <TimeBreakdown {data} {token} {hex} />
+    <details ontoggle={(event) => showBreakdown = event.currentTarget.open}>
+      <summary>Time breakdown</summary>
+      {#if showBreakdown}<TimeBreakdown {data} {token} {hex} />{/if}
+    </details>
   {:else}
     <Statistics {data} {token} />
-    <Distribution {data} {token} {hex} />
-    {#if isLatencyToken && timestampToken}
-      <LatencyOverTime {data} {token} {timestampToken} {hex} />
-    {/if}
     <ValueFreqGraph {data} {token} />
-    <TopValuesTable {data} {token} />
-    <OverTimeGraph {data} {token} {timestampToken} />
-    <LocationMap {data} {token} {hex} />
+    <details ontoggle={(event) => showDistribution = event.currentTarget.open}>
+      <summary>Distribution & trends</summary>
+      {#if showDistribution}<Distribution {data} {token} {hex} />
+      {#if isLatencyToken && timestampToken}
+        <LatencyOverTime {data} {token} {timestampToken} {hex} />
+      {/if}
+      <OverTimeGraph {data} {token} {timestampToken} />
+      <LocationMap {data} {token} {hex} />{/if}
+    </details>
+    <details ontoggle={(event) => showExamples = event.currentTarget.open}>
+      <summary>Values & examples</summary>
+      {#if showExamples}<TopValuesTable {data} {token} />{/if}
+    </details>
   {/if}
 </div>
 
@@ -80,6 +96,19 @@
     padding: 1.5rem;
     background: var(--card);
   }
+  details {
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+    padding-top: .75rem;
+  }
+  summary {
+    color: var(--muted);
+    cursor: pointer;
+    font-size: .8125rem;
+    font-weight: 500;
+    list-style-position: inside;
+  }
+  summary:hover { color: var(--text); }
 
   @media screen and (max-width: 800px) {
     .card {
