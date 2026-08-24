@@ -1,11 +1,12 @@
 <script lang="ts">
   const DISPLAY_LIMIT = 100;
+  import Panel from "./Panel.svelte";
   export let failedLines: FailedLines;
 </script>
 
 {#if Object.keys(failedLines).length > 0}
   {@const total = Object.keys(failedLines).length}
-  <div class="card">
+  <Panel class="card">
     <div class="summary">
       {#if total > DISPLAY_LIMIT}
         Showing {DISPLAY_LIMIT.toLocaleString()} of {total.toLocaleString()} failed lines
@@ -19,35 +20,29 @@
         <div class="line">{line}</div>
       </div>
     {/each}
-  </div>
+  </Panel>
 {/if}
 
 <style scoped>
-  .card {
-    border: 1px solid #ffffff24;
-    border-radius: 5px;
-    margin: 3em 0;
-    padding: 2rem;
-  }
   .summary {
     font-size: 0.9em;
-    color: #888;
+    color: var(--muted);
     margin-bottom: 1rem;
   }
   .line-container {
     display: flex;
     background: #271515;
     color: #dd7178;
-    border-radius: 5px;
-    margin: 5px;
+    border-radius: calc(var(--radius) - 2px);
+    margin: .35rem 0;
     font-size: 0.9em;
   }
   .lineNumber {
     margin: 6px 0;
-    padding: 4px 20px;
+    padding: 4px .75rem;
     border-right: 1px solid #5e1e2e;
   }
   .line {
-    margin: 10px 20px;
+    margin: .55rem .75rem;
   }
 </style>

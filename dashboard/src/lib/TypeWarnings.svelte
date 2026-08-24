@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import Badge from "./Badge.svelte";
+  import Panel from "./Panel.svelte";
 
   type Examples = { [token: string]: Example };
   type Example = { [type: string]: { line: string; pattern: string } };
@@ -44,17 +46,15 @@
   export let data: Data, multiTypes: DataTypes;
 </script>
 
-<div class="card" class:hidden={Object.keys(multiTypes).length === 0}>
+{#if Object.keys(multiTypes).length > 0}
+<Panel class="card">
   {#each Object.entries(multiTypes) as [token, dataTypes]}
     <div class="line-container">
       <div class="token-header">
         <b>{token}</b> has {Object.keys(dataTypes).length} data types
         <span class="type-counts">
           {#each Object.entries(dataTypes) as [type, count], i}
-            <span class="type-pill"
-              >{type} <span class="pill-count">× {count.toLocaleString()}</span
-              ></span
-            >{#if i < Object.keys(dataTypes).length - 1}{" "}{/if}
+            <Badge tone="warning">{type} × {count.toLocaleString()}</Badge>{#if i < Object.keys(dataTypes).length - 1}{" "}{/if}
           {/each}
         </span>
       </div>
@@ -72,22 +72,17 @@
       {/if}
     </div>
   {/each}
-</div>
+</Panel>
+{/if}
 
 <style scoped>
-  .card {
-    border: 1px solid #ffffff24;
-    border-radius: 5px;
-    margin: 3em 0;
-    padding: 2rem;
-  }
   .line-container {
     background: #5e4c1589;
     color: #ddd871;
-    border-radius: 5px;
-    margin: 5px;
+    border-radius: calc(var(--radius) - 2px);
+    margin: .5rem 0;
     font-size: 0.9em;
-    padding: 20px 20px;
+    padding: 1rem;
   }
   .token-header {
     padding: 5px 15px;
@@ -100,18 +95,9 @@
     margin-left: 8px;
     vertical-align: middle;
   }
-  .type-pill {
-    background: #ffffff18;
-    border-radius: 4px;
-    padding: 1px 8px;
-    font-size: 0.9em;
-  }
-  .pill-count {
-    color: #b8b44a;
-  }
   .examples {
     padding: 5px 15px;
-    margin-left: 20px;
+    margin-left: 1rem;
   }
   .type-label {
     margin-bottom: 4px;

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import Panel from "./Panel.svelte";
 
   function quantile(arr: number[], q: number) {
     const sorted = arr.slice().sort((a, b) => a - b);
@@ -58,6 +59,7 @@
 </script>
 
 {#if statistics}
+  <Panel>
   <div class="container">
     <div class="statistic">
       <div class="value">{statistics.min.toLocaleString()}</div>
@@ -88,15 +90,11 @@
       <div class="label">p99</div>
     </div>
   </div>
+  </Panel>
 {/if}
 
 <style scoped>
   .container {
-    border: 1px solid #ffffff24;
-    border: 1px solid rgb(42, 42, 42);
-    border-radius: 5px;
-    margin: 3em 0 2em;
-    padding: 2rem;
     display: flex;
     flex-wrap: wrap;
     gap: 1rem 0;
@@ -104,7 +102,7 @@
   .statistic {
     flex: 1;
     min-width: 80px;
-    font-size: 1.6em;
+    font-size: 1.25rem;
     display: grid;
     place-items: center;
   }
@@ -113,6 +111,6 @@
   }
   .label {
     font-size: 0.62em;
-    color: #888;
+    color: var(--muted);
   }
 </style>

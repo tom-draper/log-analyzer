@@ -73,6 +73,30 @@ button:focus-visible {
   display: none !important;
 }
 
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: #1b1b1b;
+  color: var(--muted);
+  padding: .15rem .45rem;
+  font-size: .75rem;
+  line-height: 1.1;
+}
+
+.badge.warning { background: #292319; border-color: #713f12; color: #fcd34d; }
+.badge.danger { background: #2a1518; border-color: #7f1d1d; color: #fda4af; }
+.empty-state { color: var(--muted); font-size: .875rem; margin: 1rem 0; }
+
 
 /* @media (prefers-color-scheme: light) {
   :root {
