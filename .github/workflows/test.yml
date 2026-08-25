@@ -16,9 +16,12 @@ jobs:
         with:
           node-version: 22
       - run: corepack enable
-      - run: pnpm --dir dashboard install --frozen-lockfile
-      - run: pnpm --dir dashboard run check
-      - run: pnpm --dir dashboard run build
+      - run: pnpm install --frozen-lockfile
+        working-directory: dashboard
+      - run: pnpm run check
+        working-directory: dashboard
+      - run: pnpm run build
+        working-directory: dashboard
       - run: git diff --exit-code -- dashboard/dist
       - run: go build ./...
       - run: go vet ./...
