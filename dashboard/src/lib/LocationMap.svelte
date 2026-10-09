@@ -81,9 +81,6 @@
           lataxis: {},
           bgcolor: "transparent",
         },
-        mapbox: {
-          style: "dark",
-        },
       },
       plotConfig
     );

@@ -118,7 +118,7 @@
     for (const div of [monthDiv, dayDiv, hourDiv]) {
       if (div) {
         try {
-          Plotly.restyle(div, { "marker.color": hex });
+          Plotly.restyle(div, { "marker.color": hex } as any);
         } catch (e) {}
       }
     }

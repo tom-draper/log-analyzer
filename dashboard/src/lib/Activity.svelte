@@ -47,7 +47,7 @@
       try {
         Plotly.restyle(plotDiv, {
           "marker.color": hex,
-        });
+        } as any);
       } catch (e) {}
     }
   }
