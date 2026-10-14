@@ -40,6 +40,13 @@ func LoadConfig(path string) (Config, error) {
 	if err := decoder.Decode(&config); err != nil {
 		return Config{}, err
 	}
+	var trailing json.RawMessage
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		if err != nil {
+			return Config{}, fmt.Errorf("unexpected trailing config data: %w", err)
+		}
+		return Config{}, fmt.Errorf("config must contain exactly one JSON document")
+	}
 	if err := ValidateConfig(config); err != nil {
 		return Config{}, err
 	}
