@@ -512,6 +512,12 @@ func ParseStream(r io.Reader, config *Config, follow bool, emit func(Extraction)
 
 	for {
 		chunk, err := br.ReadString('\n')
+		if err == errFollowReset {
+			// An incomplete line belongs to the old source, not its replacement.
+			partial.Reset()
+			br.Reset(r)
+			continue
+		}
 		if err == nil {
 			partial.WriteString(chunk)
 			if e := emitLine(); e != nil {
