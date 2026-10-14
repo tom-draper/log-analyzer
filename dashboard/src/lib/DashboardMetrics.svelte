@@ -6,18 +6,24 @@
     const total = data.extraction.length;
     const unmatched = data.extraction.filter((item) => item.pattern === "").length;
     const tokenCounts: Record<string, number> = {};
-    const times: number[] = [];
+    let timestampCount = 0;
+    let earliest = Infinity;
+    let latest = -Infinity;
     for (const extraction of data.extraction) {
       for (const [token, param] of Object.entries(extraction.params)) {
         tokenCounts[token] = (tokenCounts[token] ?? 0) + 1;
         if (param.type === "time") {
           const time = new Date(param.value as string).getTime();
-          if (!Number.isNaN(time)) times.push(time);
+          if (!Number.isNaN(time)) {
+            timestampCount++;
+            earliest = Math.min(earliest, time);
+            latest = Math.max(latest, time);
+          }
         }
       }
     }
     const topToken = Object.entries(tokenCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
-    const timeRange = times.length < 2 ? "—" : `${new Date(Math.min(...times)).toLocaleDateString()} – ${new Date(Math.max(...times)).toLocaleDateString()}`;
+    const timeRange = timestampCount < 2 ? "—" : `${new Date(earliest).toLocaleDateString()} – ${new Date(latest).toLocaleDateString()}`;
     const matchRate = total === 0 ? "—" : `${(((total - unmatched) / total) * 100).toFixed(1)}%`;
     return [
       { label: "Lines", value: total.toLocaleString() },

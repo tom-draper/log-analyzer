@@ -20,6 +20,8 @@ jobs:
         working-directory: dashboard
       - run: pnpm run check
         working-directory: dashboard
+      - run: pnpm test
+        working-directory: dashboard
       - run: pnpm run build
         working-directory: dashboard
       - run: git diff --exit-code -- dashboard/dist
