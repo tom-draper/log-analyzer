@@ -538,13 +538,8 @@ func runFollow(opts options, config *parse.Config) error {
 		return parse.ParseStream(os.Stdin, config, false, emit)
 	}
 
-	file, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
 	fmt.Fprintf(os.Stderr, "following %s (Ctrl-C to stop)\n", path)
-	return parse.ParseStream(file, config, true, emit)
+	return parse.FollowFile(path, config, emit)
 }
 
 // streamEmitter builds a per-record emitter for follow mode based on the chosen

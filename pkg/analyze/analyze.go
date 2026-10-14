@@ -67,21 +67,6 @@ func RunFollow(path string, config *parse.Config, host, port string, maxRecords 
 // buffered and flushed on a fixed interval so that a burst of new lines results
 // in at most a couple of dashboard refreshes per second rather than one per line.
 func tail(path string, config *parse.Config, maxRecords int, store *server.Store) {
-	var reader = os.Stdin
-	follow := true
-	if path != "-" {
-		file, err := os.Open(path)
-		if err != nil {
-			log.Printf("follow: %s", err)
-			return
-		}
-		defer file.Close()
-		reader = file
-	} else {
-		// A pipe streams line-by-line and ends at EOF.
-		follow = false
-	}
-
 	var (
 		mu      sync.Mutex
 		pending []parse.Extraction
@@ -108,7 +93,13 @@ func tail(path string, config *parse.Config, maxRecords int, store *server.Store
 		}
 	}()
 
-	if err := parse.ParseStream(reader, config, follow, emit); err != nil {
+	var err error
+	if path == "-" {
+		err = parse.ParseStream(os.Stdin, config, false, emit)
+	} else {
+		err = parse.FollowFile(path, config, emit)
+	}
+	if err != nil {
 		log.Printf("follow: %s", err)
 	}
 	close(done)

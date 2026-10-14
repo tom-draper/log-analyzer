@@ -296,6 +296,10 @@ tail -f ./logs/app.log | ./log-analyzer --follow -
 
 Note that follow mode considers single-line patterns only, since streaming cannot look ahead for multi-line patterns.
 
+When the log file is replaced, follow mode reads its replacement from the start.
+If the file shrinks below the current read position, follow mode rewinds it.
+Incomplete trailing text from the previous file is discarded.
+
 ## Additional Tools
 
 ### Pattern Identification
