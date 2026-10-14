@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net"
 	"os"
 	"regexp"
@@ -138,7 +139,7 @@ func inferDataTypes(params map[string]string) map[string]Param {
 			}
 			continue
 		} else if strings.HasPrefix(token, "float_") {
-			if value, err := strconv.ParseFloat(match, 64); strings.Contains(match, ".") && err == nil {
+			if value, err := strconv.ParseFloat(match, 64); err == nil && !math.IsNaN(value) && !math.IsInf(value, 0) {
 				typedParams[token] = Param{Value: value, Type: "float"}
 			}
 			continue
