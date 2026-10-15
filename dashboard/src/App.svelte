@@ -182,15 +182,6 @@
   function applyData(d: Data) {
     performConversions(d);
     originalData = d;
-    if (!filters.timestampToken) {
-      const firstTimeToken = d.extraction
-        .flatMap(record => Object.entries(record.params))
-        .find(([, param]) => param.type === "time")?.[0];
-      filters = {
-        ...filters,
-        timestampToken: identifyTimestampToken(d) ?? firstTimeToken ?? "",
-      };
-    }
   }
 
   async function loadData() {

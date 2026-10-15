@@ -5,7 +5,6 @@
   export let records: Extraction[];
   export let filters: DashboardFilters;
   $: tokens = [...new Set([...data.extraction.flatMap(record => Object.keys(record.params)), ...(filters.token ? [filters.token] : [])])].sort();
-  $: timeTokens = [...new Set([...data.extraction.flatMap(record => Object.entries(record.params).filter(([, param]) => param.type === "time").map(([token]) => token)), ...(filters.timestampToken ? [filters.timestampToken] : [])])].sort();
   $: sources = [...new Set([...data.extraction.map(record => record.sourceFile ?? ""), ...(filters.source !== null ? [filters.source] : [])])].sort();
   $: values = [...new Set([...data.extraction.flatMap(record => filters.token in record.params ? [String(record.params[filters.token].value)] : []), ...(filters.value !== null ? [filters.value] : [])])].sort();
   $: invalidRange = filters.start && filters.end && new Date(filters.start) > new Date(filters.end);
@@ -23,9 +22,8 @@
 <section class="filters" aria-label="Dashboard filters">
   <div class="heading"><h2>Dashboard filters</h2><span aria-live="polite">{records.length.toLocaleString()} of {data.extraction.length.toLocaleString()} records</span></div>
   <div class="controls">
-    <label>Timestamp<select bind:value={filters.timestampToken} onchange={() => { if (!filters.timestampToken) { filters.start = ""; filters.end = ""; } }}><option value="">Choose timestamp</option>{#each timeTokens as token}<option value={token}>{token}</option>{/each}</select></label>
-    <label>From<input type="datetime-local" step="1" bind:value={filters.start} disabled={!filters.timestampToken} /></label>
-    <label>Through<input type="datetime-local" step="1" bind:value={filters.end} disabled={!filters.timestampToken} /></label>
+    <label>From<input type="datetime-local" step="1" bind:value={filters.start} /></label>
+    <label>Through<input type="datetime-local" step="1" bind:value={filters.end} /></label>
     <label>Token<select bind:value={filters.token} onchange={() => filters.value = null}><option value="">All tokens</option>{#each tokens as token}<option value={token}>{token}</option>{/each}</select></label>
     <label>Value<select bind:value={filters.value} disabled={!filters.token}><option value={null}>Any value</option>{#each values as value}<option {value}>{value === "" ? "(empty string)" : value}</option>{/each}</select></label>
     <label>Source file<select bind:value={filters.source}><option value={null}>All sources</option>{#each sources as source}<option value={source}>{source || "Unknown source"}</option>{/each}</select></label>
@@ -34,7 +32,7 @@
   </div>
   <p>Filters apply to all charts and events. Times use your local timezone and include both bounds. Records without a valid timestamp are excluded when a time bound is set.</p>
   {#if invalidRange}<p role="alert">From must be earlier than or equal to Through.</p>{/if}
-  <div class="actions"><button onclick={() => filters = { ...emptyFilters(), timestampToken: filters.timestampToken }}>Clear filters</button><button onclick={download} disabled={records.length === 0}>Export {records.length.toLocaleString()} matching records (JSON)</button></div>
+  <div class="actions"><button onclick={() => filters = emptyFilters()}>Clear filters</button><button onclick={download} disabled={records.length === 0}>Export {records.length.toLocaleString()} matching records (JSON)</button></div>
 </section>
 
 <style>

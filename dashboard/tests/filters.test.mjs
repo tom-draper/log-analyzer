@@ -24,10 +24,10 @@ test("empty filters retain records and source metadata", () => {
 });
 
 test("time bounds are inclusive and exclude missing or invalid timestamps", () => {
-  assert.deepEqual(select({ timestampToken: "timestamp", start: "2024-01-01T12:00:00Z", end: "2024-01-01T13:00:00Z" }), records.slice(0, 2));
-  assert.deepEqual(select({ timestampToken: "timestamp", end: "2024-01-01T12:00:00Z" }), [records[0]]);
-  assert.deepEqual(select({ timestampToken: "timestamp", start: "2024-01-01T14:00:00Z" }), [records[2]]);
-  assert.deepEqual(select({ timestampToken: "timestamp", start: "2024-02-01", end: "2024-01-01" }), []);
+  assert.deepEqual(select({ start: "2024-01-01T12:00:00Z", end: "2024-01-01T13:00:00Z" }), records.slice(0, 2));
+  assert.deepEqual(select({ end: "2024-01-01T12:00:00Z" }), [records[0]]);
+  assert.deepEqual(select({ start: "2024-01-01T14:00:00Z" }), [records[2]]);
+  assert.deepEqual(select({ start: "2024-02-01", end: "2024-01-01" }), []);
 });
 
 test("token filters require presence and compare exact values including zero and empty strings", () => {
@@ -40,7 +40,7 @@ test("token filters require presence and compare exact values including zero and
 });
 
 test("source, token, time, and case-insensitive raw text filters intersect", () => {
-  assert.deepEqual(select({ source: "a.log", token: "status", value: "500", timestampToken: "timestamp", start: "2024-01-01", end: "2024-01-02", query: "get /HOME" }), [records[2]]);
+  assert.deepEqual(select({ source: "a.log", token: "status", value: "500", start: "2024-01-01", end: "2024-01-02", query: "get /HOME" }), [records[2]]);
   assert.deepEqual(select({ source: "", failuresOnly: true, query: "get" }), [records[3]]);
   assert.deepEqual(select({ source: "missing.log" }), []);
 });

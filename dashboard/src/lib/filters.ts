@@ -1,7 +1,6 @@
 export type DashboardFilters = {
   start: string;
   end: string;
-  timestampToken: string;
   token: string;
   value: string | null;
   source: string | null;
@@ -10,7 +9,7 @@ export type DashboardFilters = {
 };
 
 export function emptyFilters(): DashboardFilters {
-  return { start: "", end: "", timestampToken: "", token: "", value: null, source: null, query: "", failuresOnly: false };
+  return { start: "", end: "", token: "", value: null, source: null, query: "", failuresOnly: false };
 }
 
 export function filterRecords(records: Extraction[], filters: DashboardFilters): Extraction[] {
@@ -26,8 +25,8 @@ export function filterRecords(records: Extraction[], filters: DashboardFilters):
       if (!param || (filters.value !== null && String(param.value) !== filters.value)) return false;
     }
     if (filters.start || filters.end) {
-      const param = record.params[filters.timestampToken];
-      if (!param || param.type !== "time") return false;
+      const param = Object.values(record.params).find(param => param.type === "time");
+      if (!param) return false;
       const timestamp = new Date(param.value).getTime();
       if (!Number.isFinite(timestamp) || !(timestamp >= start && timestamp <= end)) return false;
     }
