@@ -25,7 +25,7 @@ func TestFollowFileReturnsEmitterError(t *testing.T) {
 	if err != stop {
 		t.Fatalf("error = %v, want emitter error", err)
 	}
-	want := []Extraction{{Line: "before", LineNumber: 0, Pattern: "str_message", Params: map[string]Param{"str_message": {Value: "before", Type: "str"}}}}
+	want := []Extraction{{SourceFile: path, Line: "before", LineNumber: 0, Pattern: "str_message", Params: map[string]Param{"str_message": {Value: "before", Type: "str"}}}}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("records = %+v, want %+v", got, want)
 	}
