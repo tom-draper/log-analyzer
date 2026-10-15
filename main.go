@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"os"
 	"strconv"
 	"strings"
@@ -242,59 +243,56 @@ func runSuggest(args []string) error {
 		return fmt.Errorf("usage: log-analyzer suggest <log-file>")
 	}
 
-	lines, err := readNonEmptyLines(path)
+	sample, total, err := readSuggestSample(path)
 	if err != nil {
 		return err
 	}
-	if len(lines) == 0 {
+	if total == 0 {
 		return fmt.Errorf("no lines read from %s", path)
 	}
 
-	sample := sampleLines(lines, maxSuggestSample)
 	groups := similarity.FindGroupsFromLines(sample)
-	printSuggestions(os.Stdout, groups, len(lines), len(sample))
+	printSuggestions(os.Stdout, groups, total, len(sample))
 	return nil
 }
 
-func readNonEmptyLines(path string) ([]string, error) {
+func readSuggestSample(path string) ([]string, int, error) {
 	var r io.Reader = os.Stdin
 	if path != "-" {
 		file, err := os.Open(path)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		defer file.Close()
 		r = file
 	}
+	return sampleLines(r, maxSuggestSample)
+}
 
+// sampleLines uses reservoir sampling to retain at most limit nonempty lines.
+// A fixed seed makes suggestions repeatable for the same input.
+func sampleLines(r io.Reader, limit int) ([]string, int, error) {
 	br := bufio.NewReader(r)
-	var lines []string
+	rng := rand.New(rand.NewPCG(0, 0))
+	sample := make([]string, 0, limit)
+	total := 0
 	for {
 		line, err := br.ReadString('\n')
 		if trimmed := strings.TrimRight(line, "\r\n"); trimmed != "" {
-			lines = append(lines, trimmed)
+			total++
+			if len(sample) < limit {
+				sample = append(sample, trimmed)
+			} else if index := rng.IntN(total); index < limit {
+				sample[index] = trimmed
+			}
 		}
 		if err != nil {
 			if err == io.EOF {
-				return lines, nil
+				return sample, total, nil
 			}
-			return lines, err
+			return sample, total, err
 		}
 	}
-}
-
-// sampleLines returns at most limit lines, evenly spaced across the input so the
-// sample reflects formats found throughout the file rather than just the start.
-func sampleLines(lines []string, limit int) []string {
-	if len(lines) <= limit {
-		return lines
-	}
-	sample := make([]string, 0, limit)
-	step := float64(len(lines)) / float64(limit)
-	for i := 0; i < limit; i++ {
-		sample = append(sample, lines[int(float64(i)*step)])
-	}
-	return sample
 }
 
 func printSuggestions(w io.Writer, groups []similarity.Group, total, sampled int) {
