@@ -2,6 +2,11 @@ package main
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -117,26 +122,98 @@ func TestParseArgsErrors(t *testing.T) {
 	}
 }
 
-func TestSampleLines(t *testing.T) {
-	lines := make([]string, 100)
-	for i := range lines {
-		lines[i] = string(rune('a' + i%26))
+func TestSuggestSampleBounded(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "large.log")
+	if err := os.WriteFile(path, []byte(strings.Repeat("request accepted\n", 10_000)), 0600); err != nil {
+		t.Fatal(err)
 	}
-
-	// Under the limit: returns everything unchanged.
-	if got := sampleLines(lines[:5], 10); len(got) != 5 {
-		t.Errorf("expected 5 lines, got %d", len(got))
+	sample, total, err := readSuggestSample(path)
+	if err != nil {
+		t.Fatal(err)
 	}
-
-	// Over the limit: returns exactly limit lines, starting at the first.
-	got := sampleLines(lines, 10)
-	if len(got) != 10 {
-		t.Fatalf("expected 10 sampled lines, got %d", len(got))
+	if len(sample) != maxSuggestSample {
+		t.Fatalf("retained %d lines, want %d", len(sample), maxSuggestSample)
 	}
-	if got[0] != lines[0] {
-		t.Errorf("expected sample to start at first line, got %q", got[0])
+	if total != 10_000 {
+		t.Fatalf("counted %d lines, want 10000", total)
 	}
 }
+
+func TestSampleLines(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		input string
+		want  []string
+	}{
+		{"empty", "", []string{}},
+		{"blank lines", "\n\r\n", []string{}},
+		{"line endings and final line", "\nfirst\r\n\r\nsecond\nlast", []string{"first", "second", "last"}},
+		{"whitespace", " \n\t\n", []string{" ", "\t"}},
+		{"long line", strings.Repeat("x", 128*1024) + "\n", []string{strings.Repeat("x", 128*1024)}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got, total, err := sampleLines(strings.NewReader(tc.input), 100)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if total != len(tc.want) || !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("sample or total differs: retained %d, counted %d, want %d lines", len(got), total, len(tc.want))
+			}
+		})
+	}
+}
+
+func TestSampleLinesCoversStream(t *testing.T) {
+	var input strings.Builder
+	for i := range 10_000 {
+		fmt.Fprintf(&input, "%d\n", i)
+	}
+	got, total, err := sampleLines(strings.NewReader(input.String()), 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 100 || total != 10_000 {
+		t.Fatalf("sample size %d, total %d, want 100 and 10000", len(got), total)
+	}
+	seen := make(map[string]bool)
+	late := false
+	for _, line := range got {
+		if seen[line] {
+			t.Fatalf("duplicate sampled line %q", line)
+		}
+		seen[line] = true
+		var index int
+		if _, err := fmt.Sscan(line, &index); err != nil {
+			t.Fatal(err)
+		}
+		if index >= 5_000 {
+			late = true
+		}
+	}
+	if !late {
+		t.Fatal("sample contains no lines from the second half of the stream")
+	}
+	again, _, err := sampleLines(strings.NewReader(input.String()), 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(got, again) {
+		t.Fatal("same input produced a different sample")
+	}
+}
+
+func TestSampleLinesReadError(t *testing.T) {
+	wantErr := errors.New("read failed")
+	r := io.MultiReader(strings.NewReader("first\nlast"), failingReader{wantErr})
+	got, total, err := sampleLines(r, 100)
+	if !errors.Is(err, wantErr) || total != 2 || !reflect.DeepEqual(got, []string{"first", "last"}) {
+		t.Fatalf("got %v, %d, %v; want both lines and read error", got, total, err)
+	}
+}
+
+type failingReader struct{ err error }
+
+func (r failingReader) Read([]byte) (int, error) { return 0, r.err }
 
 func TestRepresentative(t *testing.T) {
 	members := []string{"a longer line", "short", "medium one"}
