@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-
   type DependentTokenValueCounts = {
     [token: string]: {
       [dependentToken: string]: {
@@ -122,10 +120,7 @@
     bars = sortedBars(freq);
   }
 
-  onMount(() => {
-    const freq = tokenValueFrequency(data, token, dependentToken);
-    setBars(freq);
-  });
+  $: setBars(tokenValueFrequency(data, token, dependentToken));
 
   export let data: Data, token: string, dependentToken: string;
 </script>

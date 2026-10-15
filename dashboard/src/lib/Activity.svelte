@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy } from "svelte";
   import Plotly from "plotly.js-dist-min";
   import { timestampRange, makeTimeSlots, nearestSlotIndex } from "./timeSlots";
   import { chartLayout, plotConfig } from "./plot";
 
   function buildPlot() {
+    if (!plotDiv) return;
     const range = timestampRange(data, token);
-    if (!range) return;
+    if (!range) { Plotly.purge(plotDiv); return; }
     const [min, max] = range;
 
     const timeSlots = makeTimeSlots(min, max, 20);
@@ -21,7 +22,7 @@
 
     const x = timeSlots.map((s) => s.toDate());
 
-    Plotly.newPlot(
+    Plotly.react(
       plotDiv,
       [
         {
@@ -38,27 +39,11 @@
     );
   }
 
-  $effect(() => {
-    updatePlotColour();
-  });
-
-  function updatePlotColour() {
-    if (plotDiv) {
-      try {
-        Plotly.restyle(plotDiv, {
-          "marker.color": hex,
-        } as any);
-      } catch (e) {}
-    }
-  }
-
-  let plotDiv: HTMLDivElement;
+  let plotDiv = $state<HTMLDivElement>();
   let { data, token, hex }: { data: Data; token: string; hex: string } =
     $props();
-  onMount(() => {
-    buildPlot();
-    return () => Plotly.purge(plotDiv);
-  });
+  $effect(() => { if (plotDiv) buildPlot(); });
+  onDestroy(() => { if (plotDiv) Plotly.purge(plotDiv); });
 </script>
 
 <div class="container">

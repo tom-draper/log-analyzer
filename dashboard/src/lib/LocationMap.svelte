@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy } from "svelte";
   import Plotly from "plotly.js-dist-min";
   import { chartLayout, plotConfig } from "./plot";
 
@@ -32,6 +32,7 @@
   }
 
   function buildPlot() {
+    if (!plotDiv) return;
     const { locationCount } = locationSummary(data);
     const [locations, z] = unpackObject(locationCount);
 
@@ -63,7 +64,7 @@
       },
     ];
 
-    Plotly.newPlot(
+    Plotly.react(
       plotDiv,
       plotData,
       {
@@ -86,23 +87,12 @@
     );
   }
 
-  $effect(() => {
-    const color = hex;
-    if (plotDiv && plotData) {
-      Plotly.restyle(plotDiv, {
-        colorscale: [[[0, color], [0.4, color], [1, "#101010"]]],
-      } as any);
-    }
-  });
-
-  let plotDiv: HTMLDivElement;
+  let plotDiv = $state<HTMLDivElement>();
   let plotData: any;
   let { data, token, hex }: { data: Data; token: string; hex: string } = $props();
   let coverage = $derived(locationSummary(data));
-  onMount(() => {
-    buildPlot();
-    return () => Plotly.purge(plotDiv);
-  });
+  $effect(() => { if (plotDiv) buildPlot(); });
+  onDestroy(() => { if (plotDiv) Plotly.purge(plotDiv); });
 </script>
 
 <div class="container" class:hidden={coverage.mapped === 0}>

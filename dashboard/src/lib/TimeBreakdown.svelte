@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
   import Plotly from "plotly.js-dist-min";
   import { chartLayout, plotConfig } from "./plot";
 
@@ -17,7 +16,7 @@
   }
 
   function buildChart(div: HTMLDivElement, x: string[], y: number[], height = 200) {
-    Plotly.newPlot(
+    Plotly.react(
       div,
       [{ x, y, type: "bar", marker: { color: hex } }],
       chartLayout({ height }),
@@ -27,7 +26,7 @@
 
   function buildHourChart(div: HTMLDivElement, counts: number[]) {
     // Each hour = 15° (360/24). Rotation 90 puts midnight at top, clockwise matches a clock face.
-    Plotly.newPlot(
+    Plotly.react(
       div,
       [
         {
@@ -63,65 +62,35 @@
     );
   }
 
-  let showMonths = $state(false);
-  let showDays = $state(false);
-  let showHours = $state(false);
-  let monthCounts: number[];
-  let dayCounts: number[];
-  let hourCounts: number[];
+  let counts = $derived.by(() => {
+    const months = Array(12).fill(0);
+    const days = Array(7).fill(0);
+    const hours = Array(24).fill(0);
+    for (const ts of collectTimestamps()) {
+      months[ts.getMonth()]++;
+      days[ts.getDay()]++;
+      hours[ts.getHours()]++;
+    }
+    return { months, days, hours };
+  });
+  let showMonths = $derived(counts.months.filter(Boolean).length >= 2);
+  let showDays = $derived(counts.days.filter(Boolean).length >= 2);
+  let showHours = $derived(counts.hours.filter(Boolean).length >= 2);
   let monthDiv = $state<HTMLDivElement>();
   let dayDiv = $state<HTMLDivElement>();
   let hourDiv = $state<HTMLDivElement>();
-  let disposed = false;
-
-  async function initialiseCharts() {
-    const timestamps = collectTimestamps();
-
-    monthCounts = Array(12).fill(0);
-    dayCounts = Array(7).fill(0);
-    hourCounts = Array(24).fill(0);
-
-    for (const ts of timestamps) {
-      monthCounts[ts.getMonth()]++;
-      dayCounts[ts.getDay()]++;
-      hourCounts[ts.getHours()]++;
-    }
-
-    showMonths = monthCounts.filter(Boolean).length >= 2;
-    showDays = dayCounts.filter(Boolean).length >= 2;
-    showHours = hourCounts.filter(Boolean).length >= 2;
-
-    await tick();
-
-    if (disposed) return;
-
-    if (showMonths && monthDiv) buildChart(monthDiv, MONTHS, monthCounts);
-    if (showDays && dayDiv) buildChart(dayDiv, DAYS, dayCounts, 280);
-    if (showHours && hourDiv) buildHourChart(hourDiv, hourCounts);
-  }
-
-  onMount(() => {
-    void initialiseCharts();
-    return () => {
-      disposed = true;
-      for (const div of [monthDiv, dayDiv, hourDiv]) {
-        if (div) Plotly.purge(div);
-      }
-    };
-  });
 
   $effect(() => {
-    updateColours();
+    if (monthDiv) buildChart(monthDiv, MONTHS, counts.months);
   });
-
-  function updateColours() {
-    for (const div of [monthDiv, dayDiv, hourDiv]) {
-      if (div) {
-        try {
-          Plotly.restyle(div, { "marker.color": hex } as any);
-        } catch (e) {}
-      }
-    }
+  $effect(() => {
+    if (dayDiv) buildChart(dayDiv, DAYS, counts.days, 280);
+  });
+  $effect(() => {
+    if (hourDiv) buildHourChart(hourDiv, counts.hours);
+  });
+  function cleanupChart(div: HTMLDivElement) {
+    return { destroy: () => Plotly.purge(div) };
   }
 
   let { data, token, hex }: { data: Data; token: string; hex: string } = $props();
@@ -132,19 +101,19 @@
     {#if showMonths}
       <div class="chart">
         <div class="label">Month</div>
-        <div bind:this={monthDiv}></div>
+        <div bind:this={monthDiv} use:cleanupChart></div>
       </div>
     {/if}
     {#if showDays}
       <div class="chart">
         <div class="label">Day of week</div>
-        <div bind:this={dayDiv}></div>
+        <div bind:this={dayDiv} use:cleanupChart></div>
       </div>
     {/if}
     {#if showHours}
       <div class="chart">
         <div class="label">Hour of day</div>
-        <div bind:this={hourDiv}></div>
+        <div bind:this={hourDiv} use:cleanupChart></div>
       </div>
     {/if}
   </div>

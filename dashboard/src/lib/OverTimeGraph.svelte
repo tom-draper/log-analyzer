@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import Moment from "moment";
   import { timestampRange, makeTimeSlots, nearestSlotIndex } from "./timeSlots";
 
@@ -78,18 +77,21 @@
 
   let sortedValueCounts: SortableValueCount[];
   let valueCounts: ValueCounts;
-  let valueMax: ValueCount;
+  let valueMax: ValueCount | undefined;
   let timeSlots: Moment.Moment[];
-  onMount(() => {
+  $: {
     const range = timestampRange(data, timestampToken);
-    if (!range) return;
-    const [min, max] = range;
-    timeSlots = makeTimeSlots(min, max, 50);
+    if (!range) {
+      valueMax = undefined;
+    } else {
+      const [min, max] = range;
+      timeSlots = makeTimeSlots(min, max, 50);
 
-    valueCounts = limitSeries(valueByTimeSlot(data, token, timestampToken, timeSlots));
-    sortedValueCounts = sortedValueByTimeSlot(valueCounts);
-    valueMax = valueCountMax(valueCounts);
-  });
+      valueCounts = limitSeries(valueByTimeSlot(data, token, timestampToken, timeSlots));
+      sortedValueCounts = sortedValueByTimeSlot(valueCounts);
+      valueMax = valueCountMax(valueCounts);
+    }
+  }
 
   export let data: Data, token: string, timestampToken: string | null;
 </script>
