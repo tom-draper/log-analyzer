@@ -33,7 +33,8 @@
 
   function buildPlot() {
     if (!plotDiv) return;
-    const { locationCount } = locationSummary(data);
+    const { locationCount, mapped } = locationSummary(data);
+    if (mapped === 0) { Plotly.purge(plotDiv); return; }
     const [locations, z] = unpackObject(locationCount);
 
     plotData = [

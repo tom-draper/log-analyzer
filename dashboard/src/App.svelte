@@ -265,6 +265,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
   }
+  .summary-grid :global(.coverage:only-child) { grid-column: 1 / -1; }
   .summary-grid :global(.funnel),
   .summary-grid :global(.coverage) { margin: 0; }
   @media screen and (max-width: 900px) { .summary-grid { grid-template-columns: 1fr; } }

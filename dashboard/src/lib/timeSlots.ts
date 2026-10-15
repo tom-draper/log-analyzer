@@ -17,7 +17,10 @@ export function timestampRange(
 
   for (const extraction of data.extraction) {
     if (!(token in extraction.params)) continue;
-    const ts = new Date(extraction.params[token].value as string);
+    const param = extraction.params[token];
+    if (param.type !== "time") continue;
+    const ts = new Date(param.value);
+    if (!Number.isFinite(ts.getTime())) continue;
     if (ts > max) max = ts;
     if (ts < min) min = ts;
     found = true;
