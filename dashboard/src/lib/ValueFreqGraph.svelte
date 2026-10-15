@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-
   type Bar = { token: string; count: number; width: number };
 
   function sortedBars(freq: ValueCount) {
@@ -60,10 +58,7 @@
     bars = sortedBars(freq);
   }
 
-  onMount(() => {
-    const freq = tokenValueFrequency(data, token);
-    setBars(freq);
-  });
+  $: setBars(tokenValueFrequency(data, token));
 
   export let data: Data, token: string;
 </script>

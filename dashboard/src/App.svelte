@@ -171,7 +171,6 @@
   let multiTypeTokens: DataTypes;
   let tokenCounts: TokenCount[];
   let timestampToken: string | null;
-  let dataVersion = 0;
   let loadError: string | null = null;
   let hex: string = "#3b82f6";
   const production = import.meta.env.MODE === "production";
@@ -190,7 +189,6 @@
     const counts = sortedTokenCounts(data);
     counts.push(...sortedTokenDependencyCounts(data));
     tokenCounts = counts;
-    dataVersion += 1;
   }
 
   async function loadData() {
@@ -239,7 +237,7 @@
         <PatternCoverage {data} />
       </div>
       <EventExplorer {data} />
-      {#each tokenCounts as token (`${token.token}:${token.dependentToken ?? ""}:${dataVersion}`)}
+      {#each tokenCounts as token (JSON.stringify([token.token, token.dependentToken ?? null]))}
         <Card
           {data}
           token={token.token}

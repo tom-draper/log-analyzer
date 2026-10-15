@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy } from "svelte";
   import Plotly from "plotly.js-dist-min";
   import { chartLayout, plotConfig } from "./plot";
 
@@ -13,12 +13,13 @@
   }
 
   function buildPlot(values: number[]) {
+    if (!plotDiv) return;
     const min = Math.min(...values);
     const max = Math.max(...values);
     const binCount = Math.max(5, Math.min(40, Math.ceil(Math.sqrt(values.length))));
     const size = max === min ? 1 : (max - min) / binCount;
 
-    Plotly.newPlot(
+    Plotly.react(
       plotDiv,
       [
         {
@@ -34,34 +35,15 @@
     );
   }
 
-  $effect(() => { updatePlotColour(); });
-
-  function updatePlotColour() {
-    if (plotDiv) {
-      try {
-        Plotly.restyle(plotDiv, {
-          "marker.color": hex,
-        } as any);
-      } catch (e) {
-        // console.error(e);
-      }
-    }
-  }
-
-  let isNumeric = $state(false);
-  let plotDiv: HTMLDivElement;
+  let plotDiv = $state<HTMLDivElement>();
   let { data, token, hex }: { data: Data; token: string; hex: string } = $props();
-  onMount(() => {
-    const values = numericValues(data);
-    if (values.length === 0) {
-      return;
-    }
-    isNumeric = true;
-    buildPlot(values);
-    // Resize window to snap graph to window width
-    window.dispatchEvent(new Event("resize"));
-    return () => Plotly.purge(plotDiv);
+  let values = $derived(numericValues(data));
+  let isNumeric = $derived(values.length > 0);
+  $effect(() => {
+    if (plotDiv && isNumeric) buildPlot(values);
+    else if (plotDiv) Plotly.purge(plotDiv);
   });
+  onDestroy(() => { if (plotDiv) Plotly.purge(plotDiv); });
 </script>
 
 <div class="container" class:hidden={!isNumeric}>

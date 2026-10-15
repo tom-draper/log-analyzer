@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import Panel from "./Panel.svelte";
 
   function quantile(arr: number[], q: number) {
@@ -40,12 +39,11 @@
     p99: number;
   };
 
-  let statistics: Statistics;
-  onMount(() => {
+  function calculateStatistics(data: Data, token: string): Statistics | undefined {
     const values = numericValues(data, token);
     if (values.length == 0) return;
     values.sort((a, b) => a - b);
-    statistics = {
+    return {
       min: values[0],
       lq: quantile(values, 0.25),
       median: quantile(values, 0.5),
@@ -54,7 +52,8 @@
       p95: quantile(values, 0.95),
       p99: quantile(values, 0.99),
     };
-  });
+  }
+  $: statistics = calculateStatistics(data, token);
   export let data: Data, token: string;
 </script>
 
