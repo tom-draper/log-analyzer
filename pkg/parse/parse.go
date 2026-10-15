@@ -22,6 +22,7 @@ import (
 )
 
 type Extraction struct {
+	SourceFile string           `json:"sourceFile,omitempty"`
 	Params     map[string]Param `json:"params"`
 	Pattern    string           `json:"pattern"`
 	LineNumber int              `json:"lineNumber"`
@@ -553,7 +554,11 @@ func ParseFile(path string, config *Config) ([]Extraction, error) {
 		return nil, err
 	}
 	defer file.Close()
-	return ParseReader(file, config)
+	records, err := ParseReader(file, config)
+	for i := range records {
+		records[i].SourceFile = path
+	}
+	return records, err
 }
 
 // ParseFile reads the log text from each of the given file paths, separates the

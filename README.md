@@ -270,6 +270,20 @@ Use `-` as the log path to read from stdin, which lets you pipe logs directly in
 cat ./tests/data/logs/demo.log | ./log-analyzer - --format csv
 ```
 
+### Dashboard filters
+
+Use **Dashboard filters** to apply a time range, an exact token value, a source
+file, raw text, or unmatched-only selection to the charts and event explorer
+together. A token without a value matches every record containing that token.
+Time bounds use your local timezone and include both endpoints. Records without
+a valid timestamp are excluded when a time bound is set.
+
+**Export matching records (JSON)** downloads all matching records, including
+records beyond the explorer's display limit. Each record includes its raw line,
+parsed parameters, pattern, line number, and source file when available. Older
+data and stdin records appear under **Unknown source**. Filters remain selected
+during live updates and apply to the retained records.
+
 ### Follow Mode
 
 Add the `--follow` flag to tail a growing log file (or a stdin stream) as new lines are appended.

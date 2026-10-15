@@ -10,6 +10,8 @@
   import EventExplorer from "./lib/EventExplorer.svelte";
   import PatternCoverage from "./lib/PatternCoverage.svelte";
   import DashboardMetrics from "./lib/DashboardMetrics.svelte";
+  import DashboardFilters from "./lib/DashboardFilters.svelte";
+  import { emptyFilters, filterRecords } from "./lib/filters";
 
   type TokenCount = { token: string; dependentToken?: string; count: number };
 
@@ -166,29 +168,20 @@
     return multiTypes;
   }
 
-  let data: Data;
-  let failedLines: FailedLines;
-  let multiTypeTokens: DataTypes;
-  let tokenCounts: TokenCount[];
-  let timestampToken: string | null;
+  let originalData: Data;
+  let filters = emptyFilters();
   let loadError: string | null = null;
   let hex: string = "#3b82f6";
   const production = import.meta.env.MODE === "production";
+  $: timestampToken = originalData ? identifyTimestampToken(originalData) : null;
+  $: data = originalData ? { ...originalData, extraction: filterRecords(originalData.extraction, filters) } : undefined;
+  $: failedLines = data ? getFailedLines(data) : {};
+  $: multiTypeTokens = data ? getMultiTypeTokens(getDataTypeBreakdown(data)) : {};
+  $: tokenCounts = data ? [...sortedTokenCounts(data), ...sortedTokenDependencyCounts(data)] : [];
 
   function applyData(d: Data) {
-    data = d;
-    performConversions(data);
-
-    timestampToken = identifyTimestampToken(data);
-
-    failedLines = getFailedLines(data);
-
-    const dataTypes = getDataTypeBreakdown(data);
-    multiTypeTokens = getMultiTypeTokens(dataTypes);
-
-    const counts = sortedTokenCounts(data);
-    counts.push(...sortedTokenDependencyCounts(data));
-    tokenCounts = counts;
+    performConversions(d);
+    originalData = d;
   }
 
   async function loadData() {
@@ -224,13 +217,14 @@
   {#if loadError}
     <p class="error">Unable to load dashboard data: {loadError}</p>
   {/if}
-  {#if tokenCounts !== undefined}
+  {#if data && originalData}
     <div class="content">
       <Header
         {failedLines}
         {multiTypeTokens}
         lineCount={data.extraction.length}
       />
+      <DashboardFilters data={originalData} records={data.extraction} bind:filters />
       <DashboardMetrics {data} />
       <div class="summary-grid">
         <RequestFunnel {data} />
@@ -271,6 +265,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
   }
+  .summary-grid :global(.coverage:only-child) { grid-column: 1 / -1; }
   .summary-grid :global(.funnel),
   .summary-grid :global(.coverage) { margin: 0; }
   @media screen and (max-width: 900px) { .summary-grid { grid-template-columns: 1fr; } }

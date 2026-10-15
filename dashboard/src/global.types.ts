@@ -5,6 +5,7 @@ type Data = {
 };
 
 type Extraction = {
+    sourceFile?: string;
     params: Params;
     line: string
     lineNumber: number

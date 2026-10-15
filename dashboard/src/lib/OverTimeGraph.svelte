@@ -23,9 +23,10 @@
     for (const extraction of data.extraction) {
       if (!(token in extraction.params)) continue;
 
-      const timestamp = new Date(
-        extraction.params[timestampToken].value as string
-      ).getTime();
+      const param = extraction.params[timestampToken];
+      if (!param || param.type !== "time") continue;
+      const timestamp = new Date(param.value).getTime();
+      if (!Number.isFinite(timestamp)) continue;
       const slotIndex = nearestSlotIndex(timestamp, slotMs);
 
       const value = extraction.params[token].value;

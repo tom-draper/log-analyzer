@@ -8,11 +8,20 @@
 
   function findStatusToken(data: Data): string | null {
     const counts: Record<string, number> = {};
+    const hasHttpMethod = data.extraction.some(record =>
+      Object.entries(record.params).some(([token, param]) =>
+        /^(?:str_)?(?:http_)?(?:request_)?method$/i.test(token) &&
+        /^(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)$/.test(String(param.value))
+      )
+    );
     for (const extraction of data.extraction) {
       for (const [token, param] of Object.entries(extraction.params)) {
         const value = param.value;
-        if (typeof value !== "number" || value < 100 || value > 599) continue;
-        if (!/(status|code)/i.test(token)) continue;
+        if (typeof value !== "number" || !Number.isInteger(value) || value < 100 || value > 599) continue;
+        const name = token.replace(/^int_/, "");
+        const explicitHttp = /^http[_-]?(?:status|code|status[_-]?code)$/i.test(name);
+        const genericStatus = /^(?:response[_-]?)?(?:status|code|status[_-]?code)$/i.test(name);
+        if (!explicitHttp && !(hasHttpMethod && genericStatus)) continue;
         counts[token] = (counts[token] ?? 0) + 1;
       }
     }
@@ -28,7 +37,7 @@
     let serverErrors = 0;
     for (const extraction of data.extraction) {
       const value = extraction.params[statusToken]?.value;
-      if (typeof value !== "number") continue;
+      if (typeof value !== "number" || !Number.isInteger(value) || value < 100 || value > 599) continue;
       total++;
       if (value >= 400 && value < 500) clientErrors++;
       if (value >= 500 && value < 600) serverErrors++;

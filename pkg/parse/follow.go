@@ -17,7 +17,10 @@ func FollowFile(path string, config *Config, emit func(Extraction) error) error 
 	}
 	reader := &fileFollower{file: file, path: path}
 	defer func() { reader.file.Close() }()
-	return ParseStream(reader, config, true, emit)
+	return ParseStream(reader, config, true, func(record Extraction) error {
+		record.SourceFile = path
+		return emit(record)
+	})
 }
 
 type fileFollower struct {
